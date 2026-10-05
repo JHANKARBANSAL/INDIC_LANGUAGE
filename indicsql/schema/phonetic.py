@@ -1,5 +1,10 @@
+"""
+IndicSQL Phonetic Transliteration Module
+Handles conversion of Latin/Hinglish/Code-mixed inputs to standard Indic Scripts.
+"""
+
 import re
-from typing import Dict, Optional
+from typing import Dict
 
 try:
     from indic_transliteration import sanscript
@@ -43,7 +48,7 @@ TRANSLITERATION_MAP: Dict[str, str] = {
 }
 
 
-def normalize_indic_phonetics(text: str, target_lang: Optional[str] = "hi") -> str:
+def normalize_indic_phonetics(text: str, target_lang: str = "hi") -> str:
     """
     Normalizes phonetic variations and replaces colloquial Romanized keywords
     with canonical concepts to aid schema linking.
@@ -56,11 +61,16 @@ def normalize_indic_phonetics(text: str, target_lang: Optional[str] = "hi") -> s
         pattern = rf"\b{roman_token}\b"
         normalized = re.sub(pattern, f"{roman_token} ({canonical})", normalized)
 
+    if target_lang not in LANG_TO_SCHEME:
+        return normalized
+
     # If sanscript is available, transliterate Latin phonetic tokens to Indic script
-    if HAS_SANSCRIPT and target_lang and target_lang in LANG_TO_SCHEME:
-        scheme = getattr(sanscript, LANG_TO_SCHEME[target_lang].upper(), None)
+    if HAS_SANSCRIPT and target_lang in LANG_TO_SCHEME:
+        scheme_name = LANG_TO_SCHEME[target_lang].upper()
+        scheme = getattr(sanscript, scheme_name, None)
+
+        # Transliterate only if we have primarily Latin characters
         if scheme and any(c.isascii() and c.isalpha() for c in text):
-            # Keep both original/canonical mapping and transliterated terms
             try:
                 xlit = transliterate(text, sanscript.ITRANS, scheme)
                 return f"{normalized} {xlit}".strip()
@@ -68,3 +78,13 @@ def normalize_indic_phonetics(text: str, target_lang: Optional[str] = "hi") -> s
                 return normalized
 
     return normalized
+
+
+def test_transliteration() -> None:
+    print(normalize_indic_phonetics("vidyarthi", "hi"))  # Should print student + विद्यार्थी
+    print(normalize_indic_phonetics("kisano", "hi"))  # Should print farmer + किसानों
+    print(normalize_indic_phonetics("shala", "mr"))  # Should print school + शाळा
+
+
+if __name__ == "__main__":
+    test_transliteration()

@@ -892,6 +892,11 @@ ml = [
     { name = "transformers" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "accelerate", marker = "extra == 'ml'", specifier = ">=0.30.0" },
@@ -927,6 +932,9 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.30.0" },
 ]
 provides-extras = ["ml", "eval", "dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = ">=0.16.8" }]
 
 [[package]]
 name = "iniconfig"
