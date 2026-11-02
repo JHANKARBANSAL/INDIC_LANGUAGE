@@ -114,7 +114,22 @@ class SarvamAdapter(ModelAdapter):
     """Specialized adapter for Sarvam-2B transliteration and Indic query normalization."""
 
     def __init__(self, lora_path: Optional[Path] = None):
-        target_path = lora_path or (DEFAULT_WEIGHTS_DIR / "sarvam_transliteration")
+        if lora_path:
+            target_path = Path(lora_path)
+        elif (
+            (DEFAULT_WEIGHTS_DIR / "sarvam_adapter" / "adapter_model.safetensors").exists()
+            or (DEFAULT_WEIGHTS_DIR / "sarvam_adapter" / "adapter_model.bin").exists()
+        ):
+            target_path = DEFAULT_WEIGHTS_DIR / "sarvam_adapter"
+        elif (
+            (DEFAULT_WEIGHTS_DIR / "sarvam_transliteration" / "adapter_model.safetensors").exists()
+            or (DEFAULT_WEIGHTS_DIR / "sarvam_transliteration" / "adapter_model.bin").exists()
+        ):
+            target_path = DEFAULT_WEIGHTS_DIR / "sarvam_transliteration"
+        elif (DEFAULT_WEIGHTS_DIR / "sarvam_adapter").exists():
+            target_path = DEFAULT_WEIGHTS_DIR / "sarvam_adapter"
+        else:
+            target_path = DEFAULT_WEIGHTS_DIR / "sarvam_transliteration"
         super().__init__(
             model_id="sarvamai/sarvam-2b",
             lora_path=target_path,
@@ -125,7 +140,22 @@ class QwenAdapter(ModelAdapter):
     """Specialized adapter for Qwen-2.5-Coder-3B SQL synthesis."""
 
     def __init__(self, lora_path: Optional[Path] = None):
-        target_path = lora_path or (DEFAULT_WEIGHTS_DIR / "qwen_3b_sql")
+        if lora_path:
+            target_path = Path(lora_path)
+        elif (
+            (DEFAULT_WEIGHTS_DIR / "qwen_adapter" / "adapter_model.safetensors").exists()
+            or (DEFAULT_WEIGHTS_DIR / "qwen_adapter" / "adapter_model.bin").exists()
+        ):
+            target_path = DEFAULT_WEIGHTS_DIR / "qwen_adapter"
+        elif (
+            (DEFAULT_WEIGHTS_DIR / "qwen_3b_sql" / "adapter_model.safetensors").exists()
+            or (DEFAULT_WEIGHTS_DIR / "qwen_3b_sql" / "adapter_model.bin").exists()
+        ):
+            target_path = DEFAULT_WEIGHTS_DIR / "qwen_3b_sql"
+        elif (DEFAULT_WEIGHTS_DIR / "qwen_adapter").exists():
+            target_path = DEFAULT_WEIGHTS_DIR / "qwen_adapter"
+        else:
+            target_path = DEFAULT_WEIGHTS_DIR / "qwen_3b_sql"
         super().__init__(
             model_id="Qwen/Qwen2.5-Coder-3B-Instruct",
             lora_path=target_path,

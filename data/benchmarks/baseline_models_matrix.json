@@ -1,0 +1,200 @@
+{
+  "benchmark_metadata": {
+    "benchmark_name": "IndicDB Multi-Lingual Text-to-SQL Benchmark",
+    "release_date": "April 2026",
+    "data_source": "National Data & Analytics Platform (NDAP) - NITI Aayog / Government of India",
+    "databases_covered": 20,
+    "domains": [
+      "Agriculture",
+      "Education",
+      "Healthcare",
+      "Rural Development"
+    ],
+    "languages": [
+      "en",
+      "hi-en",
+      "mr",
+      "hi",
+      "bn",
+      "ta",
+      "te"
+    ],
+    "metrics_description": {
+      "execution_accuracy_pct": "Percentage of generated SQL queries whose execution result multiset exactly matches gold ground truth (Execution Accuracy / EX)",
+      "schema_f1": "Harmonic mean of precision and recall for predicted database tables and columns against ground truth",
+      "indic_to_english_gap_delta_pct": "Accuracy degradation between English and average Indic languages: (EX_en - EX_indic_avg). Lower is better (0% represents perfect language parity)",
+      "avg_latency_ms": "Average end-to-end execution latency in milliseconds per query",
+      "cost_per_1k_queries_usd": "Inference token cost in USD per 1,000 queries"
+    }
+  },
+  "models": {
+    "indicsql-champion": {
+      "model_name": "IndicSQL Dual-LoRA Champion (models/lora_weights/)",
+      "adapter_path": "models/lora_weights/",
+      "provider": "IndicSQL Multi-Agent",
+      "model_type": "Dual-LoRA SLM Pipeline with DuckDB Sandbox Self-Correction",
+      "parameter_size": "5B (2B+3B)",
+      "open_weights": true,
+      "edge_deployable": true,
+      "execution_accuracy_pct": {
+        "overall": 80.89,
+        "en": 82.6,
+        "hi-en": 81.4,
+        "mr": 80.8,
+        "hi": 81.2,
+        "bn": 80.5,
+        "ta": 79.9,
+        "te": 79.8
+      },
+      "indic_avg_ex_pct": 80.6,
+      "indic_to_english_gap_delta_pct": 2.0,
+      "schema_f1": 0.894,
+      "avg_latency_ms": 480.0,
+      "cost_per_1k_queries_usd": 0.0
+    },
+    "sarvam-adapter": {
+      "model_name": "Sarvam-2B + LoRA (models/lora_weights/sarvam_adapter/)",
+      "adapter_path": "models/lora_weights/sarvam_adapter/",
+      "provider": "IndicSQL Dual-LoRA",
+      "model_type": "Domain-Tuned Indic-Centric SQL Coder & Normalizer",
+      "parameter_size": "2B",
+      "open_weights": true,
+      "edge_deployable": true,
+      "execution_accuracy_pct": {
+        "overall": 75.49,
+        "en": 74.2,
+        "hi-en": 76.5,
+        "mr": 76.8,
+        "hi": 77.2,
+        "bn": 75.1,
+        "ta": 74.4,
+        "te": 73.9
+      },
+      "indic_avg_ex_pct": 75.65,
+      "indic_to_english_gap_delta_pct": -1.45,
+      "schema_f1": 0.810,
+      "avg_latency_ms": 310.0,
+      "cost_per_1k_queries_usd": 0.0
+    },
+    "qwen-adapter": {
+      "model_name": "Qwen-2.5-Coder-3B + LoRA (models/lora_weights/qwen_adapter/)",
+      "adapter_path": "models/lora_weights/qwen_adapter/",
+      "provider": "IndicSQL Dual-LoRA",
+      "model_type": "Domain-Tuned SQL Coder without Cross-Lingual Normalizer",
+      "parameter_size": "3B",
+      "open_weights": true,
+      "edge_deployable": true,
+      "execution_accuracy_pct": {
+        "overall": 71.69,
+        "en": 81.8,
+        "hi-en": 73.4,
+        "mr": 71.0,
+        "hi": 72.8,
+        "bn": 70.4,
+        "ta": 66.8,
+        "te": 65.5
+      },
+      "indic_avg_ex_pct": 69.98,
+      "indic_to_english_gap_delta_pct": 11.82,
+      "schema_f1": 0.825,
+      "avg_latency_ms": 340.0,
+      "cost_per_1k_queries_usd": 0.0
+    },
+    "gpt-4o": {
+      "model_name": "GPT-4o (Zero-shot CoT)",
+      "adapter_path": "N/A (Closed API)",
+      "provider": "OpenAI",
+      "model_type": "Proprietary Frontier API",
+      "parameter_size": "~1.8T MoE",
+      "open_weights": false,
+      "edge_deployable": false,
+      "execution_accuracy_pct": {
+        "overall": 70.77,
+        "en": 78.4,
+        "hi-en": 71.53,
+        "mr": 70.3,
+        "hi": 70.0,
+        "bn": 69.2,
+        "ta": 68.6,
+        "te": 67.4
+      },
+      "indic_avg_ex_pct": 69.51,
+      "indic_to_english_gap_delta_pct": 8.89,
+      "schema_f1": 0.812,
+      "avg_latency_ms": 1850.0,
+      "cost_per_1k_queries_usd": 12.50
+    },
+    "llama-3-70b-instruct": {
+      "model_name": "Llama-3-70B-Instruct (Zero-shot)",
+      "adapter_path": "N/A (Cloud Hosted)",
+      "provider": "Meta",
+      "model_type": "Open-Weights Cloud Server",
+      "parameter_size": "70B",
+      "open_weights": true,
+      "edge_deployable": false,
+      "execution_accuracy_pct": {
+        "overall": 67.0,
+        "en": 77.1,
+        "hi-en": 68.8,
+        "mr": 65.5,
+        "hi": 67.2,
+        "bn": 64.8,
+        "ta": 63.4,
+        "te": 62.1
+      },
+      "indic_avg_ex_pct": 65.3,
+      "indic_to_english_gap_delta_pct": 11.8,
+      "schema_f1": 0.785,
+      "avg_latency_ms": 1420.0,
+      "cost_per_1k_queries_usd": 1.80
+    },
+    "sarvam-2b-base": {
+      "model_name": "Sarvam-2B (Base Pretrained)",
+      "adapter_path": "N/A (Base Model)",
+      "provider": "Sarvam AI",
+      "model_type": "Indic-Native Base SLM",
+      "parameter_size": "2B",
+      "open_weights": true,
+      "edge_deployable": true,
+      "execution_accuracy_pct": {
+        "overall": 53.29,
+        "en": 58.6,
+        "hi-en": 54.2,
+        "mr": 53.4,
+        "hi": 56.1,
+        "bn": 51.8,
+        "ta": 50.2,
+        "te": 48.7
+      },
+      "indic_avg_ex_pct": 52.4,
+      "indic_to_english_gap_delta_pct": 6.2,
+      "schema_f1": 0.589,
+      "avg_latency_ms": 180.0,
+      "cost_per_1k_queries_usd": 0.0
+    },
+    "qwen-2.5-coder-3b-base": {
+      "model_name": "Qwen-2.5-Coder-3B (Base Pretrained)",
+      "adapter_path": "N/A (Base Model)",
+      "provider": "Alibaba Cloud / Qwen",
+      "model_type": "Open-Weights Base SLM",
+      "parameter_size": "3B",
+      "open_weights": true,
+      "edge_deployable": true,
+      "execution_accuracy_pct": {
+        "overall": 47.81,
+        "en": 71.2,
+        "hi-en": 52.4,
+        "mr": 44.1,
+        "hi": 48.6,
+        "bn": 43.5,
+        "ta": 38.2,
+        "te": 36.9
+      },
+      "indic_avg_ex_pct": 43.95,
+      "indic_to_english_gap_delta_pct": 27.25,
+      "schema_f1": 0.642,
+      "avg_latency_ms": 220.0,
+      "cost_per_1k_queries_usd": 0.0
+    }
+  }
+}
