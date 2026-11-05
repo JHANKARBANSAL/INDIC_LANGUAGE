@@ -1,5 +1,5 @@
 """
-IndicDB Benchmark Evaluation Harness (Phase 1: p1_2).
+IndicDB Benchmark Evaluation Harness.
 Executes candidate multi-agent SQL queries against gold relational ground truth,
 computing Execution Accuracy (EX), Schema-Linking F1, and Indic-to-English Gap Delta.
 """

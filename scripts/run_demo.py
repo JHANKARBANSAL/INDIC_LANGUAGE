@@ -23,7 +23,7 @@ def load_sample_queries():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="IndicSQL Swarm Interactive CLI Demonstration (Phase 1)"
+        description="IndicSQL Swarm Interactive CLI Demonstration"
     )
     parser.add_argument("query", nargs="?", default=None, help="Custom natural language query")
     parser.add_argument(
@@ -57,7 +57,7 @@ def main():
         selected_query = args.query
 
     print("=" * 75)
-    print("🇮🇳 IndicSQL: Autonomous Cross-Lingual Text-to-SQL Swarm (Phase 1)")
+    print("🇮🇳 IndicSQL: Autonomous Cross-Lingual Text-to-SQL Swarm")
     print(
         f"   Registered NDAP Databases: {NDAPCatalog.get_total_table_count()} | Parquet Stores Mounted"
     )

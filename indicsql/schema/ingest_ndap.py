@@ -1,5 +1,5 @@
 """
-NDAP Ingestion and Parquet Export Pipeline (Phase 1: p1_1).
+NDAP Ingestion and Parquet Export Pipeline.
 Generates realistic benchmark data aligned with Government of India NDAP statistics
 and exports clean, compressed Apache Parquet tables and DDL catalog definitions for all 20 databases.
 """
@@ -452,7 +452,7 @@ def ingest_and_export_all_ndap_databases(
     parquet_dir: Path = PARQUET_DIR, catalog_dir: Path = CATALOG_DIR
 ) -> Dict[str, int]:
     """
-    Executes the Phase 1 Ingestion Pipeline:
+    Executes the Ingestion Pipeline:
     1. Creates target directories for parquet files and SQL DDLs.
     2. Synthesizes full datasets for all 20 NDAP databases.
     3. Exports compressed Apache Parquet (.parquet) tables.
@@ -508,7 +508,7 @@ def ingest_and_export_all_ndap_databases(
         json.dump(master_metadata, f, indent=2)
 
     print(
-        f"\n✨ Phase 1 Ingestion Complete: {sum(summary.values()):,} total records across 20 NDAP databases."
+        f"\n✨ Ingestion Complete: {sum(summary.values()):,} total records across 20 NDAP databases."
     )
     print(f"📁 Parquet Stores: {parquet_dir}")
     print(f"📁 Catalog DDLs: {catalog_dir}")

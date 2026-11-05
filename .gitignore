@@ -37,8 +37,13 @@ venv.bak/
 
 # Hugging Face & Model checkpoints
 checkpoints/
-models/
-lora_weights/
+checkpoint-*/
+models/lora_weights/**/checkpoint-*/
+models/*
+!models/lora_weights/
+!models/lora_weights/**/
+!models/lora_weights/README.md
+!models/lora_weights/**/.gitkeep
 *.bin
 *.safetensors
 *.pt
@@ -60,6 +65,8 @@ data/parquet_stores/*
 !data/parquet_stores/README.md
 data/raw/*
 !data/raw/.gitkeep
+data/training/*.jsonl
+!data/training/.gitkeep
 
 # Evaluation output logs
 benchmark_results/
@@ -93,3 +100,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Graphify knowledge graph outputs
+graphify-out/*
+!graphify-out/GRAPH_REPORT.md

@@ -1,5 +1,5 @@
 """
-IndicDB Benchmark Dataset Definition and Suite Generator (Phase 1: p1_2).
+IndicDB Benchmark Dataset Definition and Suite Generator.
 Structures test instances covering 7 languages across 20 NDAP databases and 3 difficulty tiers.
 """
 

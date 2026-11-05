@@ -1,5 +1,5 @@
 """
-Unit tests for the 20 NDAP database catalogs and parquet stores (Phase 1: p1_1).
+Unit tests for the 20 NDAP database catalogs and parquet stores.
 """
 
 import unittest

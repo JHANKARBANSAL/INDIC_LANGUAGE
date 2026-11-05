@@ -8,6 +8,8 @@ with localized Indian numbering (Lakhs and Crores).
 from typing import Any, Dict
 
 from indicsql.core.state import IndicSQLState
+from indicsql.events.bus import EventBus
+from indicsql.events.schemas import VoiceSynthesisEvent
 
 
 def format_indian_currency_number(val: float) -> str:
@@ -124,8 +126,17 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
 def response_verbalizer_node(state: IndicSQLState) -> Dict[str, Any]:
     """
     Verbalizer Node: Formulates vernacular answer.
+    Emits VoiceSynthesisEvent on the EventBus.
     """
     answer = verbalize_tabular_result(state)
+
+    EventBus.publish(
+        VoiceSynthesisEvent(
+            query_id=state.get("query_id"),
+            verbalized_text=answer,
+            char_count=len(answer),
+        )
+    )
 
     audit_entry = {
         "step": 5,

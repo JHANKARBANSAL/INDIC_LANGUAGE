@@ -140,7 +140,7 @@ IndicSQL_Repo/
 │   ├── test_agents.py            # Unit tests for agent nodes and AST validator
 │   ├── test_benchmark_harness.py # Unit tests for IndicDB evaluator and isomorphism
 │   ├── test_ndap_catalogs.py     # Unit tests for 20 NDAP databases and parquet stores
-│   ├── test_phase2_schema_linking.py # Cross-lingual schema linking test suite across 7 languages
+│   ├── test_schema_linking.py # Cross-lingual schema linking test suite across 7 languages
 │   └── test_pipeline.py          # End-to-end integration tests
 
 ├── .env.example                  # Environment configuration template
@@ -155,18 +155,20 @@ IndicSQL_Repo/
 
 ## ⚡ Current State of the Project
 
-The project foundation, data layer, and schema-linking swarm are fully established:
+The project foundation, data substrate, fine-tuning engine, and schema-linking swarm are fully established:
 
 - [x] **Agent Blackboard State**: Strongly-typed `IndicSQLState`, `SchemaElement`, and `TabularResult` contracts.
 - [x] **6 Swarm Agent Nodes**: Implemented Supervisor, Schema-Linker, SQL-Synthesizer, AST Critic, Sandbox Executor, Reflection Healer, and Response Verbalizer.
+- [x] **Sovereign Dual-Model LoRA Integration**: Fine-tuned PEFT/LoRA adapters (`Qwen-2.5-Coder-3B-Instruct` for SQL synthesis and `Sarvam-2B` for cross-lingual Indic transliteration/entity grounding) mounted in `models/lora_weights/` with lazy loading and graceful offline fallback.
+- [x] **Tri-Combo Architecture**: Tri-combo execution matrix comparing Hybrid Champion (Sarvam + Qwen), Pure Sarvam-2B, and Pure Qwen-2.5-Coder configurations.
+- [x] **Event-Driven Architecture**: Decoupled asynchronous Pub/Sub Event Bus (`indicsql.events.bus`) with typed event schemas (`QueryInitiatedEvent`, `SchemaLinkedEvent`, etc.).
+- [x] **Tree-of-Thoughts (ToT) SQL Exploration**: Multi-candidate query generation scored via weighted multi-attribute utility functions (AST safety, join validity, schema confidence).
 - [x] **Sandboxed Relational Execution**: Ephemeral in-memory execution sandbox strictly mounted across **all 20 physical NDAP Parquet database stores** (4,238 real records across Agriculture, Education, Health, and Rural Development) via DuckDB zero-copy readers with zero mock/dummy data.
 - [x] **Phonetic & Cross-Lingual Schema Linking**: Dual-scheme phonetic transliteration engine (`indic-transliteration` / `sanscript`) coupled with a comprehensive multilingual inverted lexicon across 7 languages (*Hindi, Marathi, Bengali, Tamil, Telugu, Hinglish, English*).
 - [x] **AST Safety Linter**: Deterministic mutation blocking (`DROP`, `DELETE`, `UPDATE`, `INSERT`) and automatic `LIMIT` clause enforcement.
 - [x] **Dynamic Vernacular Verbalization**: Schema-aware prose synthesis with Indian number formatting (Lakhs and Crores) across all 20 NDAP databases.
-- [x] **CLI Demonstration Tool**: `scripts/run_demo.py` with multi-sample support for instant terminal verification.
-- [x] **FastAPI Gateway**: `indicsql/api/server.py` with `/query`, `/schemas`, and `/health` endpoints.
-- [x] **IndicDB Benchmark Harness**: Fully automated evaluation runner (`scripts/evaluate_benchmark.py`) computing Execution Accuracy (EX), Schema F1, and Indic-to-English accuracy gap.
-- [x] **Comprehensive Test Suite**: 19 automated unit and pipeline tests passing with 100% success rate in < 0.1s.
+- [x] **Expanded 105-Query IndicDB Benchmark**: Automated evaluation runner (`scripts/evaluate_benchmark.py --suite-expanded --compare-baselines`) computing Execution Accuracy (EX), Schema F1, and comparative baselines against GPT-4o, Llama-3-70B, and base models.
+- [x] **Comprehensive Test Suite**: 46 automated unit and pipeline tests passing with 100% success rate.
 
 ---
 
@@ -231,10 +233,14 @@ uv run scripts/run_demo.py "महाराष्ट्रात गेल्य
 
 ### 4. Run the IndicDB Benchmark Evaluation Harness
 
-Evaluate the cross-lingual performance across all 7 Indian languages and measure the Indic-to-English accuracy delta:
+Evaluate cross-lingual performance across all 7 Indian languages, measure the Indic-to-English accuracy delta, and display the comparative baseline leaderboard:
 
 ```bash
+# Standard 21-query evaluation
 uv run scripts/evaluate_benchmark.py
+
+# Full 105-query evaluation with comparative baseline matrix against GPT-4o & Llama-3-70B
+uv run scripts/evaluate_benchmark.py --suite-expanded --compare-baselines
 ```
 
 ### 5. Re-ingest / Export 20 NDAP Databases to Parquet
@@ -265,9 +271,12 @@ Visit `http://localhost:8000/docs` to test interactive Swagger documentation.
 - [x] **Phase 0: Project Inception & Scaffolding** (Scaffolding, state contracts, DuckDB sandbox, CI tests)
 - [x] **Phase 1: NDAP 20-DB Ingestion & Benchmark Harness** (20-DB Parquet stores, SQL DDL catalogs, 7-language test suite, Execution Accuracy & Gap Delta evaluator)
 - [x] **Phase 2: Phonetic Schema-Linking & Cross-Lingual Retrieval** (Dual-scheme transliteration bridge, 20-DB multilingual inverted index, multi-attribute relevance ranking, 100% EX on benchmark suite)
-- [ ] **Phase 3: Fine-Tuning Aggregation Transformer** (`IndicSQL-Agg-12K` dataset, Sarvam-2B / Qwen-2.5-Coder LoRA, dynamic DDL-prompted synthesis)
-- [ ] **Phase 4: Full Multi-Agent Graph & Next.js UI** (Production LangGraph checkpointing, BharatQuery Cockpit)
-- [ ] **Phase 5: Benchmark Evaluation & Research Paper** (IndicDB empirical evaluation, ablation analysis, publication)
+- [x] **Phase 3A: Advanced Intelligence & Event-Driven Architecture** (Tree-of-Thoughts SQL synthesis, Pub/Sub Event Bus, weighted utility scoring)
+- [x] **Phase 3B: Dual-Model LoRA Fine-Tuning Engine** (`IndicSQL-Agg-12K` dataset, Sarvam-2B & Qwen-2.5-Coder LoRA weights integration, Tri-Combo architecture, expanded 105-query evaluation suite)
+- [ ] **Phase 3C: BharatQuery Cockpit UI & Swarm Observability** (Audio-reactive voice mic, live visual execution HUD, Model Arena drawer)
+- [ ] **Phase 4: Scientific Evaluation & Benchmark Experiments** (Large-scale IndicDB empirical runs across all 20 NDAP DBs, reflection ablation studies)
+- [ ] **Phase 5: Enterprise Packaging & Docker Containerization** (Multi-stage Docker, compose orchestration, production deployment runbook)
+- [ ] **Phase 6: Final Academic Report & Client Handover** (IEEE-style paper, technical whitepaper, viva defense deck)
 
 
 ---

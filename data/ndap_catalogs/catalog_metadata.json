@@ -13,7 +13,7 @@
       "domain": "Agriculture",
       "title": "PM-KISAN Direct Benefit Transfer Portal",
       "description": "Pradhan Mantri Kisan Samman Nidhi state and district level fund disbursements.",
-      "row_count": 212,
+      "row_count": 388,
       "parquet_file": "ndap_pm_kisan_disbursement.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name (e.g., MAHARASHTRA, BIHAR, TAMIL NADU)",
@@ -32,7 +32,7 @@
       "domain": "Agriculture",
       "title": "Annual Agricultural Crop Census",
       "description": "District-wise crop acreage, production yield, and seasonal harvest volumes.",
-      "row_count": 1060,
+      "row_count": 17853,
       "parquet_file": "ndap_crop_production_census.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -56,7 +56,7 @@
       "domain": "Agriculture",
       "title": "e-NAM Mandi Market Commodity Arrivals & Prices",
       "description": "Daily and monthly wholesale agricultural commodity prices across regulated mandis.",
-      "row_count": 400,
+      "row_count": 76,
       "parquet_file": "ndap_mandi_commodity_prices.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -81,7 +81,7 @@
       "domain": "Agriculture",
       "title": "Integrated Fertilizer Management System (iFMS)",
       "description": "District-level fertilizer allocations, stock availability, and retail point sales.",
-      "row_count": 848,
+      "row_count": 1552,
       "parquet_file": "ndap_fertilizer_distribution.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -103,7 +103,7 @@
       "domain": "Agriculture",
       "title": "Soil Health Card Scheme Database",
       "description": "Micro and macro nutrient soil test profiles and Soil Health Cards issued.",
-      "row_count": 159,
+      "row_count": 291,
       "parquet_file": "ndap_soil_health_records.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -125,7 +125,7 @@
       "domain": "Education",
       "title": "UDISE+ School Education & Demographic Statistics",
       "description": "Unified District Information System for Education Plus student and literacy indicators.",
-      "row_count": 212,
+      "row_count": 388,
       "parquet_file": "ndap_education_stats.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -146,7 +146,7 @@
       "domain": "Education",
       "title": "National School Facility & Basic Amenities Survey",
       "description": "School facility compliance including electricity, drinking water, toilets, and digital labs.",
-      "row_count": 106,
+      "row_count": 388,
       "parquet_file": "ndap_school_infrastructure.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -168,7 +168,7 @@
       "domain": "Education",
       "title": "All India Survey on Higher Education (AISHE)",
       "description": "Colleges, universities, faculty census, and Gross Enrollment Ratios (GER).",
-      "row_count": 20,
+      "row_count": 56,
       "parquet_file": "ndap_higher_education_aishe.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -188,7 +188,7 @@
       "domain": "Education",
       "title": "PM POSHAN / Mid-Day Meal Nutrition Portal",
       "description": "Coverage of school meal nutrition, foodgrain quotas, and student beneficiaries.",
-      "row_count": 106,
+      "row_count": 388,
       "parquet_file": "ndap_midday_meal_scheme.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -209,7 +209,7 @@
       "domain": "Education",
       "title": "Skill India & PMKVY Vocational Database",
       "description": "Short-term skilling, ITI certifications, and placement records.",
-      "row_count": 240,
+      "row_count": 2716,
       "parquet_file": "ndap_vocational_skill_training.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -231,7 +231,7 @@
       "domain": "Healthcare",
       "title": "National Family Health Survey (NFHS-5)",
       "description": "District maternal health, child nutrition, immunization, and lifestyle indicators.",
-      "row_count": 53,
+      "row_count": 341,
       "parquet_file": "ndap_nfhs5_health_indicators.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -251,7 +251,7 @@
       "domain": "Healthcare",
       "title": "Rural Health Statistics (RHS Bulletin)",
       "description": "Primary healthcare centers (PHC), community health centers (CHC), and specialist doctors.",
-      "row_count": 20,
+      "row_count": 56,
       "parquet_file": "ndap_rural_health_infrastructure.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -271,7 +271,7 @@
       "domain": "Healthcare",
       "title": "Sample Registration System (SRS) Vital Statistics",
       "description": "Maternal Mortality Ratio (MMR), Infant Mortality Rate (IMR), and Under-5 Mortality.",
-      "row_count": 20,
+      "row_count": 56,
       "parquet_file": "ndap_maternal_child_mortality.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -290,7 +290,7 @@
       "domain": "Healthcare",
       "title": "Ayushman Bharat PM-JAY Health Protection Portal",
       "description": "Golden card issuances, hospital empanelment, and secondary/tertiary claim settlements.",
-      "row_count": 106,
+      "row_count": 388,
       "parquet_file": "ndap_ayushman_bharat_pmjay.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -311,7 +311,7 @@
       "domain": "Healthcare",
       "title": "Ni-kshay National TB Elimination Portal",
       "description": "Tuberculosis notifications, treatment completion outcomes, and nutritional support (Nikshay Poshan).",
-      "row_count": 159,
+      "row_count": 388,
       "parquet_file": "ndap_national_tuberculosis_portal.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -332,7 +332,7 @@
       "domain": "Rural Development",
       "title": "MGNREGA National Rural Employment Portal",
       "description": "Mahatma Gandhi NREGA person-days generated, households engaged, and wage expenditures.",
-      "row_count": 40,
+      "row_count": 24,
       "parquet_file": "mgnrega_state_annual_employment.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -351,7 +351,7 @@
       "domain": "Rural Development",
       "title": "Pradhan Mantri Gram Sadak Yojana (PMGSY)",
       "description": "All-weather road connectivity to eligible unconnected rural habitations.",
-      "row_count": 159,
+      "row_count": 388,
       "parquet_file": "ndap_pmgsy_rural_roads.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -372,7 +372,7 @@
       "domain": "Rural Development",
       "title": "Jal Jeevan Mission Har Ghar Jal Portal",
       "description": "Rural household tap water connections (FHTC) and water quality surveillance.",
-      "row_count": 53,
+      "row_count": 97,
       "parquet_file": "ndap_jal_jeevan_tap_water.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -391,7 +391,7 @@
       "domain": "Rural Development",
       "title": "Pradhan Mantri Awaas Yojana - Gramin (PMAY-G)",
       "description": "Pucca houses sanctioned, constructed, and subsidy installments credited to homeless beneficiaries.",
-      "row_count": 159,
+      "row_count": 388,
       "parquet_file": "ndap_pmay_rural_housing.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",
@@ -411,7 +411,7 @@
       "domain": "Rural Development",
       "title": "e-GramSwaraj Local Body Finance & 15th FC Grants",
       "description": "Fifteenth Finance Commission basic and tied grants allocated to Gram Panchayats.",
-      "row_count": 106,
+      "row_count": 388,
       "parquet_file": "ndap_gram_panchayat_finance.parquet",
       "columns": {
         "state_name": "VARCHAR - State/UT name",

@@ -7,15 +7,26 @@ Implements the self-healing cycle up to 3 attempts.
 from typing import Any, Dict
 
 from indicsql.core.state import IndicSQLState
+from indicsql.events.bus import EventBus
+from indicsql.events.schemas import ReflectionTriggeredEvent
 
 
 def reflection_healer_node(state: IndicSQLState) -> Dict[str, Any]:
     """
     Diagnoses DuckDB execution error or empty set and generates corrected SQL.
+    Emits ReflectionTriggeredEvent on the EventBus.
     """
     attempts = state.get("reflection_attempts", 0) + 1
     current_sql = state.get("generated_sql", "")
-    err = state.get("execution_error", "")
+    err = state.get("execution_error", "") or ""
+
+    EventBus.publish(
+        ReflectionTriggeredEvent(
+            query_id=state.get("query_id"),
+            error_message=err,
+            attempt_number=attempts,
+        )
+    )
 
     # Example heuristic: if casing mismatch or syntax issue, patch query
     corrected_sql = current_sql

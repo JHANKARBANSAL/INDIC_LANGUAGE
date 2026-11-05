@@ -1,5 +1,5 @@
 """
-Unit tests for Phase 2 Cross-Lingual Schema-Linking & Transliteration Normalization.
+Unit tests for Cross-Lingual Schema-Linking & Transliteration Normalization.
 Validates linking across 7 Indic languages (Hindi, Marathi, Bengali, Tamil, Telugu, Hinglish, English)
 and across multiple NDAP domains.
 """
@@ -10,7 +10,7 @@ from indicsql.agents.schema_linker import link_schema_elements, schema_linker_no
 from indicsql.schema.phonetic import normalize_indic_phonetics
 
 
-class TestPhase2SchemaLinking(unittest.TestCase):
+class TestSchemaLinking(unittest.TestCase):
     def test_phonetic_normalization_latin(self):
         # Hinglish / Latin administrative terms
         normalized = normalize_indic_phonetics(

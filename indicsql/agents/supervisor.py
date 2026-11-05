@@ -7,6 +7,8 @@ import unicodedata
 from typing import Any, Dict
 
 from indicsql.core.state import IndicSQLState
+from indicsql.events.bus import EventBus
+from indicsql.events.schemas import QueryInitiatedEvent
 
 
 def detect_indic_script(text: str) -> str:
@@ -69,10 +71,20 @@ def supervisor_node(state: IndicSQLState) -> Dict[str, Any]:
     """
     Supervisor Agent node: Ingests raw query, identifies language & script,
     initializes audit trace and canonical query.
+    Emits QueryInitiatedEvent on the EventBus.
     """
     raw_query = state.get("raw_query", "").strip()
     script = detect_indic_script(raw_query)
     lang = identify_language_code(raw_query, script)
+
+    EventBus.publish(
+        QueryInitiatedEvent(
+            query_id=state.get("query_id"),
+            raw_query=raw_query,
+            detected_lang=lang,
+            detected_script=script,
+        )
+    )
 
     audit_entry = {
         "step": 1,
