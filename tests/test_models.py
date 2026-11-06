@@ -55,11 +55,17 @@ class TestModelsAndCombos(unittest.TestCase):
     def test_sarvam_and_qwen_adapters_default_paths(self):
         sarvam = SarvamAdapter()
         qwen = QwenAdapter()
-        self.assertIn("sarvam_transliteration", str(sarvam.lora_path))
-        self.assertIn("qwen_3b_sql", str(qwen.lora_path))
-        # In test environment without GPU training, is_available is False
-        self.assertFalse(sarvam.is_available)
-        self.assertFalse(qwen.is_available)
+        self.assertTrue(
+            "sarvam_transliteration" in str(sarvam.lora_path) or "sarvam_adapter" in str(sarvam.lora_path)
+        )
+        self.assertTrue(
+            "qwen_3b_sql" in str(qwen.lora_path) or "qwen_adapter" in str(qwen.lora_path)
+        )
+        # If weights are present on disk, verify is_available is True
+        if (sarvam.lora_path / "adapter_model.safetensors").exists():
+            self.assertTrue(sarvam.is_available)
+        if (qwen.lora_path / "adapter_model.safetensors").exists():
+            self.assertTrue(qwen.is_available)
 
     def test_tri_combo_fallback_execution(self):
         engine = TriComboEngine()

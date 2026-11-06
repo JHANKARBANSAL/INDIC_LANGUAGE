@@ -37,8 +37,13 @@ venv.bak/
 
 # Hugging Face & Model checkpoints
 checkpoints/
-/models/
-lora_weights/
+checkpoint-*/
+models/lora_weights/**/checkpoint-*/
+models/*
+!models/lora_weights/
+!models/lora_weights/**/
+!models/lora_weights/README.md
+!models/lora_weights/**/.gitkeep
 *.bin
 *.safetensors
 *.pt

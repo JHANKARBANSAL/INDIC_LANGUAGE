@@ -846,13 +846,13 @@ gantt
     section Completed Milestones
     Phase 1 - Planning, PEAS and ADK Harness       :done, p1, 2026-09-23, 2026-10-02
     Phase 2 - 6-Agent Swarm and Schema Substrate   :done, p2, 2026-10-02, 2026-10-12
+    Phase 3A - Advanced Intelligence and Events    :done, p3a, 2026-10-12, 2026-10-22
+    Phase 3B - Dual-Model LoRA Fine-Tuning Engine  :done, p3b, 2026-10-22, 2026-11-02
     
     section Active Milestone
-    Phase 3A - Advanced Intelligence and Events    :active, p3a, 2026-10-12, 2026-10-22
+    Phase 3C - BharatQuery Flutter UI and Dashboard:active, p3c, 2026-11-02, 2026-11-12
     
     section Future Milestones
-    Phase 3B - Dual-Model LoRA Fine-Tuning Engine  :p3b, 2026-10-22, 2026-11-02
-    Phase 3C - BharatQuery Flutter UI and Dashboard:p3c, 2026-11-02, 2026-11-12
     Phase 4 - IndicDB Evaluation and Tri-Combo Run :p4, 2026-11-12, 2026-11-20
     Phase 5 - Enterprise Docker and Packaging      :p5, 2026-11-20, 2026-11-28
     Phase 6 - Final Paper, Report and Handover     :p6, 2026-11-28, 2026-12-05
@@ -895,24 +895,25 @@ gantt
 
 #### Phase 3A — Advanced Agent Intelligence & Event-Driven Architecture
 
-- [ ] Tree-of-Thoughts (ToT) multi-candidate sequence exploration operational in SQL Synthesizer & Schema Linker
-- [ ] Weighted utility function candidate scoring operational (ranking candidate SQL by AST safety, join validity, and schema similarity)
-- [ ] Asynchronous Pub/Sub Event Bus (`indicsql/events/bus.py`) operational for multi-agent decoupled communication
-- [ ] Typed event schemas (`QueryInitiatedEvent`, `SchemaLinkedEvent`, `ExecutionCompletedEvent`, `ReflectionTriggeredEvent`, `VoiceSynthesisEvent`)
-- [ ] Dynamic DDL prompt injection operational (eliminating hardcoded rule-based generation with live schema context)
-- [ ] Unit tests for ToT query planning and Event Bus passing
+- [x] Tree-of-Thoughts (ToT) multi-candidate sequence exploration operational in SQL Synthesizer & Schema Linker
+- [x] Weighted utility function candidate scoring operational (ranking candidate SQL by AST safety, join validity, and schema similarity)
+- [x] Asynchronous Pub/Sub Event Bus (`indicsql/events/bus.py`) operational for multi-agent decoupled communication
+- [x] Typed event schemas (`QueryInitiatedEvent`, `SchemaLinkedEvent`, `ExecutionCompletedEvent`, `ReflectionTriggeredEvent`, `VoiceSynthesisEvent`)
+- [x] Dynamic DDL prompt injection operational (eliminating hardcoded rule-based generation with live schema context)
+- [x] Unit tests for ToT query planning and Event Bus passing
 
 #### Phase 3B — Sovereign Dual-Model LoRA Fine-Tuning Engine (Sarvam-2B & Qwen-2.5-Coder)
 
-- [ ] Dataset curation pipeline operational for `IndicSQL-Agg-12K` (12,000 paired Indic questions, DDLs, and Gold SQL across 7 languages)
-- [ ] Partition 1 curated for `Sarvam-2B`: Indic contextual transliteration, dialectal normalization, and semantic entity/filter boundary deconstruction
-- [ ] Partition 2 curated for `Qwen-2.5-Coder`: Complex aggregation SQL synthesis (`GROUP BY`, nested subqueries, temporal windows, and multi-table joins)
-- [ ] 4-bit NormalFloat (NF4) QLoRA training harness operational with Unsloth / Hugging Face PEFT & TRL (<24GB VRAM footprint)
-- [ ] Target adapter modules configured (`q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`)
-- [ ] Tri-Combo execution harness established for runtime comparison (Combo A: Hybrid Champion, Combo B: Sarvam Pure, Combo C: Qwen Pure)
-- [ ] Dynamic adapter switching & zero-copy LoRA runtime serving via vLLM / Hugging Face pipeline
-- [ ] Standalone interactive CLI benchmark runner (`scripts/run_model_arena.py`) with telemetry HUD (latency, token count, EX%, AST validity)
-- [ ] Unit tests for fine-tuning dataset integrity, tokenization coverage across 7 scripts, and LoRA inference passing
+- [x] Dataset curation pipeline operational for `IndicSQL-Agg-12K` (12,000 paired Indic questions, DDLs, and Gold SQL across 7 languages)
+- [x] Partition 1 curated for `Sarvam-2B`: Indic contextual transliteration, dialectal normalization, and semantic entity/filter boundary deconstruction
+- [x] Partition 2 curated for `Qwen-2.5-Coder`: Complex aggregation SQL synthesis (`GROUP BY`, nested subqueries, temporal windows, and multi-table joins)
+- [x] 4-bit NormalFloat (NF4) QLoRA training harness operational with Unsloth / Hugging Face PEFT & TRL (<24GB VRAM footprint)
+- [x] Target adapter modules configured (`q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`)
+- [x] Exported LoRA adapter weights integrated into `models/lora_weights/` (`qwen_adapter` & `sarvam_adapter`) with offline detection & fallback
+- [x] Tri-Combo execution harness established for runtime comparison (Combo A: Hybrid Champion, Combo B: Sarvam Pure, Combo C: Qwen Pure)
+- [x] Dynamic adapter switching & zero-copy LoRA runtime serving via vLLM / Hugging Face pipeline
+- [x] Expanded 105-query IndicDB benchmark suite & baseline leaderboard matrix comparison (`scripts/evaluate_benchmark.py --suite-expanded --compare-baselines`)
+- [x] Unit tests for fine-tuning dataset integrity, tokenization coverage across 7 scripts, and LoRA inference passing
 
 #### Phase 3C — BharatQuery Flutter Mobile Cockpit UI & Swarm Observability Dashboard
 

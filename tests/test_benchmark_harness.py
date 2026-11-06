@@ -79,6 +79,32 @@ class TestBenchmarkHarness(unittest.TestCase):
         self.assertTrue(result.execution_match)
         self.assertGreaterEqual(result.schema_f1, 0.5)
 
+    def test_expanded_dataset_loading(self):
+        from pathlib import Path
+        import json
+        from collections import Counter
+        exp_path = Path(__file__).resolve().parent.parent / "data" / "benchmarks" / "indicdb_eval_suite_expanded.json"
+        self.assertTrue(exp_path.exists())
+        with open(exp_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertEqual(len(data), 105)
+        counts = Counter(d["language"] for d in data)
+        for lang in ["en", "hi-en", "mr", "hi", "bn", "ta", "te"]:
+            self.assertEqual(counts[lang], 15)
+
+    def test_baseline_models_matrix(self):
+        from pathlib import Path
+        import json
+        matrix_path = Path(__file__).resolve().parent.parent / "data" / "benchmarks" / "baseline_models_matrix.json"
+        self.assertTrue(matrix_path.exists())
+        with open(matrix_path, "r", encoding="utf-8") as f:
+            matrix = json.load(f)
+        self.assertIn("models", matrix)
+        models = matrix["models"]
+        for key in ["gpt-4o", "llama-3-70b-instruct", "qwen-2.5-coder-3b-base", "sarvam-2b-base", "qwen-adapter", "sarvam-adapter"]:
+            self.assertIn(key, models)
+        self.assertTrue("indicsql-champion" in models or "indicsql-combo-a" in models)
+
 
 if __name__ == "__main__":
     unittest.main()

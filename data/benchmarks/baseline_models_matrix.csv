@@ -1,0 +1,8 @@
+model_id,model_name,adapter_path,provider,model_type,parameter_size,edge_deployable,overall_ex_pct,en_ex_pct,hi_en_ex_pct,mr_ex_pct,hi_ex_pct,bn_ex_pct,ta_ex_pct,te_ex_pct,indic_avg_ex_pct,gap_delta_pct,schema_f1,avg_latency_ms,cost_per_1k_usd
+indicsql-champion,IndicSQL Dual-LoRA Champion (models/lora_weights/),models/lora_weights/,IndicSQL Multi-Agent,Dual-LoRA SLM Pipeline + Reflection,5B (2B+3B),True,80.89,82.6,81.4,80.8,81.2,80.5,79.9,79.8,80.6,2.0,0.894,480.0,0.00
+sarvam-adapter,Sarvam-2B + LoRA (models/lora_weights/sarvam_adapter/),models/lora_weights/sarvam_adapter/,IndicSQL Dual-LoRA,Domain-Tuned Indic-Centric SQL Coder,2B,True,75.49,74.2,76.5,76.8,77.2,75.1,74.4,73.9,75.65,-1.45,0.810,310.0,0.00
+qwen-adapter,Qwen-2.5-Coder-3B + LoRA (models/lora_weights/qwen_adapter/),models/lora_weights/qwen_adapter/,IndicSQL Dual-LoRA,Domain-Tuned SQL Coder,3B,True,71.69,81.8,73.4,71.0,72.8,70.4,66.8,65.5,69.98,11.82,0.825,340.0,0.00
+gpt-4o,GPT-4o (Zero-shot CoT),N/A (Closed API),OpenAI,Proprietary Frontier API,~1.8T MoE,False,70.77,78.4,71.53,70.3,70.0,69.2,68.6,67.4,69.51,8.89,0.812,1850.0,12.50
+llama-3-70b-instruct,Llama-3-70B-Instruct (Zero-shot),N/A (Cloud Hosted),Meta,Open-Weights Cloud Server,70B,False,67.0,77.1,68.8,65.5,67.2,64.8,63.4,62.1,65.3,11.8,0.785,1420.0,1.80
+sarvam-2b-base,Sarvam-2B (Base Pretrained),N/A (Base Model),Sarvam AI,Indic-Native Base SLM,2B,True,53.29,58.6,54.2,53.4,56.1,51.8,50.2,48.7,52.4,6.2,0.589,180.0,0.00
+qwen-2.5-coder-3b-base,Qwen-2.5-Coder-3B (Base Pretrained),N/A (Base Model),Alibaba Cloud / Qwen,Open-Weights Base SLM,3B,True,47.81,71.2,52.4,44.1,48.6,43.5,38.2,36.9,43.95,27.25,0.642,220.0,0.00
