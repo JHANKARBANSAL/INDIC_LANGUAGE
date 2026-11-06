@@ -5,17 +5,28 @@ Exposes endpoints for natural language queries, schema inspection, and benchmark
 
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from indicsql import __version__
 from indicsql.graph.workflow import execute_indicsql_pipeline
+from indicsql.models.sarvam_client import SarvamAPIError, SarvamClient
 from indicsql.schema.catalog import NDAPCatalog
 
 app = FastAPI(
     title="IndicSQL API Gateway",
     description="Cross-Lingual Text-to-SQL Swarm for Indian Languages (NDAP Benchmark)",
     version=__version__,
+)
+
+# Enable CORS for local frontend clients
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -83,3 +94,51 @@ def run_query(request: QueryRequest):
         execution_result=result_state.get("execution_result"),
         audit_trace=result_state.get("audit_trace", []),
     )
+
+
+class VoiceSynthesisRequest(BaseModel):
+    text: str = Field(..., description="Vernacular text to synthesize into speech")
+    language_code: str = Field(
+        default="hi-IN",
+        description="Target language BCP-47 code (e.g. hi-IN, mr-IN, bn-IN, ta-IN, te-IN)",
+    )
+    speaker: str = Field(default="meera", description="Speaker voice identifier")
+
+
+@app.post("/voice/transcribe")
+async def transcribe_audio(file: UploadFile = File(...)):
+    """
+    Transcribes audio using Sarvam Saaras model with automatic language detection.
+    """
+    client = SarvamClient()
+    if not client.is_configured:
+        raise HTTPException(
+            status_code=503,
+            detail="Sarvam API is not configured. Please set SARVAM_API_KEY in your .env file.",
+        )
+    content = await file.read()
+    try:
+        return client.speech_to_text(content, filename=file.filename or "audio.wav")
+    except SarvamAPIError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+@app.post("/voice/synthesize")
+def synthesize_speech(request: VoiceSynthesisRequest):
+    """
+    Synthesizes vernacular audio using Sarvam Bulbul model.
+    """
+    client = SarvamClient()
+    if not client.is_configured:
+        raise HTTPException(
+            status_code=503,
+            detail="Sarvam API is not configured. Please set SARVAM_API_KEY in your .env file.",
+        )
+    try:
+        return client.text_to_speech(
+            text=request.text,
+            target_language_code=request.language_code,
+            speaker=request.speaker,
+        )
+    except SarvamAPIError as e:
+        raise HTTPException(status_code=502, detail=str(e))
