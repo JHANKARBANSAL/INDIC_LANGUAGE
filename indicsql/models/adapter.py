@@ -37,10 +37,13 @@ class ModelAdapter:
         self.max_length = max_length
         self._model = None
         self._tokenizer = None
+        self._load_failed = False
 
     @property
     def is_available(self) -> bool:
-        """Returns True if fine-tuned adapter weights exist on local disk."""
+        """Returns True if fine-tuned adapter weights exist on local disk and haven't failed loading."""
+        if self._load_failed:
+            return False
         if not self.lora_path or not self.lora_path.exists():
             return False
         has_safetensors = (self.lora_path / "adapter_model.safetensors").exists()
@@ -58,25 +61,29 @@ class ModelAdapter:
             )
 
         try:
+            import os
             import torch
             from peft import PeftModel
             from transformers import AutoModelForCausalLM, AutoTokenizer
 
-            logger.info(f"Loading base model {self.model_id}...")
+            local_only = os.environ.get("INDISQL_DOWNLOAD_MODELS", "0") != "1"
+            logger.info(f"Loading base model {self.model_id} (local_files_only={local_only})...")
             self._tokenizer = AutoTokenizer.from_pretrained(
-                str(self.lora_path), trust_remote_code=True
+                str(self.lora_path), trust_remote_code=True, local_files_only=local_only
             )
             base_model = AutoModelForCausalLM.from_pretrained(
                 self.model_id,
                 torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
                 device_map="auto" if torch.cuda.is_available() else "cpu",
                 trust_remote_code=True,
+                local_files_only=local_only,
             )
             logger.info(f"Attaching LoRA adapter from {self.lora_path}...")
             self._model = PeftModel.from_pretrained(base_model, str(self.lora_path))
             self._model.eval()
         except Exception as e:
-            logger.error(f"Failed to load model adapter {self.model_id}: {e}")
+            self._load_failed = True
+            logger.warning(f"Failed to load model adapter {self.model_id}: {e}")
             raise ModelUnavailableError(f"Failed loading weights: {e}") from e
 
     def generate(self, prompt: str, max_new_tokens: int = 256) -> str:
