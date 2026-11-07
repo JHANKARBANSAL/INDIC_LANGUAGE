@@ -78,7 +78,10 @@ def schema_linker_node(state: IndicSQLState) -> Dict[str, Any]:
     pruned = link_schema_elements(canonical_query, lang)
     primary_table = pruned[0]["table_name"] if pruned else "ndap_default_table"
     matched_cols = [el["column_name"] for el in pruned]
-    confidence = 0.92
+
+    # Dynamic schema-linking confidence score based on match count and specificity
+    match_density = sum(len(el.get("indic_synonyms", [])) for el in pruned)
+    confidence = min(0.98, max(0.45, round(0.50 + (match_density * 0.05), 2))) if pruned else 0.40
 
     EventBus.publish(
         SchemaLinkedEvent(

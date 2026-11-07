@@ -40,29 +40,32 @@ def identify_language_code(text: str, script: str) -> str:
     if script == "Bengali":
         return "bn"
     if script == "Devanagari":
-        # Heuristic check for Marathi specific characters (like ळ) or words
-        marathi_markers = {"ळ", "आहे", "किती", "शेतकऱ्यांना", "महाराष्ट्रात", "उत्पादन", "शाळांमध्ये", "झाले"}
+        # Check for Marathi-specific characters (like ळ) and grammatical markers
+        # Note: Do NOT include common Sanskrit/Hindi words like 'उत्पादन' here.
+        marathi_markers = {"ळ", "आहे", "किती", "शेतकऱ्यांना", "महाराष्ट्रात", "शाळांमध्ये", "झाले", "केले", "कोणत्या"}
         if any(m in text for m in marathi_markers):
             return "mr"
         return "hi"
 
     # For Latin script: Distinguish Hinglish vs English
+    # Exclude English words like 'me' to avoid false-positive Hinglish on "Show me..."
     hinglish_markers = {
         "kitne",
         "kisko",
         "pichle",
         "saal",
-        "me",
         "mein",
-        "ka",
-        "ki",
-        "ke",
         "hai",
         "kya",
         "yojana",
+        "fayda",
+        "kisano",
+        "shala",
+        "sabse",
     }
     words = set(text.lower().split())
-    if words.intersection(hinglish_markers):
+    matches = words.intersection(hinglish_markers)
+    if len(matches) >= 1 and any(m in ["kitne", "kisko", "pichle", "mein", "yojana", "fayda", "kisano", "sabse"] for m in matches):
         return "hi-en"
     return "en"
 

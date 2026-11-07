@@ -77,7 +77,7 @@ class TestModelsAndCombos(unittest.TestCase):
 
         for r in results:
             self.assertIsInstance(r, ComboResult)
-            self.assertEqual(r.method, "tot_heuristic")
+            self.assertIn(r.method, ["tot_heuristic", "ollama_qwen2.5:3b", "schema_grounded_fallback", "lora"])
             self.assertTrue(r.generated_sql.upper().startswith("SELECT"))
             self.assertGreater(r.utility_score, 0.0)
             self.assertGreaterEqual(r.latency_ms, 0.0)
@@ -91,7 +91,7 @@ class TestModelsAndCombos(unittest.TestCase):
 
         trace = res["audit_trace"]
         self.assertTrue(len(trace) > 0)
-        self.assertEqual(trace[-1]["method"], "tot_heuristic")
+        self.assertIn(trace[-1]["method"], ["tot_heuristic", "ollama_qwen2.5:3b", "schema_grounded_fallback"])
 
 
 if __name__ == "__main__":

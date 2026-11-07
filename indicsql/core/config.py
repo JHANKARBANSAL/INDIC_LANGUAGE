@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     app_port: int = Field(default=8000, description="API port")
 
     # LLM Settings
+    ollama_host: str = Field(default="http://localhost:11434", description="Ollama API base URL")
+    ollama_model: str = Field(default="qwen2.5:3b", description="Default Ollama model")
     sarvam_api_key: Optional[str] = Field(default=None, description="Sarvam AI API key")
     sarvam_model_endpoint: str = Field(
         default="https://api.sarvam.ai/v1", description="Sarvam API endpoint"

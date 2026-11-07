@@ -12,15 +12,21 @@ from indicsql.events.bus import EventBus
 from indicsql.events.schemas import VoiceSynthesisEvent
 
 
-def format_indian_currency_number(val: float) -> str:
-    """Formats large integers/floats into Crores or Lakhs."""
-    if val >= 10_000_000:
-        crores = val / 10_000_000
+def format_indian_currency_number(val: Any) -> str:
+    """Formats large integers/floats into Crores or Lakhs safely."""
+    if val is None:
+        return "0"
+    try:
+        fval = float(val)
+    except (ValueError, TypeError):
+        return str(val)
+    if fval >= 10_000_000:
+        crores = fval / 10_000_000
         return f"{crores:.2f} कोटी (Crores)"
-    if val >= 100_000:
-        lakhs = val / 100_000
+    if fval >= 100_000:
+        lakhs = fval / 100_000
         return f"{lakhs:.2f} लाख (Lakhs)"
-    return f"{val:,.0f}"
+    return f"{fval:,.0f}"
 
 
 def verbalize_tabular_result(state: IndicSQLState) -> str:
@@ -77,23 +83,21 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
             return f"Under MGNREGA, a total of {mandays:,} person-days (mandays) were generated."
 
     # 3. PM-KISAN Farmers & Disbursement
-    if "total_farmers" in columns or "farmer_beneficiaries" in columns:
-        farmers_idx = (
-            columns.index("total_farmers")
-            if "total_farmers" in columns
-            else columns.index("farmer_beneficiaries")
-        )
-        farmers = row[farmers_idx]
-        farmers_fmt = format_indian_currency_number(float(farmers))
+    farmer_col_idx = next(
+        (i for i, c in enumerate(columns) if any(k in c for k in ["farmer", "beneficiar"])),
+        None
+    )
+    if farmer_col_idx is not None:
+        farmers = row[farmer_col_idx]
+        farmers_fmt = format_indian_currency_number(farmers)
         amount_part = ""
-        if "total_amount" in columns or "amount_inr" in columns:
-            amt_idx = (
-                columns.index("total_amount")
-                if "total_amount" in columns
-                else columns.index("amount_inr")
-            )
-            amt = row[amt_idx]
-            amt_fmt = format_indian_currency_number(float(amt))
+        amt_col_idx = next(
+            (i for i, c in enumerate(columns) if any(k in c for k in ["amount", "disbursed"])),
+            None
+        )
+        if amt_col_idx is not None:
+            amt = row[amt_col_idx]
+            amt_fmt = format_indian_currency_number(amt)
             amount_part = (
                 f", आणि ₹{amt_fmt} ची रक्कम थेट वितरित करण्यात आली"
                 if lang == "mr"

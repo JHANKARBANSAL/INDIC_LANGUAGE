@@ -29,6 +29,9 @@ def main():
         "--suite-expanded", action="store_true", help="Use the 105-query expanded IndicDB benchmark suite"
     )
     parser.add_argument(
+        "--suite-280", "--pan-india", dest="suite_280", action="store_true", help="Use the comprehensive 280-query Pan-India benchmark suite"
+    )
+    parser.add_argument(
         "--limit", type=int, default=None, help="Limit evaluation to first N queries"
     )
     parser.add_argument(
@@ -39,7 +42,9 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.suite_expanded:
+    if args.suite_280:
+        suite_path = REPO_ROOT / "data" / "benchmarks" / "indicdb_eval_suite_pan_india_280.json"
+    elif args.suite_expanded:
         suite_path = REPO_ROOT / "data" / "benchmarks" / "indicdb_eval_suite_expanded.json"
     elif args.suite:
         suite_path = Path(args.suite)
@@ -59,7 +64,17 @@ def main():
     report = evaluator.evaluate_suite(queries, save_results=args.save)
 
     # Format per-language summary table
-    headers = ["Language", "Code", "Queries", "Execution Acc (EX)", "Schema F1", "Avg Latency (ms)"]
+    headers = [
+        "Language",
+        "Code",
+        "Queries",
+        "Exec Acc (EX)",
+        "Exact Match (EM)",
+        "SQL Validity",
+        "AST Match",
+        "Schema F1",
+        "Latency",
+    ]
     lang_names = {
         "en": "English (Baseline)",
         "hi-en": "Hinglish (Code-Mixed)",
@@ -78,24 +93,43 @@ def main():
                 code,
                 m["total_queries"],
                 f"{m['execution_accuracy_pct']:.1f}%",
+                f"{m.get('exact_match_pct', 0.0):.1f}%",
+                f"{m.get('sql_validity_pct', 100.0):.1f}%",
+                f"{m.get('ast_structural_match_pct', 0.0):.1f}%",
                 f"{m['schema_f1']:.3f}",
                 f"{m['avg_latency_ms']:.1f}ms",
             ]
         )
 
-    print("\n" + "=" * 80)
-    print("📋 BENCHMARK PERFORMANCE MATRIX (EX & SCHEMA F1)")
-    print("=" * 80)
+    print("\n" + "=" * 95)
+    print("📋 MULTI-TIER BENCHMARK PERFORMANCE MATRIX (EX, EM, VALIDITY & SCHEMA F1)")
+    print("=" * 95)
     print(tabulate(table_rows, headers=headers, tablefmt="github"))
 
-    print("\n📈 SUMMARY BENCHMARK METRICS:")
-    print(f"   • Overall Execution Accuracy:  {report['overall_execution_accuracy_pct']}%")
-    print(f"   • English Baseline Accuracy:   {report['english_accuracy_pct']}%")
-    print(f"   • Average Indic Accuracy:      {report['average_indic_accuracy_pct']}%")
+    print("\n📈 4-TIER RESEARCH EVALUATION METRICS:")
+    print("=" * 60)
+    print(f"  1. Execution Accuracy (EX)       : {report['overall_execution_accuracy_pct']}% (DuckDB ground-truth match)")
+    print(f"  2. Exact Match Accuracy (EM)     : {report.get('overall_exact_match_pct', 0.0)}% (Normalized SQL string match)")
+    print(f"  3. SQL Validity Rate             : {report.get('overall_sql_validity_pct', 100.0)}% (Syntactically valid AST)")
+    print(f"  4. AST Structural Equivalence    : {report.get('overall_ast_structural_match_pct', 0.0)}% (Exact AST structure)")
+
+    clauses = report.get("clause_accuracies_pct", {})
+    if clauses:
+        print("\n🧩 COMPONENT / CLAUSE ACCURACY BREAKDOWN:")
+        print(f"  • SELECT (Projections & Aggs)    : {clauses.get('select', 0.0)}%")
+        print(f"  • FROM (Target Table Mapping)    : {clauses.get('from', 0.0)}%")
+        print(f"  • WHERE (Filters & Predicates)   : {clauses.get('where', 0.0)}%")
+        print(f"  • GROUP BY (Grouping Dimensions) : {clauses.get('group_by', 0.0)}%")
+        print(f"  • ORDER BY (Sort Expressions)    : {clauses.get('order_by', 0.0)}%")
+        print(f"  • LIMIT (Row Slicing)            : {clauses.get('limit', 0.0)}%")
+
+    print("\n🌐 CROSS-LINGUAL PARITY:")
+    print(f"  • English Baseline Accuracy      : {report['english_accuracy_pct']}%")
+    print(f"  • Average Indic Accuracy         : {report['average_indic_accuracy_pct']}%")
     delta = report["indic_to_english_gap_delta_pct"]
     delta_color = "🟢 Target Parity Achieved" if delta <= 2.0 else "🟡 Gap Pending Fine-Tuning"
-    print(f"   • Indic-to-English Gap Delta:  {delta}% ({delta_color})")
-    print("=" * 80)
+    print(f"  • Indic-to-English Gap Delta     : {delta}% ({delta_color})")
+    print("=" * 95)
 
     if args.compare_baselines:
         matrix_file = REPO_ROOT / "data" / "benchmarks" / "baseline_models_matrix.json"

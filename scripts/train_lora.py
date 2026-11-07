@@ -112,10 +112,24 @@ def train_lora(
         args=sft_config,
     )
 
-    trainer.train()
+    train_result = trainer.train()
     trainer.model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
     print(f"Adapter saved to {output_dir}")
+
+    # Save epoch loss history for research paper graph plotting
+    import json
+    history_file = Path(output_dir) / "training_loss_history.json"
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(trainer.state.log_history, f, indent=2)
+    print(f"📊 Training loss history logged to: {history_file}")
+
+    # Auto-generate publication graph
+    try:
+        from scripts.plot_training_loss_curves import plot_loss_curves
+        plot_loss_curves(history_file, Path(output_dir) / "loss_convergence_curve.png")
+    except Exception as e:
+        print(f"Graph plotting notice: {e}")
 
 
 if __name__ == "__main__":

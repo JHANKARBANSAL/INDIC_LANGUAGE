@@ -1,541 +1,268 @@
 """
-SQL Synthesizer Agent — Tree-of-Thoughts (ToT) Multi-Candidate Generation.
-
-Generates N candidate SQL queries via heuristic templates, scores each using
-a weighted utility function, and emits a SQLSynthesizedEvent on the EventBus.
-
-Scoring weights (tunable via env vars in future):
-  - syntactic_validity  : 0.30
-  - aggregation_coverage: 0.25
-  - filter_precision    : 0.25
-  - join_correctness    : 0.20
-
-Addresses the 28% Aggregation & GROUP BY Breakdown identified in IndicDB.
+SQL Synthesizer Agent — Dynamic Neural & Multi-Candidate Generation.
+Synthesizes deterministic DuckDB SQL queries from cross-lingual Indic inputs
+using local LLM inference (Ollama Qwen-2.5-Coder / Qwen-2.5) with schema grounding
+and reflection-guided self-correction.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Tuple
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
 from indicsql.core.state import IndicSQLState
 from indicsql.events.bus import EventBus
 from indicsql.events.schemas import SQLSynthesizedEvent
+from indicsql.models.ollama_client import OllamaClient
+from indicsql.schema.catalog import NDAPCatalog
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Scoring weights
-# ---------------------------------------------------------------------------
-_W_SYNTAX = 0.30
-_W_AGG = 0.25
-_W_FILTER = 0.25
-_W_JOIN = 0.20
+# Reusable Ollama client instance
+_ollama_client = OllamaClient()
 
 # ---------------------------------------------------------------------------
-# Regional entity lexicons
+# Comprehensive Pan-India Entity Lexicons (All Regions)
 # ---------------------------------------------------------------------------
 _STATE_LEXICON: List[Tuple[List[str], str]] = [
-    (["महाराष्ट्र", "maharashtra"], "MAHARASHTRA"),
-    (["तमिलनाडु", "தமிழ்நாடு", "தமிழ்நாட்டில்", "tamil nadu"], "TAMIL NADU"),
-    (["बिहार", "bihar"], "BIHAR"),
-    (["आंध्र", "ఆంధ్రప్రదేశ్", "andhra pradesh"], "ANDHRA PRADESH"),
-    (["पश्चिम बंगाल", "পশ্চিমবঙ্গ", "west bengal"], "WEST BENGAL"),
-    (["उत्तर प्रदेश", "uttar pradesh"], "UTTAR PRADESH"),
-    (["मध्य प्रदेश", "madhya pradesh"], "MADHYA PRADESH"),
+    # North
+    (["उत्तर प्रदेश", "uttar pradesh", "up"], "UTTAR PRADESH"),
+    (["पंजाब", "punjab", "ਪੰਜਾਬ"], "PUNJAB"),
+    (["हरियाणा", "haryana"], "HARYANA"),
     (["राजस्थान", "rajasthan"], "RAJASTHAN"),
-    (["गुजरात", "gujarat"], "GUJARAT"),
-    (["कर्नाटक", "కర్ణాటక", "karnataka"], "KARNATAKA"),
+    (["हिमाचल", "himachal pradesh", "himachal"], "HIMACHAL PRADESH"),
+    (["उत्तराखंड", "uttarakhand"], "UTTARAKHAND"),
+    (["जम्मू", "कश्मीर", "jammu", "kashmir"], "JAMMU AND KASHMIR"),
+    (["दिल्ली", "delhi", "new delhi"], "DELHI"),
+    # South
+    (["तमिलनाडु", "தமிழ்நாடு", "tamil nadu", "tamilnadu"], "TAMIL NADU"),
+    (["कर्नाटक", "ಕರ್ನಾಟಕ", "karnataka"], "KARNATAKA"),
+    (["केरल", "kerala", "കേരളം"], "KERALA"),
+    (["आंध्र", "ఆంధ్రప్రదేశ్", "andhra pradesh", "andhra"], "ANDHRA PRADESH"),
+    (["तेलंगाना", "తెలంగాణ", "telangana"], "TELANGANA"),
+    # West
+    (["महाराष्ट्र", "maharashtra", "महाराष्ट्रात"], "MAHARASHTRA"),
+    (["गुजरात", "gujarat", "ગુજરાત"], "GUJARAT"),
+    (["गोवा", "goa"], "GOA"),
+    # East & Central
+    (["बिहार", "bihar"], "BIHAR"),
+    (["पश्चिम बंगाल", "পশ্চিমবঙ্গ", "west bengal", "bengal"], "WEST BENGAL"),
+    (["ओडिशा", "odisha", "orissa", "ଓଡ଼ିଶା"], "ODISHA"),
+    (["झारखंड", "jharkhand"], "JHARKHAND"),
+    (["मध्य प्रदेश", "madhya pradesh", "mp"], "MADHYA PRADESH"),
+    (["छत्तीसगढ़", "chhattisgarh"], "CHHATTISGARH"),
+    # North-East
+    (["असम", "assam", "অসম"], "ASSAM"),
+    (["मेघालय", "meghalaya"], "MEGHALAYA"),
+    (["त्रिपुरा", "tripura"], "TRIPURA"),
 ]
 
 _DISTRICT_LEXICON: List[Tuple[List[str], str]] = [
     (["पुणे", "pune"], "Pune"),
-    (["மதுரை", "madurai"], "Madurai"),
-    (["విశాఖపట్నం", "visakhapatnam"], "Visakhapatnam"),
-    (["মুর্শিদাবাদ", "murshidabad"], "Murshidabad"),
     (["नाशिक", "nashik"], "Nashik"),
+    (["नागपुर", "nagpur"], "Nagpur"),
     (["पटना", "patna"], "Patna"),
-    (["वाराणसी", "varanasi"], "Varanasi"),
-    (["கோயம்புத்தூர்", "coimbatore"], "Coimbatore"),
+    (["वाराणसी", "varanasi", "kashi", "banaras"], "Varanasi"),
+    (["लखनऊ", "lucknow"], "Lucknow"),
+    (["कानपुर", "kanpur"], "Kanpur"),
+    (["மதுரை", "madurai"], "Madurai"),
+    (["சென்னை", "chennai"], "Chennai"),
+    (["கோவை", "coimbatore"], "Coimbatore"),
+    (["విశాఖపట్నం", "visakhapatnam", "vizag"], "Visakhapatnam"),
     (["గుంటూరు", "guntur"], "Guntur"),
-    (["కృష్ణా", "krishna"], "Krishna"),
+    (["ముర్షిదాబాద్", "মুর্শিদাবাদ", "murshidabad"], "Murshidabad"),
+    (["কলকাতা", "kolkata", "calcutta"], "Kolkata"),
     (["মালদা", "malda"], "Malda"),
+    (["अमृतसर", "amritsar"], "Amritsar"),
+    (["लुधियाना", "ludhiana"], "Ludhiana"),
+    (["जयपुर", "jaipur"], "Jaipur"),
+    (["जोधपुर", "jodhpur"], "Jodhpur"),
+    (["भोपाल", "bhopal"], "Bhopal"),
+    (["इंदौर", "indore"], "Indore"),
+    (["अहमदाबाद", "ahmedabad"], "Ahmedabad"),
+    (["सूरत", "surat"], "Surat"),
+]
+
+_COMMODITY_LEXICON: List[Tuple[List[str], str]] = [
+    (["गेहूं", "গম", "wheat", "godhumai"], "WHEAT"),
+    (["चावल", "धान", "వరి", "நெல்", "rice", "চাল"], "RICE"),
+    (["कापूस", "cotton", "பருத்தி", "कपास"], "COTTON"),
+    (["गन्ना", "sugarcane", "कரும்பு"], "SUGARCANE"),
+    (["सोयाबीन", "soybean"], "SOYBEAN"),
+    (["मक्का", "maize", "corn"], "MAIZE"),
+    (["सरसों", "mustard"], "MUSTARD"),
+    (["मूंगफली", "groundnut", "peanut"], "GROUNDNUT"),
+    (["डीएपी", "డీఏపీ", "dap"], "DAP"),
+    (["यूरिया", "urea"], "UREA"),
 ]
 
 
-# ---------------------------------------------------------------------------
-# Entity resolution helpers
-# ---------------------------------------------------------------------------
+def extract_canonical_entities(raw_query: str) -> Dict[str, str]:
+    """Extracts standardized uppercase entities from vernacular queries."""
+    lower = raw_query.lower()
+    entities: Dict[str, str] = {}
 
-def _resolve_state(raw: str) -> str:
-    lower = raw.lower()
-    for keywords, value in _STATE_LEXICON:
-        if any(k in lower or k in raw for k in keywords):
-            return f"state_name = '{value}'"
-    return "1=1"
+    # State
+    for keywords, state_name in _STATE_LEXICON:
+        if any(k in lower or k in raw_query for k in keywords):
+            entities["state_name"] = state_name
+            break
+
+    # District
+    for keywords, district_name in _DISTRICT_LEXICON:
+        if any(k in lower or k in raw_query for k in keywords):
+            entities["district_name"] = district_name
+            break
+
+    # Crop / Fertilizer / Commodity
+    for keywords, commodity in _COMMODITY_LEXICON:
+        if any(k in lower or k in raw_query for k in keywords):
+            entities["commodity"] = commodity
+            break
+
+    return entities
 
 
-def _resolve_district(raw: str) -> str:
-    lower = raw.lower()
-    for keywords, value in _DISTRICT_LEXICON:
-        if any(k in lower or k in raw for k in keywords):
-            return f"district_name = '{value}'"
-    return ""
-
-
-# ---------------------------------------------------------------------------
-# Candidate template generators
-# ---------------------------------------------------------------------------
-
-def _build_candidates(state: IndicSQLState) -> List[Dict[str, Any]]:
+def _build_dynamic_fallback(
+    table_name: str,
+    table_schema: Dict[str, Any],
+    entities: Dict[str, str],
+    raw_query: str,
+) -> str:
     """
-    Produce N candidate SQL dicts: {sql, agg_covered, filter_precise, has_join}.
-    Each candidate represents a reasoning branch in the ToT expansion.
+    Constructs a structurally valid DuckDB SQL query dynamically from schema DDL
+    when local LLM daemon is offline.
     """
-    raw = state.get("raw_query", "")
-    table = state.get("target_database", "ndap_pm_kisan_disbursement")
-    sf = _resolve_state(raw)
-    df = _resolve_district(raw)
-    dist_clause = f" AND {df}" if df else ""
-    lower = raw.lower()
+    cols = table_schema.get("columns", {})
+    where_clauses = []
 
-    def _cand(sql: str, agg: bool, filt: bool, join: bool) -> Dict[str, Any]:
-        return {"sql": sql, "agg_covered": agg, "filter_precise": filt, "has_join": join}
+    if "state_name" in cols and "state_name" in entities:
+        where_clauses.append(f"state_name = '{entities['state_name']}'")
+    if "district_name" in cols and "district_name" in entities:
+        where_clauses.append(f"district_name = '{entities['district_name']}'")
+    if "crop_name" in cols and "commodity" in entities:
+        where_clauses.append(f"crop_name = '{entities['commodity']}'")
+    if "fertilizer_type" in cols and "commodity" in entities:
+        where_clauses.append(f"fertilizer_type = '{entities['commodity']}'")
 
-    candidates: List[Dict[str, Any]] = []
+    where_str = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
 
-    # --- MGNREGA ---
-    if "mgnrega" in table:
-        if any(k in raw or k in lower for k in ["महिलांचे", "महिला", "women", "మహిళల"]):
-            candidates.append(_cand(
-                f"SELECT AVG(women_mandays_pct) FROM mgnrega_state_annual_employment WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
-                f"FROM mgnrega_state_annual_employment WHERE {sf} "
-                f"GROUP BY financial_year ORDER BY financial_year DESC;",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-            candidates.append(_cand(
-                f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
-                f"FROM mgnrega_state_annual_employment WHERE {sf} GROUP BY financial_year;",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Education Stats ---
-    elif "education_stats" in table:
-        if any(k in raw or k in lower for k in ["कम", "सर्वात कमी", "lowest", "குறைவாக", "తక్కువ", "কম", "sabse kam"]):
-            candidates.append(_cand(
-                f"SELECT district_name, female_literacy_rate FROM ndap_education_stats "
-                f"WHERE {sf} ORDER BY female_literacy_rate ASC LIMIT 1;",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT district_name, female_literacy_rate FROM ndap_education_stats "
-                f"WHERE {sf} ORDER BY female_literacy_rate DESC LIMIT 1;",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Crop Production ---
-    elif "crop_production" in table:
-        crop_f = ""
-        if any(k in raw or k in lower for k in ["कापूस", "cotton", "பருத்தி"]):
-            crop_f = " AND crop_name = 'COTTON'"
-        elif any(k in raw or k in lower for k in ["चावल", "ধান", "వరి", "நெல்", "rice", "চাল"]):
-            crop_f = " AND crop_name = 'RICE'"
-        elif any(k in raw or k in lower for k in ["गेहूं", "গম", "wheat"]):
-            crop_f = " AND crop_name = 'WHEAT'"
-        candidates.append(_cand(
-            f"SELECT SUM(production_tonnes) FROM ndap_crop_production_census "
-            f"WHERE {sf}{crop_f};",
-            agg=True, filt=bool(sf != "1=1" or crop_f), join=False
-        ))
-
-    # --- School Infrastructure ---
-    elif "school_infrastructure" in table:
-        if any(k in raw or k in lower for k in ["संगणक", "computer"]):
-            col = "schools_with_computer_labs"
-        elif any(k in raw or k in lower for k in ["తాగునీటి", "drinking water", "पानी"]):
-            col = "schools_with_drinking_water"
-        elif any(k in raw or k in lower for k in ["बिजली", "மின்சார", "electricity"]):
-            col = "schools_with_electricity"
-        elif any(k in raw or k in lower for k in ["শৌচাগার", "toilets", "toilet"]):
-            col = "schools_with_girl_toilets"
-        else:
-            col = "schools_with_computer_labs"
-        candidates.append(_cand(
-            f"SELECT SUM({col}) FROM ndap_school_infrastructure "
-            f"WHERE {sf}{dist_clause};",
-            agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-        ))
-
-    # --- Fertilizer Distribution ---
-    elif "fertilizer" in table:
-        if any(k in raw or k in lower for k in ["डीएपी", "డీఏపీ", "dap"]):
-            fert_f = " AND fertilizer_type = 'DAP'"
-        else:
-            fert_f = " AND fertilizer_type = 'UREA'"
-        candidates.append(_cand(
-            f"SELECT SUM(sales_tonnes) FROM ndap_fertilizer_distribution "
-            f"WHERE {sf}{fert_f};",
-            agg=True, filt=bool(sf != "1=1" or fert_f), join=False
-        ))
-
-    # --- Ayushman Bharat ---
-    elif "ayushman" in table:
-        if any(k in raw or k in lower for k in ["क्लेम", "క్లెయిమ్", "claim"]):
-            candidates.append(_cand(
-                f"SELECT SUM(claim_amount_settled_inr) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["மருத்துவமனை", "hospital"]):
-            candidates.append(_cand(
-                f"SELECT SUM(empanelled_hospitals) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["ভর্তি", "admissions"]):
-            candidates.append(_cand(
-                f"SELECT SUM(authorized_admissions) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(cards_issued) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- PMAY Rural Housing ---
-    elif "pmay" in table:
-        if any(k in raw or k in lower for k in ["जिल्ह्या", "जिल्हा", "district", "সর্বাধিক"]):
-            candidates.append(_cand(
-                f"SELECT district_name, SUM(houses_completed) AS total_houses "
-                f"FROM ndap_pmay_rural_housing WHERE {sf} "
-                f"GROUP BY district_name ORDER BY total_houses DESC LIMIT 1;",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["वित्तीय वर्ष", "financial_year", "year", "বছর"]):
-            if any(k in raw or k in lower for k in ["स्वीकृत", "sanctioned"]):
-                candidates.append(_cand(
-                    f"SELECT financial_year, SUM(houses_sanctioned) "
-                    f"FROM ndap_pmay_rural_housing WHERE {sf} "
-                    f"GROUP BY financial_year ORDER BY financial_year DESC;",
-                    agg=True, filt=bool(sf != "1=1"), join=False
-                ))
-            else:
-                candidates.append(_cand(
-                    f"SELECT financial_year, SUM(houses_completed) "
-                    f"FROM ndap_pmay_rural_housing WHERE {sf} "
-                    f"GROUP BY financial_year ORDER BY financial_year DESC;",
-                    agg=True, filt=bool(sf != "1=1"), join=False
-                ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(houses_completed) FROM ndap_pmay_rural_housing WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Jal Jeevan ---
-    elif "jal_jeevan" in table:
-        candidates.append(_cand(
-            f"SELECT households_with_tap_connection FROM ndap_jal_jeevan_tap_water "
-            f"WHERE {sf}{dist_clause};",
-            agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-        ))
-
-    # --- PMGSY Rural Roads ---
-    elif "pmgsy" in table:
-        if any(k in raw or k in lower for k in ["இணைக்கப்பட்ட", "habitations", "गावे"]):
-            candidates.append(_cand(
-                f"SELECT SUM(habitations_connected) FROM ndap_pmgsy_rural_roads WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(completed_road_length_km) FROM ndap_pmgsy_rural_roads "
-                f"WHERE {sf}{dist_clause};",
-                agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-            ))
-
-    # --- Midday Meal ---
-    elif "midday_meal" in table:
-        candidates.append(_cand(
-            f"SELECT SUM(primary_students_benefited) FROM ndap_midday_meal_scheme "
-            f"WHERE {sf}{dist_clause};",
-            agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-        ))
-
-    # --- Gram Panchayat Finance ---
-    elif "gram_panchayat" in table:
-        if any(k in raw or k in lower for k in ["वितरित", "allocated"]) and any(k in raw or k in lower for k in ["खर्च", "utilized", "उपयोग"]):
-            candidates.append(_cand(
-                f"SELECT SUM(grant_allocated_inr) AS total_allocated, SUM(grant_utilized_inr) AS total_utilized "
-                f"FROM ndap_gram_panchayat_finance WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["utilized", "utilize", "உபயோகித்த", "ఉపయోగించిన", "उपयोग", "ఖర్చు"]):
-            candidates.append(_cand(
-                f"SELECT SUM(grant_utilized_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["स्वच्छता", "sanitation", "जल"]):
-            candidates.append(_cand(
-                f"SELECT SUM(sanitation_drinking_water_expenditure_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(grant_allocated_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Higher Education AISHE ---
-    elif "higher_education" in table:
-        if any(k in raw or k in lower for k in ["অধ্যাপক", "faculty", "professor", "teacher"]):
-            candidates.append(_cand(
-                f"SELECT total_faculty_count FROM ndap_higher_education_aishe WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT university_count FROM ndap_higher_education_aishe WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Maternal & Child Mortality ---
-    elif "maternal_child" in table:
-        if any(k in raw or k in lower for k in ["శిశు", "infant", "imr", "शिशु"]):
-            candidates.append(_cand(
-                f"SELECT infant_mortality_rate_imr FROM ndap_maternal_child_mortality WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT maternal_mortality_ratio_mmr FROM ndap_maternal_child_mortality WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- National TB Portal ---
-    elif "tuberculosis" in table:
-        if any(k in raw or k in lower for k in ["यश दर", "दर", "శాతం", "விகிதம்", "வெற்றி", "হার", "rate", "success"]):
-            candidates.append(_cand(
-                f"SELECT AVG(treatment_success_rate_pct) FROM ndap_national_tuberculosis_portal WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(total_notified_patients) FROM ndap_national_tuberculosis_portal WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- NFHS-5 Health Indicators ---
-    elif "nfhs5" in table:
-        if any(k in raw or k in lower for k in ["लसीकरण", "టీకాలు", "vaccinated", "vaccination"]):
-            if df:
-                candidates.append(_cand(
-                    f"SELECT district_name, fully_vaccinated_children_pct "
-                    f"FROM ndap_nfhs5_health_indicators WHERE {sf}{dist_clause};",
-                    agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-                ))
-            elif any(k in raw or k in lower for k in ["जिल्ह्या", "जिल्हा", "जिल्ह्यात", "district", "ഏത് ಜಿಲ್ಲೆ"]):
-                candidates.append(_cand(
-                    f"SELECT district_name, fully_vaccinated_children_pct "
-                    f"FROM ndap_nfhs5_health_indicators WHERE {sf} "
-                    f"ORDER BY fully_vaccinated_children_pct DESC LIMIT 1;",
-                    agg=True, filt=bool(sf != "1=1"), join=False
-                ))
-            else:
-                candidates.append(_cand(
-                    f"SELECT AVG(fully_vaccinated_children_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
-                    agg=True, filt=bool(sf != "1=1"), join=False
-                ))
-        elif any(k in raw or k in lower for k in ["stunting", "stunted", "कुपोषण"]):
-            candidates.append(_cand(
-                f"SELECT AVG(stunted_children_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in raw or k in lower for k in ["রক্তাল্পতা", "anaemic", "anaemia"]):
-            candidates.append(_cand(
-                f"SELECT AVG(anaemic_women_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT AVG(institutional_births_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Rural Health Infrastructure ---
-    elif "rural_health" in table:
-        candidates.append(_cand(
-            f"SELECT primary_health_centres_phc FROM ndap_rural_health_infrastructure WHERE {sf};",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
-
-    # --- Soil Health Records ---
-    elif "soil_health" in table:
-        if any(k in raw or k in lower for k in ["नमूनों", "samples"]):
-            candidates.append(_cand(
-                f"SELECT SUM(samples_tested) FROM ndap_soil_health_records WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(cards_issued) FROM ndap_soil_health_records WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    # --- Vocational Skill Training ---
-    elif "vocational" in table:
-        candidates.append(_cand(
-            f"SELECT SUM(placed_candidates) FROM ndap_vocational_skill_training WHERE {sf};",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
-
-    # --- Default PM-KISAN ---
-    if not candidates:
-        if "MAHARASHTRA" in sf:
-            candidates.append(_cand(
-                f"SELECT SUM(farmer_beneficiaries) AS total_farmers, "
-                f"SUM(amount_inr) AS total_amount "
-                f"FROM ndap_pm_kisan_disbursement WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        elif any(k in lower or k in raw for k in ["నిధులు", "amount", "total_amount", "पैसे", "रुपये", "நிதி"]):
-            candidates.append(_cand(
-                f"SELECT SUM(amount_inr) FROM ndap_pm_kisan_disbursement WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-        else:
-            candidates.append(_cand(
-                f"SELECT SUM(farmer_beneficiaries) FROM ndap_pm_kisan_disbursement WHERE {sf};",
-                agg=True, filt=bool(sf != "1=1"), join=False
-            ))
-
-    return candidates
-
-
-# ---------------------------------------------------------------------------
-# Weighted utility scorer
-# ---------------------------------------------------------------------------
-
-def _score_candidate(c: Dict[str, Any]) -> float:
-    """
-    Compute weighted utility score for a candidate.
-    Syntactic validity is assumed True for all template-generated candidates.
-    """
-    score = (
-        _W_SYNTAX * 1.0                          # all templates are syntactically valid
-        + _W_AGG * (1.0 if c["agg_covered"] else 0.0)
-        + _W_FILTER * (1.0 if c["filter_precise"] else 0.5)
-        + _W_JOIN * (1.0 if c["has_join"] else 0.8)  # JOINs not always needed; penalise less
-    )
-    return round(score, 4)
-
-
-# ---------------------------------------------------------------------------
-# Public helpers (also used by tests)
-# ---------------------------------------------------------------------------
-
-def generate_aggregation_sql(state: IndicSQLState) -> str:
-    """
-    Backward-compatible entry point.
-    Runs ToT internally and returns the highest-utility SQL string.
-    """
-    best_sql, _, _, _ = _tot_select(state)
-    return best_sql
-
-
-def _tot_select(
-    state: IndicSQLState,
-) -> Tuple[str, float, int, str]:
-    """
-    Tree-of-Thoughts selection: expand candidates (including LoRA branch if available),
-    score by weighted utility, and return the winning SQL candidate and metadata.
-
-    Returns:
-        (best_sql, best_score, num_candidates, method)
-    """
-    candidates = _build_candidates(state)
-
-    # LoRA Candidate Branch: evaluate fine-tuned Qwen model if weights exist
-    try:
-        from indicsql.models.adapter import QwenAdapter
-        qwen = QwenAdapter()
-        if qwen.is_available:
-            from indicsql.models.combo import TriComboEngine
-            lora_sql = TriComboEngine(qwen_adapter=qwen).synthesize_sql_lora(state)
-            if lora_sql:
-                candidates.append({
-                    "sql": lora_sql,
-                    "agg_covered": True,
-                    "filter_precise": True,
-                    "has_join": False,
-                    "_method": "lora",
-                })
-    except Exception as e:
-        logger.debug("LoRA candidate branch evaluation skipped: %s", e)
-
-    if not candidates:
-        fallback = (
-            "SELECT SUM(farmer_beneficiaries) AS total_farmers, "
-            "SUM(amount_inr) AS total_amount "
-            "FROM ndap_pm_kisan_disbursement WHERE 1=1;"
-        )
-        return fallback, 0.0, 0, "tot_heuristic"
-
-    scored = [
-        (c["sql"], _score_candidate(c), c.get("_method", "tot_heuristic"))
-        for c in candidates
+    # Find candidate numeric measure columns
+    numeric_cols = [
+        c for c, desc in cols.items()
+        if any(t in desc.upper() for t in ["BIGINT", "DOUBLE", "INTEGER"])
+        and not c.endswith("_year")
+        and not c.endswith("_id")
     ]
-    scored.sort(key=lambda x: x[1], reverse=True)
 
-    best_sql, best_score, best_method = scored[0]
-    logger.debug(
-        "ToT selected candidate (score=%.4f, method=%s) from %d branches: %s",
-        best_score, best_method, len(candidates), best_sql[:80]
-    )
-    return best_sql, best_score, len(candidates), best_method
+    # Check for lowest / highest superlative in query
+    lower = raw_query.lower()
+    is_min = any(w in lower or w in raw_query for w in ["कम", "lowest", "குறைவாக", "తక్కువ", "কম", "sabse kam", "कमी"])
+    is_max = any(w in lower or w in raw_query for w in ["ज्यादा", "सर्वाधिक", "highest", "সর্বাধিক", "अधिक", "maximum"])
+
+    if (is_min or is_max) and "district_name" in cols and numeric_cols:
+        measure = numeric_cols[0]
+        order_dir = "ASC" if is_min else "DESC"
+        return f"SELECT district_name, {measure} FROM {table_name}{where_str} ORDER BY {measure} {order_dir} LIMIT 1;"
+
+    if numeric_cols:
+        measure = numeric_cols[0]
+        func = "AVG" if "pct" in measure or "rate" in measure else "SUM"
+        return f"SELECT {func}({measure}) AS total_metric FROM {table_name}{where_str};"
+
+    return f"SELECT * FROM {table_name}{where_str} LIMIT 10;"
 
 
-# ---------------------------------------------------------------------------
-# LangGraph node
-# ---------------------------------------------------------------------------
+def synthesize_sql(
+    state: IndicSQLState,
+    error_feedback: Optional[str] = None,
+    previous_sql: Optional[str] = None,
+) -> Tuple[str, str, float]:
+    """
+    Synthesizes SQL query through Ollama neural generation with schema awareness
+    and reflective self-correction.
+    Returns:
+        (sql_query, method, confidence_score)
+    """
+    raw_query = state.get("raw_query", "").strip()
+    table_name = state.get("target_database") or "ndap_pm_kisan_disbursement"
+    table_schema = NDAPCatalog.get_table_schema(table_name)
+    language = state.get("detected_lang", "en")
+    entities = extract_canonical_entities(raw_query)
+
+    # Map generic commodity to the table's specific column name
+    table_cols = table_schema.get("columns", {})
+    mapped_entities: Dict[str, str] = {}
+    if "state_name" in entities:
+        mapped_entities["state_name"] = entities["state_name"]
+    if "district_name" in entities:
+        mapped_entities["district_name"] = entities["district_name"]
+    if "commodity" in entities:
+        if "crop_name" in table_cols:
+            mapped_entities["crop_name"] = entities["commodity"]
+        elif "fertilizer_type" in table_cols:
+            mapped_entities["fertilizer_type"] = entities["commodity"]
+        elif "commodity" in table_cols:
+            mapped_entities["commodity"] = entities["commodity"]
+
+    # 1. Neural Generation via Ollama
+    if _ollama_client.is_available:
+        try:
+            neural_sql = _ollama_client.generate_sql(
+                query=raw_query,
+                table_name=table_name,
+                table_schema=table_schema,
+                language=language,
+                canonical_entities=mapped_entities,
+                error_feedback=error_feedback,
+                previous_sql=previous_sql,
+            )
+            if neural_sql and ("SELECT" in neural_sql.upper() or "WITH" in neural_sql.upper()):
+                logger.info("Successfully synthesized neural SQL via Ollama (%s)", _ollama_client.model_name)
+                return neural_sql, f"ollama_{_ollama_client.model_name}", 0.94
+        except Exception as e:
+            logger.warning("Neural SQL synthesis error: %s", e)
+
+    # 2. Dynamic Schema-Grounded Fallback
+    fallback_sql = _build_dynamic_fallback(table_name, table_schema, entities, raw_query)
+    return fallback_sql, "schema_grounded_fallback", 0.80
+
 
 def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
     """
-    Synthesizer Node
-
-    1. Expands N candidate SQL branches (ToT + optional LoRA).
-    2. Scores each by weighted utility.
-    3. Selects the highest-utility candidate.
-    4. Emits SQLSynthesizedEvent on the global EventBus.
-    5. Returns state patch.
+    SQL Synthesizer Node in LangGraph Swarm.
+    Receives current state, applies reflection feedback if retrying,
+    and produces executable SQL.
     """
-    best_sql, best_score, n_candidates, best_method = _tot_select(state)
+    error_feedback = state.get("reflection_feedback")
+    prev_sql = state.get("generated_sql")
 
-    # Emit event
+    best_sql, method, score = synthesize_sql(
+        state,
+        error_feedback=error_feedback,
+        previous_sql=prev_sql,
+    )
+
+    # Publish Event
     EventBus.publish(
         SQLSynthesizedEvent(
             query_id=state.get("query_id"),
             candidate_sql=best_sql,
-            method=best_method,
-            utility_score=best_score,
-            candidates_evaluated=n_candidates,
+            method=method,
+            utility_score=score,
+            candidates_evaluated=1,
         )
     )
 
     audit_entry = {
         "step": 3,
         "agent": "SQLSynthesizerAgent",
-        "action": "tot_select",
-        "method": best_method,
+        "action": "neural_or_grounded_synthesis",
+        "method": method,
+        "utility_score": score,
         "output_sql": best_sql,
-        "utility_score": best_score,
-        "candidates_evaluated": n_candidates,
-        "attempts": state.get("reflection_attempts", 0),
+        "reflection_attempt": state.get("reflection_attempts", 0),
     }
 
     current_trace = list(state.get("audit_trace", []))
@@ -546,3 +273,9 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
         "syntax_valid": True,
         "audit_trace": current_trace,
     }
+
+
+def _tot_select(state: IndicSQLState) -> Tuple[str, float, List[Dict[str, Any]], str]:
+    """Helper for backwards-compatible model combo fallback."""
+    sql, method, score = synthesize_sql(state)
+    return sql, score, [{"sql": sql, "score": score}], method

@@ -148,14 +148,14 @@ class TestToTSynthesizerEvents(unittest.TestCase):
         self.assertEqual(len(emitted), 1)
         evt = emitted[0]
         self.assertEqual(evt.query_id, "q-tot-1")
-        self.assertEqual(evt.method, "tot_heuristic")
+        self.assertIn(evt.method, ["tot_heuristic", "ollama_qwen2.5:3b", "schema_grounded_fallback"])
         self.assertGreater(evt.utility_score, 0)
         self.assertGreater(evt.candidates_evaluated, 0)
         self.assertIn("generated_sql", result)
         self.assertIn("audit_trace", result)
-        # The audit entry should contain tot_select metadata
+        # The audit entry should contain synthesis metadata
         last_audit = result["audit_trace"][-1]
-        self.assertEqual(last_audit["action"], "tot_select")
+        self.assertIn(last_audit["action"], ["tot_select", "neural_or_grounded_synthesis"])
         self.assertIn("utility_score", last_audit)
 
     def test_full_pipeline_event_chain(self):

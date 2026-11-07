@@ -66,7 +66,7 @@ class TestBenchmarkHarness(unittest.TestCase):
         evaluator = IndicDBEvaluator()
         bq = BenchmarkQuery(
             query_id="test-en-01",
-            query="What is the total number of farmer beneficiaries under PM-KISAN in Maharashtra?",
+            query="What is the total number of farmer beneficiaries and disbursement amount under PM-KISAN in Maharashtra?",
             language="en",
             script="Latin",
             domain="Agriculture",
@@ -77,6 +77,8 @@ class TestBenchmarkHarness(unittest.TestCase):
         )
         result = evaluator.evaluate_query(bq)
         self.assertTrue(result.execution_match)
+        self.assertTrue(result.sql_validity)
+        self.assertTrue(result.clause_accuracy.get("from"))
         self.assertGreaterEqual(result.schema_f1, 0.5)
 
     def test_expanded_dataset_loading(self):
