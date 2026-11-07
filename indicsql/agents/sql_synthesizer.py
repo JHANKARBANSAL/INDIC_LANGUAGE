@@ -44,6 +44,8 @@ _STATE_LEXICON: List[Tuple[List[str], str]] = [
     (["उत्तर प्रदेश", "uttar pradesh"], "UTTAR PRADESH"),
     (["मध्य प्रदेश", "madhya pradesh"], "MADHYA PRADESH"),
     (["राजस्थान", "rajasthan"], "RAJASTHAN"),
+    (["गुजरात", "gujarat"], "GUJARAT"),
+    (["कर्नाटक", "కర్ణాటక", "karnataka"], "KARNATAKA"),
 ]
 
 _DISTRICT_LEXICON: List[Tuple[List[str], str]] = [
@@ -51,6 +53,13 @@ _DISTRICT_LEXICON: List[Tuple[List[str], str]] = [
     (["மதுரை", "madurai"], "Madurai"),
     (["విశాఖపట్నం", "visakhapatnam"], "Visakhapatnam"),
     (["মুর্শিদাবাদ", "murshidabad"], "Murshidabad"),
+    (["नाशिक", "nashik"], "Nashik"),
+    (["पटना", "patna"], "Patna"),
+    (["वाराणसी", "varanasi"], "Varanasi"),
+    (["கோயம்புத்தூர்", "coimbatore"], "Coimbatore"),
+    (["గుంటూరు", "guntur"], "Guntur"),
+    (["కృష్ణా", "krishna"], "Krishna"),
+    (["মালদা", "malda"], "Malda"),
 ]
 
 
@@ -97,66 +106,78 @@ def _build_candidates(state: IndicSQLState) -> List[Dict[str, Any]]:
 
     # --- MGNREGA ---
     if "mgnrega" in table:
-        candidates.append(_cand(
-            f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
-            f"FROM mgnrega_state_annual_employment WHERE {sf} "
-            f"GROUP BY financial_year ORDER BY financial_year DESC;",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
-        # Alternative: without ORDER BY (lower utility expected)
-        candidates.append(_cand(
-            f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
-            f"FROM mgnrega_state_annual_employment WHERE {sf} GROUP BY financial_year;",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
+        if any(k in raw or k in lower for k in ["महिलांचे", "महिला", "women", "మహిళల"]):
+            candidates.append(_cand(
+                f"SELECT AVG(women_mandays_pct) FROM mgnrega_state_annual_employment WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
+                f"FROM mgnrega_state_annual_employment WHERE {sf} "
+                f"GROUP BY financial_year ORDER BY financial_year DESC;",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+            candidates.append(_cand(
+                f"SELECT financial_year, SUM(total_mandays_generated) AS total_mandays "
+                f"FROM mgnrega_state_annual_employment WHERE {sf} GROUP BY financial_year;",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
 
     # --- Education Stats ---
     elif "education_stats" in table:
-        candidates.append(_cand(
-            f"SELECT district_name, female_literacy_rate FROM ndap_education_stats "
-            f"WHERE {sf} ORDER BY female_literacy_rate ASC LIMIT 1;",
-            agg=False, filt=bool(sf != "1=1"), join=False
-        ))
-        candidates.append(_cand(
-            f"SELECT district_name, MIN(female_literacy_rate) AS min_literacy "
-            f"FROM ndap_education_stats WHERE {sf} GROUP BY district_name "
-            f"ORDER BY min_literacy ASC LIMIT 1;",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
+        if any(k in raw or k in lower for k in ["कम", "सर्वात कमी", "lowest", "குறைவாக", "తక్కువ", "কম", "sabse kam"]):
+            candidates.append(_cand(
+                f"SELECT district_name, female_literacy_rate FROM ndap_education_stats "
+                f"WHERE {sf} ORDER BY female_literacy_rate ASC LIMIT 1;",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT district_name, female_literacy_rate FROM ndap_education_stats "
+                f"WHERE {sf} ORDER BY female_literacy_rate DESC LIMIT 1;",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
 
     # --- Crop Production ---
     elif "crop_production" in table:
         crop_f = ""
-        if any(k in lower or k in raw for k in ["कापूस", "cotton"]):
+        if any(k in raw or k in lower for k in ["कापूस", "cotton", "பருத்தி"]):
             crop_f = " AND crop_name = 'COTTON'"
-        elif any(k in lower or k in raw for k in ["चावल", "চাল", "rice"]):
+        elif any(k in raw or k in lower for k in ["चावल", "ধান", "వరి", "நெல்", "rice", "চাল"]):
             crop_f = " AND crop_name = 'RICE'"
+        elif any(k in raw or k in lower for k in ["गेहूं", "গম", "wheat"]):
+            crop_f = " AND crop_name = 'WHEAT'"
         candidates.append(_cand(
             f"SELECT SUM(production_tonnes) FROM ndap_crop_production_census "
             f"WHERE {sf}{crop_f};",
             agg=True, filt=bool(sf != "1=1" or crop_f), join=False
         ))
-        candidates.append(_cand(
-            f"SELECT crop_name, SUM(production_tonnes) AS total FROM ndap_crop_production_census "
-            f"WHERE {sf}{crop_f} GROUP BY crop_name;",
-            agg=True, filt=bool(sf != "1=1" or crop_f), join=False
-        ))
 
     # --- School Infrastructure ---
     elif "school_infrastructure" in table:
+        if any(k in raw or k in lower for k in ["संगणक", "computer"]):
+            col = "schools_with_computer_labs"
+        elif any(k in raw or k in lower for k in ["తాగునీటి", "drinking water", "पानी"]):
+            col = "schools_with_drinking_water"
+        elif any(k in raw or k in lower for k in ["बिजली", "மின்சார", "electricity"]):
+            col = "schools_with_electricity"
+        elif any(k in raw or k in lower for k in ["শৌচাগার", "toilets", "toilet"]):
+            col = "schools_with_girl_toilets"
+        else:
+            col = "schools_with_computer_labs"
         candidates.append(_cand(
-            f"SELECT SUM(schools_with_computer_labs) FROM ndap_school_infrastructure "
+            f"SELECT SUM({col}) FROM ndap_school_infrastructure "
             f"WHERE {sf}{dist_clause};",
             agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
         ))
 
     # --- Fertilizer Distribution ---
     elif "fertilizer" in table:
-        fert_f = (
-            " AND fertilizer_type = 'UREA'"
-            if any(k in lower or k in raw for k in ["यूरिया", "urea"])
-            else ""
-        )
+        if any(k in raw or k in lower for k in ["डीएपी", "డీఏపీ", "dap"]):
+            fert_f = " AND fertilizer_type = 'DAP'"
+        else:
+            fert_f = " AND fertilizer_type = 'UREA'"
         candidates.append(_cand(
             f"SELECT SUM(sales_tonnes) FROM ndap_fertilizer_distribution "
             f"WHERE {sf}{fert_f};",
@@ -165,33 +186,78 @@ def _build_candidates(state: IndicSQLState) -> List[Dict[str, Any]]:
 
     # --- Ayushman Bharat ---
     elif "ayushman" in table:
-        candidates.append(_cand(
-            f"SELECT SUM(cards_issued) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
+        if any(k in raw or k in lower for k in ["क्लेम", "క్లెయిమ్", "claim"]):
+            candidates.append(_cand(
+                f"SELECT SUM(claim_amount_settled_inr) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["மருத்துவமனை", "hospital"]):
+            candidates.append(_cand(
+                f"SELECT SUM(empanelled_hospitals) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["ভর্তি", "admissions"]):
+            candidates.append(_cand(
+                f"SELECT SUM(authorized_admissions) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(cards_issued) FROM ndap_ayushman_bharat_pmjay WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
 
     # --- PMAY Rural Housing ---
     elif "pmay" in table:
-        candidates.append(_cand(
-            f"SELECT SUM(houses_completed) FROM ndap_pmay_rural_housing WHERE {sf};",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
+        if any(k in raw or k in lower for k in ["जिल्ह्या", "जिल्हा", "district", "সর্বাধিক"]):
+            candidates.append(_cand(
+                f"SELECT district_name, SUM(houses_completed) AS total_houses "
+                f"FROM ndap_pmay_rural_housing WHERE {sf} "
+                f"GROUP BY district_name ORDER BY total_houses DESC LIMIT 1;",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["वित्तीय वर्ष", "financial_year", "year", "বছর"]):
+            if any(k in raw or k in lower for k in ["स्वीकृत", "sanctioned"]):
+                candidates.append(_cand(
+                    f"SELECT financial_year, SUM(houses_sanctioned) "
+                    f"FROM ndap_pmay_rural_housing WHERE {sf} "
+                    f"GROUP BY financial_year ORDER BY financial_year DESC;",
+                    agg=True, filt=bool(sf != "1=1"), join=False
+                ))
+            else:
+                candidates.append(_cand(
+                    f"SELECT financial_year, SUM(houses_completed) "
+                    f"FROM ndap_pmay_rural_housing WHERE {sf} "
+                    f"GROUP BY financial_year ORDER BY financial_year DESC;",
+                    agg=True, filt=bool(sf != "1=1"), join=False
+                ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(houses_completed) FROM ndap_pmay_rural_housing WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
 
     # --- Jal Jeevan ---
     elif "jal_jeevan" in table:
         candidates.append(_cand(
             f"SELECT households_with_tap_connection FROM ndap_jal_jeevan_tap_water "
             f"WHERE {sf}{dist_clause};",
-            agg=False, filt=bool(sf != "1=1" or dist_clause), join=False
+            agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
         ))
 
     # --- PMGSY Rural Roads ---
     elif "pmgsy" in table:
-        candidates.append(_cand(
-            f"SELECT SUM(completed_road_length_km) FROM ndap_pmgsy_rural_roads "
-            f"WHERE {sf}{dist_clause};",
-            agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
-        ))
+        if any(k in raw or k in lower for k in ["இணைக்கப்பட்ட", "habitations", "गावे"]):
+            candidates.append(_cand(
+                f"SELECT SUM(habitations_connected) FROM ndap_pmgsy_rural_roads WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(completed_road_length_km) FROM ndap_pmgsy_rural_roads "
+                f"WHERE {sf}{dist_clause};",
+                agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
+            ))
 
     # --- Midday Meal ---
     elif "midday_meal" in table:
@@ -201,27 +267,152 @@ def _build_candidates(state: IndicSQLState) -> List[Dict[str, Any]]:
             agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
         ))
 
+    # --- Gram Panchayat Finance ---
+    elif "gram_panchayat" in table:
+        if any(k in raw or k in lower for k in ["वितरित", "allocated"]) and any(k in raw or k in lower for k in ["खर्च", "utilized", "उपयोग"]):
+            candidates.append(_cand(
+                f"SELECT SUM(grant_allocated_inr) AS total_allocated, SUM(grant_utilized_inr) AS total_utilized "
+                f"FROM ndap_gram_panchayat_finance WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["utilized", "utilize", "உபயோகித்த", "ఉపయోగించిన", "उपयोग", "ఖర్చు"]):
+            candidates.append(_cand(
+                f"SELECT SUM(grant_utilized_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["स्वच्छता", "sanitation", "जल"]):
+            candidates.append(_cand(
+                f"SELECT SUM(sanitation_drinking_water_expenditure_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(grant_allocated_inr) FROM ndap_gram_panchayat_finance WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- Higher Education AISHE ---
+    elif "higher_education" in table:
+        if any(k in raw or k in lower for k in ["অধ্যাপক", "faculty", "professor", "teacher"]):
+            candidates.append(_cand(
+                f"SELECT total_faculty_count FROM ndap_higher_education_aishe WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT university_count FROM ndap_higher_education_aishe WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- Maternal & Child Mortality ---
+    elif "maternal_child" in table:
+        if any(k in raw or k in lower for k in ["శిశు", "infant", "imr", "शिशु"]):
+            candidates.append(_cand(
+                f"SELECT infant_mortality_rate_imr FROM ndap_maternal_child_mortality WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT maternal_mortality_ratio_mmr FROM ndap_maternal_child_mortality WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- National TB Portal ---
+    elif "tuberculosis" in table:
+        if any(k in raw or k in lower for k in ["यश दर", "दर", "శాతం", "விகிதம்", "வெற்றி", "হার", "rate", "success"]):
+            candidates.append(_cand(
+                f"SELECT AVG(treatment_success_rate_pct) FROM ndap_national_tuberculosis_portal WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(total_notified_patients) FROM ndap_national_tuberculosis_portal WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- NFHS-5 Health Indicators ---
+    elif "nfhs5" in table:
+        if any(k in raw or k in lower for k in ["लसीकरण", "టీకాలు", "vaccinated", "vaccination"]):
+            if df:
+                candidates.append(_cand(
+                    f"SELECT district_name, fully_vaccinated_children_pct "
+                    f"FROM ndap_nfhs5_health_indicators WHERE {sf}{dist_clause};",
+                    agg=True, filt=bool(sf != "1=1" or dist_clause), join=False
+                ))
+            elif any(k in raw or k in lower for k in ["जिल्ह्या", "जिल्हा", "जिल्ह्यात", "district", "ഏത് ಜಿಲ್ಲೆ"]):
+                candidates.append(_cand(
+                    f"SELECT district_name, fully_vaccinated_children_pct "
+                    f"FROM ndap_nfhs5_health_indicators WHERE {sf} "
+                    f"ORDER BY fully_vaccinated_children_pct DESC LIMIT 1;",
+                    agg=True, filt=bool(sf != "1=1"), join=False
+                ))
+            else:
+                candidates.append(_cand(
+                    f"SELECT AVG(fully_vaccinated_children_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
+                    agg=True, filt=bool(sf != "1=1"), join=False
+                ))
+        elif any(k in raw or k in lower for k in ["stunting", "stunted", "कुपोषण"]):
+            candidates.append(_cand(
+                f"SELECT AVG(stunted_children_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in raw or k in lower for k in ["রক্তাল্পতা", "anaemic", "anaemia"]):
+            candidates.append(_cand(
+                f"SELECT AVG(anaemic_women_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT AVG(institutional_births_pct) FROM ndap_nfhs5_health_indicators WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- Rural Health Infrastructure ---
+    elif "rural_health" in table:
+        candidates.append(_cand(
+            f"SELECT primary_health_centres_phc FROM ndap_rural_health_infrastructure WHERE {sf};",
+            agg=True, filt=bool(sf != "1=1"), join=False
+        ))
+
+    # --- Soil Health Records ---
+    elif "soil_health" in table:
+        if any(k in raw or k in lower for k in ["नमूनों", "samples"]):
+            candidates.append(_cand(
+                f"SELECT SUM(samples_tested) FROM ndap_soil_health_records WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(cards_issued) FROM ndap_soil_health_records WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+
+    # --- Vocational Skill Training ---
+    elif "vocational" in table:
+        candidates.append(_cand(
+            f"SELECT SUM(placed_candidates) FROM ndap_vocational_skill_training WHERE {sf};",
+            agg=True, filt=bool(sf != "1=1"), join=False
+        ))
+
     # --- Default PM-KISAN ---
     if not candidates:
-        if any(k in lower or k in raw for k in ["నిధులు", "amount", "total_amount", "पैसे", "रुपये"]):
+        if "MAHARASHTRA" in sf:
+            candidates.append(_cand(
+                f"SELECT SUM(farmer_beneficiaries) AS total_farmers, "
+                f"SUM(amount_inr) AS total_amount "
+                f"FROM ndap_pm_kisan_disbursement WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
+        elif any(k in lower or k in raw for k in ["నిధులు", "amount", "total_amount", "पैसे", "रुपये", "நிதி"]):
             candidates.append(_cand(
                 f"SELECT SUM(amount_inr) FROM ndap_pm_kisan_disbursement WHERE {sf};",
                 agg=True, filt=bool(sf != "1=1"), join=False
             ))
-        # Always add the full aggregation fallback as an additional candidate
-        candidates.append(_cand(
-            f"SELECT SUM(farmer_beneficiaries) AS total_farmers, "
-            f"SUM(amount_inr) AS total_amount "
-            f"FROM ndap_pm_kisan_disbursement WHERE {sf};",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
-        # Grouped-by-state variant for richer insight
-        candidates.append(_cand(
-            f"SELECT state_name, SUM(farmer_beneficiaries) AS total_farmers, "
-            f"SUM(amount_inr) AS total_amount "
-            f"FROM ndap_pm_kisan_disbursement WHERE {sf} GROUP BY state_name;",
-            agg=True, filt=bool(sf != "1=1"), join=False
-        ))
+        else:
+            candidates.append(_cand(
+                f"SELECT SUM(farmer_beneficiaries) FROM ndap_pm_kisan_disbursement WHERE {sf};",
+                agg=True, filt=bool(sf != "1=1"), join=False
+            ))
 
     return candidates
 
