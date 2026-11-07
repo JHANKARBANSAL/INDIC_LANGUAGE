@@ -256,7 +256,15 @@ class IndicDBEvaluator:
 
         # 2. Run IndicSQL multi-agent pipeline
         start_time = time.perf_counter()
-        agent_state = execute_indicsql_pipeline(bq.query, query_id=bq.query_id)
+        try:
+            agent_state = execute_indicsql_pipeline(bq.query, query_id=bq.query_id)
+        except Exception as e:
+            agent_state = {
+                "generated_sql": "",
+                "execution_result": None,
+                "execution_error": str(e),
+                "pruned_schema": [],
+            }
         latency_ms = (time.perf_counter() - start_time) * 1000.0
 
         pred_sql = agent_state.get("generated_sql", "")
@@ -300,7 +308,11 @@ class IndicDBEvaluator:
         )
 
     def evaluate_suite(
-        self, queries: List[BenchmarkQuery], save_results: bool = True
+        self,
+        queries: List[BenchmarkQuery],
+        save_results: bool = True,
+        start_index: int = 1,
+        resume: bool = False,
     ) -> Dict[str, Any]:
         """
         Executes benchmark evaluation across a set of queries and computes aggregate metrics:
@@ -308,14 +320,45 @@ class IndicDBEvaluator:
         - Exact Match Accuracy (EM)
         - SQL Validity Rate
         - Component / Clause Accuracies (SELECT, FROM, WHERE, GROUP BY, ORDER BY, LIMIT)
+        Supports resuming from failure via start_index and incremental checkpointing.
         """
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        checkpoint_path = RESULTS_DIR / ".benchmark_eval_checkpoint.jsonl"
         results: List[BenchmarkResult] = []
-        total = len(queries)
+        evaluated_qids: Set[str] = set()
 
+        if resume and checkpoint_path.exists():
+            try:
+                with open(checkpoint_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.strip():
+                            bdata = json.loads(line)
+                            r = BenchmarkResult(**bdata)
+                            results.append(r)
+                            evaluated_qids.add(r.query_id)
+                print(f"⚡ Resumed from checkpoint: {len(results)} queries loaded.")
+            except Exception as e:
+                print(f"Warning: Could not read checkpoint: {e}")
+
+        total = len(queries)
         print(f"🚀 Evaluating {total} IndicDB Benchmark Queries across 7 Languages...")
         for i, q in enumerate(queries, start=1):
+            if i < start_index:
+                continue
+            if q.query_id in evaluated_qids:
+                continue
+
             res = self.evaluate_query(q)
             results.append(res)
+            evaluated_qids.add(q.query_id)
+
+            # Persist incrementally to checkpoint
+            try:
+                with open(checkpoint_path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(res.model_dump(), ensure_ascii=False) + "\n")
+            except Exception:
+                pass
+
             ex_icon = "✓" if res.execution_match else "✗"
             em_icon = "✓" if res.exact_match else "✗"
             print(
@@ -394,26 +437,28 @@ class IndicDBEvaluator:
         avg_indic_acc = (sum(indic_accuracies) / len(indic_accuracies)) if indic_accuracies else 0.0
         delta_indic_en = round(en_accuracy - avg_indic_acc, 2)
 
+        eval_count = len(results) if results else total
+
         overall_ex = (
-            (sum(1 for r in results if r.execution_match) / total) * 100.0 if total else 0.0
+            (sum(1 for r in results if r.execution_match) / eval_count) * 100.0 if eval_count else 0.0
         )
         overall_em = (
-            (sum(1 for r in results if r.exact_match) / total) * 100.0 if total else 0.0
+            (sum(1 for r in results if r.exact_match) / eval_count) * 100.0 if eval_count else 0.0
         )
         overall_valid = (
-            (sum(1 for r in results if r.sql_validity) / total) * 100.0 if total else 0.0
+            (sum(1 for r in results if r.sql_validity) / eval_count) * 100.0 if eval_count else 0.0
         )
         overall_ast = (
-            (sum(1 for r in results if r.ast_match) / total) * 100.0 if total else 0.0
+            (sum(1 for r in results if r.ast_match) / eval_count) * 100.0 if eval_count else 0.0
         )
 
         overall_clauses = {
-            c: round((clause_overall[c] / total) * 100.0, 2) if total else 0.0
+            c: round((clause_overall[c] / eval_count) * 100.0, 2) if eval_count else 0.0
             for c in ["select", "from", "where", "group_by", "order_by", "limit"]
         }
 
         report: Dict[str, Any] = {
-            "total_evaluated": total,
+            "total_evaluated": eval_count,
             "overall_execution_accuracy_pct": round(overall_ex, 2),
             "overall_exact_match_pct": round(overall_em, 2),
             "overall_sql_validity_pct": round(overall_valid, 2),

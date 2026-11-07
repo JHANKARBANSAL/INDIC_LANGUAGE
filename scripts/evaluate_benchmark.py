@@ -38,6 +38,12 @@ def main():
         "--compare-baselines", action="store_true", help="Print comparative baseline leaderboard against GPT-4o, Llama-3-70B, etc."
     )
     parser.add_argument(
+        "--start", type=int, default=1, help="Start evaluation from query index (e.g. --start 121)"
+    )
+    parser.add_argument(
+        "--resume", action="store_true", default=False, help="Resume from incremental checkpoint"
+    )
+    parser.add_argument(
         "--save", action="store_true", default=True, help="Save evaluation artifacts to disk"
     )
     args = parser.parse_args()
@@ -61,7 +67,12 @@ def main():
     print(f"Loaded {len(queries)} evaluation questions across 7 languages & 20 NDAP databases.\n")
 
     evaluator = IndicDBEvaluator()
-    report = evaluator.evaluate_suite(queries, save_results=args.save)
+    report = evaluator.evaluate_suite(
+        queries,
+        save_results=args.save,
+        start_index=args.start,
+        resume=args.resume,
+    )
 
     # Format per-language summary table
     headers = [

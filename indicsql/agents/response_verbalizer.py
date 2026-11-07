@@ -72,15 +72,19 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
             else columns.index("total_mandays_generated")
         )
         mandays = row[mandays_idx]
-        mandays_fmt = format_indian_currency_number(float(mandays))
+        mandays_fmt = format_indian_currency_number(mandays)
         if lang == "ta":
             return f"மகாத்மா காந்தி ஊரக வேலை உறுதித் திட்டத்தின் கீழ் மொத்தம் {mandays_fmt} மனித வேலை நாட்கள் உருவாக்கப்பட்டுள்ளன."
         elif lang == "hi":
             return f"मनरेगा योजना के तहत कुल {mandays_fmt} कार्य दिवस (Mandays) उत्पन्न किए गए।"
         elif lang == "mr":
             return f"मनरेगा योजनेअंतर्गत एकूण {mandays_fmt} मनुष्य दिन रोजगार निर्माण करण्यात आला."
+        elif lang == "te":
+            return f"ఉపాధి హామీ పథకం కింద మొత్తం {mandays_fmt} పనిదినాలు కల్పించబడ్డాయి."
+        elif lang == "bn":
+            return f"১০০ দিনের কাজের প্রকল্পে মোট {mandays_fmt} কর্মদিবস তৈরি হয়েছে।"
         else:
-            return f"Under MGNREGA, a total of {mandays:,} person-days (mandays) were generated."
+            return f"Under MGNREGA, a total of {mandays_fmt} person-days (mandays) were generated."
 
     # 3. PM-KISAN Farmers & Disbursement
     farmer_col_idx = next(
@@ -110,18 +114,21 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
             return f"पीएम-किसान योजना के तहत कुल {farmers_fmt} किसानों को लाभ प्राप्त हुआ{amount_part}."
         elif lang == "hi-en":
             return f"PM-KISAN yojana ke tahat total {farmers_fmt} farmers ko labh mila."
+        elif lang == "te":
+            return f"పీఎం-కిసాన్ పథకం కింద మొత్తం {farmers_fmt} రైతులకు లబ్ధి చేకూరింది."
+        elif lang == "ta":
+            return f"பிஎம்-கிசான் திட்டத்தின் கீழ் மொத்தம் {farmers_fmt} விவசாயிகள் பயனடைந்துள்ளனர்."
+        elif lang == "bn":
+            return f"পিএম-কিষান প্রকল্পের অধীনে মোট {farmers_fmt} জন কৃষক উপকৃত হয়েছেন।"
         else:
             return (
-                f"Under PM-KISAN, a total of {farmers:,} farmers received direct benefit transfers."
+                f"Under PM-KISAN, a total of {farmers_fmt} farmers received direct benefit transfers."
             )
 
     # Generic schema-aware verbalization
     items_desc = []
     for col, val in zip(res.get("columns", []), row):
-        if isinstance(val, (int, float)):
-            val_str = format_indian_currency_number(float(val))
-        else:
-            val_str = str(val)
+        val_str = format_indian_currency_number(val)
         items_desc.append(f"{col}: {val_str}")
 
     return f"डेटाबेस परिणाम ({len(rows)} रेकॉर्ड): " + ", ".join(items_desc)
