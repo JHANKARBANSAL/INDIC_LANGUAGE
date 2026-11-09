@@ -48,28 +48,106 @@ TRANSLITERATION_MAP: Dict[str, str] = {
 }
 
 
+UNICODE_TO_SCHEME = [
+    (0x0900, 0x097F, "DEVANAGARI"),
+    (0x0980, 0x09FF, "BENGALI"),
+    (0x0B80, 0x0BFF, "TAMIL"),
+    (0x0C00, 0x0C7F, "TELUGU"),
+    (0x0A80, 0x0AFF, "GUJARATI"),
+    (0x0A00, 0x0A7F, "GURMUKHI"),
+    (0x0C80, 0x0CFF, "KANNADA"),
+    (0x0D00, 0x0D7F, "MALAYALAM"),
+    (0x0B00, 0x0B7F, "ORIYA"),
+]
+
+
+def detect_indic_script_scheme(text: str) -> str | None:
+    """Detects the Brahmic script scheme of the given text for sanscript."""
+    for ch in text:
+        cp = ord(ch)
+        for start, end, scheme in UNICODE_TO_SCHEME:
+            if start <= cp <= end:
+                return scheme
+    return None
+
+
+def transliterate_indic_to_latin(text: str) -> str:
+    """
+    Algorithmically transliterates any native Indic script into Roman/Latin phonetics.
+    Converts word-by-word to handle multi-lingual or mixed inputs gracefully.
+    """
+    if not HAS_SANSCRIPT or not text:
+        return text
+
+    words = text.split()
+    out = []
+    for w in words:
+        scheme = detect_indic_script_scheme(w)
+        if scheme:
+            src = getattr(sanscript, scheme, None)
+            if src:
+                try:
+                    w = sanscript.transliterate(w, src, sanscript.ITRANS)
+                except Exception:
+                    pass
+        out.append(w)
+    res = " ".join(out)
+    return re.sub(r"[\.\^~_]", "", res)
+
+
+def deaspirate(w: str) -> str:
+    """Standardizes aspirated consonants and phonetic clusters in Indian names."""
+    w = w.lower()
+    w = re.sub(r"dh", "d", w)
+    w = re.sub(r"th", "t", w)
+    w = re.sub(r"bh", "b", w)
+    w = re.sub(r"kh", "k", w)
+    w = re.sub(r"gh", "g", w)
+    w = re.sub(r"ph", "p", w)
+    w = re.sub(r"ch", "c", w)
+    w = re.sub(r"sh|zh", "s", w)
+    w = re.sub(r"v|w", "b", w)
+    w = re.sub(r"m(?=[kgcjtdpbnsr])", "n", w)
+    w = re.sub(r"(.)\1+", r"\1", w)
+    return w
+
+
+def consonant_skeleton(word: str) -> str:
+    """
+    Extracts phonetic consonant skeleton to match Anglicized revenue spellings
+    (e.g., 'Nelluru' <-> 'Nellore', 'Karnulu' <-> 'Kurnool', 'Madhurai' <-> 'Madurai', 'Malada' <-> 'Malda').
+    """
+    w = deaspirate(word)
+    # Strip vowels
+    cons = re.sub(r"[aeiou]", "", w)
+    return cons
+
+
 def normalize_indic_phonetics(text: str, target_lang: str = "hi") -> str:
     """
     Normalizes phonetic variations and replaces colloquial Romanized keywords
     with canonical concepts to aid schema linking.
 
-    If target_lang is provided and Latin characters are present, performs
-    transliteration into the target Indic script when indic-transliteration is installed.
+    Bidirectional:
+    - If Latin characters are present, transliterates into target Indic script.
+    - If native Indic script is present, appends algorithmic Latin bridge.
     """
     normalized = text.lower()
     for roman_token, canonical in TRANSLITERATION_MAP.items():
         pattern = rf"\b{roman_token}\b"
         normalized = re.sub(pattern, f"{roman_token} ({canonical})", normalized)
 
-    if target_lang not in LANG_TO_SCHEME:
-        return normalized
+    # 1. Indic -> Latin Transliteration Bridge (Always active when Indic chars present)
+    if HAS_SANSCRIPT and any(ord(c) >= 0x0900 for c in text):
+        latin_bridge = transliterate_indic_to_latin(text)
+        if latin_bridge and latin_bridge.lower() != text.lower():
+            normalized = f"{normalized} {latin_bridge.lower()}"
 
-    # If sanscript is available, transliterate Latin phonetic tokens to Indic script
+    # 2. Latin -> Indic Transliteration (When primarily ASCII)
     if HAS_SANSCRIPT and target_lang in LANG_TO_SCHEME:
         scheme_name = LANG_TO_SCHEME[target_lang].upper()
         scheme = getattr(sanscript, scheme_name, None)
 
-        # Transliterate only if we have primarily Latin characters
         if scheme and any(c.isascii() and c.isalpha() for c in text):
             try:
                 xlit = transliterate(text, sanscript.ITRANS, scheme)

@@ -27,14 +27,14 @@ PARQUET_STORE_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "pa
 
 # Fallback Indian Geography for data synthesis if parquets not yet generated
 FALLBACK_STATES_AND_DISTRICTS: Dict[str, List[str]] = {
-    "MAHARASHTRA": ["Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Kolhapur", "Thane", "Amravati"],
-    "UTTAR PRADESH": ["Varanasi", "Lucknow", "Gorakhpur", "Kanpur", "Prayagraj", "Agra", "Meerut", "Jhansi"],
-    "BIHAR": ["Patna", "Gaya", "Purnia", "Muzaffarpur", "Bhagalpur", "Darbhanga", "Nalanda", "Samastipur"],
-    "TAMIL NADU": ["Chennai", "Madurai", "Coimbatore", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode"],
-    "WEST BENGAL": ["Kolkata", "Murshidabad", "Howrah", "Darjeeling", "Nadia", "North 24 Parganas", "Hooghly"],
-    "KARNATAKA": ["Bengaluru Rural", "Mysuru", "Belagavi", "Dharwad", "Kalaburagi", "Ballari", "Dakshina Kannada"],
-    "GUJARAT": ["Ahmedabad", "Surat", "Rajkot", "Vadodara", "Mehsana", "Bhavnagar", "Jamnagar", "Junagadh"],
-    "ANDHRA PRADESH": ["Visakhapatnam", "Vijayawada", "Guntur", "Kurnool", "Nellore", "Tirupati", "Kadapa"],
+    "MAHARASHTRA": ["Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Kolhapur", "Thane", "Amravati", "Satara", "Sangli", "Ahmednagar", "Nanded", "Latur"],
+    "UTTAR PRADESH": ["Varanasi", "Lucknow", "Gorakhpur", "Kanpur", "Prayagraj", "Agra", "Meerut", "Jhansi", "Aligarh", "Bareilly", "Moradabad"],
+    "BIHAR": ["Patna", "Gaya", "Purnia", "Muzaffarpur", "Bhagalpur", "Darbhanga", "Nalanda", "Samastipur", "Begusarai", "Madhubani"],
+    "TAMIL NADU": ["Chennai", "Madurai", "Coimbatore", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Dindigul", "Thanjavur", "Vellore"],
+    "WEST BENGAL": ["Kolkata", "Murshidabad", "Howrah", "Darjeeling", "Nadia", "North 24 Parganas", "Hooghly", "Birbhum", "Malda", "Bankura", "Purulia", "Jalpaiguri"],
+    "KARNATAKA": ["Bengaluru Rural", "Mysuru", "Belagavi", "Dharwad", "Kalaburagi", "Ballari", "Dakshina Kannada", "Tumakuru", "Udupi", "Shivamogga"],
+    "GUJARAT": ["Ahmedabad", "Surat", "Rajkot", "Vadodara", "Mehsana", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Kheda", "Anand"],
+    "ANDHRA PRADESH": ["Visakhapatnam", "Vijayawada", "Guntur", "Kurnool", "Nellore", "Tirupati", "Kadapa", "Anantapur", "Chittoor", "Prakasam"],
     "RAJASTHAN": ["Jaipur", "Jodhpur", "Kota", "Bikaner", "Udaipur", "Ajmer", "Alwar", "Bhilwara"],
     "MADHYA PRADESH": ["Bhopal", "Indore", "Gwalior", "Jabalpur", "Ujjain", "Sagar", "Rewa", "Satna"],
     "KERALA": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Malappuram", "Thrissur", "Kannur"],

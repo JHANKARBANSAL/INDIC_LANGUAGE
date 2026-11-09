@@ -1,0 +1,1813 @@
+{
+  "total_audited_failures": 40,
+  "benchmark_summary": {
+    "total_queries": 140,
+    "passed_queries": 100,
+    "failed_queries": 40,
+    "execution_accuracy_pct": 71.43,
+    "grounding_accuracy_pct": 100.0,
+    "table_routing_accuracy_pct": 100.0,
+    "verbalization_accuracy_pct": 98.57
+  },
+  "failure_category_counts": {
+    "Filtering logic": 4,
+    "Temporal filter handling": 20,
+    "Metric/aggregation selection": 13,
+    "GROUP BY / aggregation logic": 3
+  },
+  "traces": [
+    {
+      "query_id": "unseen-en-005",
+      "original_question": "What was the average mandi price of wheat in Maharashtra?",
+      "language_detected": "en",
+      "detected_script": "Latin",
+      "normalized_question": "What was the average mandi price of wheat in Maharashtra?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr",
+        "production_tonnes"
+      ],
+      "generated_sql": "SELECT AVG(modal_price_inr) AS avg_mandi_price_wheat_maharashtra FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "sanitized_sql": "SELECT AVG(modal_price_inr) AS avg_mandi_price_wheat_maharashtra FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "avg_mandi_price_wheat_maharashtra"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Value casing mismatch: DuckDB string equality is case-sensitive. The query filtered on uppercase `commodity = 'WHEAT'`, whereas database records store Title Case `'Wheat'`, returning NULL/empty rows.",
+      "primary_category": "Filtering logic"
+    },
+    {
+      "query_id": "unseen-en-016",
+      "original_question": "How many primary health centres (PHCs) are operational in Haryana?",
+      "language_detected": "en",
+      "detected_script": "Latin",
+      "normalized_question": "How many primary health centres (PHCs) are operational in Haryana?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS operational_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS operational_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "operational_phcs"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-en-017",
+      "original_question": "What is the total number of TB patients notified in Karnataka?",
+      "language_detected": "en",
+      "detected_script": "Latin",
+      "normalized_question": "What is the total number of TB patients notified in Karnataka?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_tuberculosis_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2023;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_tuberculosis_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2023;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            52898
+          ]
+        ],
+        "columns": [
+          "total_tuberculosis_patients"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-en-005",
+      "original_question": "Maharashtra ki mandis me wheat ka average price kya raha?",
+      "language_detected": "en",
+      "detected_script": "Latin",
+      "normalized_question": "Maharashtra ki mandis me wheat ka average price kya raha?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr",
+        "production_tonnes"
+      ],
+      "generated_sql": "SELECT AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "sanitized_sql": "SELECT AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "average_price"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Value casing mismatch: DuckDB string equality is case-sensitive. The query filtered on uppercase `commodity = 'WHEAT'`, whereas database records store Title Case `'Wheat'`, returning NULL/empty rows.",
+      "primary_category": "Filtering logic"
+    },
+    {
+      "query_id": "unseen-hi-en-008",
+      "original_question": "Madhya Pradesh me PMGSY ke under total kitne km road construct hui?",
+      "language_detected": "hi-en",
+      "detected_script": "Latin",
+      "normalized_question": "Madhya Pradesh me PMGSY ke under total kitne km road construct hui?",
+      "extracted_entities": {
+        "state_name": "MADHYA PRADESH"
+      },
+      "selected_table": "ndap_pmgsy_rural_roads",
+      "selected_metric_columns": [
+        "completed_road_length_km"
+      ],
+      "generated_sql": "SELECT MAX(completed_road_length_km) AS max_constructed_road_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+      "sanitized_sql": "SELECT MAX(completed_road_length_km) AS max_constructed_road_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            375.5
+          ]
+        ],
+        "columns": [
+          "max_constructed_road_length_km"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+        "rows": [
+          [
+            2792.2799999999993
+          ]
+        ],
+        "columns": [
+          "total_length_km"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Model selected `MAX()` instead of `SUM()` for total volume/mandays aggregation.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-hi-en-013",
+      "original_question": "Tamil Nadu me higher education me total kitne faculty members hain?",
+      "language_detected": "hi-en",
+      "detected_script": "Latin",
+      "normalized_question": "Tamil Nadu me higher education me total kitne faculty members hain?",
+      "extracted_entities": {
+        "state_name": "TAMIL NADU"
+      },
+      "selected_table": "ndap_higher_education_aishe",
+      "selected_metric_columns": [
+        "total_colleges",
+        "total_faculty_count"
+      ],
+      "generated_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU' AND survey_year IN ('2022-23');",
+      "sanitized_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU' AND survey_year IN ('2022-23');",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            72303
+          ]
+        ],
+        "columns": [
+          "total_faculty"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+        "rows": [
+          [
+            148486
+          ]
+        ],
+        "columns": [
+          "total_faculty"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `survey_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-en-016",
+      "original_question": "Haryana me total kitne primary health centres (PHC) chal rahe hain?",
+      "language_detected": "hi-en",
+      "detected_script": "Latin",
+      "normalized_question": "Haryana me total kitne primary health centres (PHC) chal rahe hain?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-en-017",
+      "original_question": "Karnataka me Nikshay portal par total kitne TB patients notify hue?",
+      "language_detected": "hi-en",
+      "detected_script": "Latin",
+      "normalized_question": "Karnataka me Nikshay portal par total kitne TB patients notify hue?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_notified_patients_karnataka"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-en-019",
+      "original_question": "Coimbatore district me Soil Health Card yojana ke under kitne soil samples test hue?",
+      "language_detected": "hi-en",
+      "detected_script": "Latin",
+      "normalized_question": "Coimbatore district me Soil Health Card yojana ke under kitne soil samples test hue?",
+      "extracted_entities": {
+        "district_name": "Coimbatore",
+        "state_name": "TAMIL NADU"
+      },
+      "selected_table": "ndap_soil_health_records",
+      "selected_metric_columns": [
+        "soil_health_card_issued",
+        "samples_tested"
+      ],
+      "generated_sql": "SELECT SUM(cards_issued) AS total_samples_tested FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+      "sanitized_sql": "SELECT SUM(cards_issued) AS total_samples_tested FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            237761
+          ]
+        ],
+        "columns": [
+          "total_samples_tested"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+        "rows": [
+          [
+            243640
+          ]
+        ],
+        "columns": [
+          "total_samples"
+        ]
+      },
+      "exact_failure_reason": "Target column confusion: Model aggregated `cards_issued` instead of `samples_tested` in ndap_soil_health_records when citizen asked about soil sample testing.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-hi-005",
+      "original_question": "महाराष्ट्र की मंडियों में गेहूं का औसत मॉडल भाव क्या रहा?",
+      "language_detected": "hi",
+      "detected_script": "Devanagari",
+      "normalized_question": "महाराष्ट्र की मंडियों में गेहूं का औसत मॉडल भाव क्या रहा?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr"
+      ],
+      "generated_sql": "SELECT AVG(modal_price_inr) AS average_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "sanitized_sql": "SELECT AVG(modal_price_inr) AS average_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "average_price_inr"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Value casing mismatch: DuckDB string equality is case-sensitive. The query filtered on uppercase `commodity = 'WHEAT'`, whereas database records store Title Case `'Wheat'`, returning NULL/empty rows.",
+      "primary_category": "Filtering logic"
+    },
+    {
+      "query_id": "unseen-hi-012",
+      "original_question": "पुणे जिले में बिजली सुविधा वाले स्कूलों की संख्या कितनी है?",
+      "language_detected": "hi",
+      "detected_script": "Devanagari",
+      "normalized_question": "पुणे जिले में बिजली सुविधा वाले स्कूलों की संख्या कितनी है?",
+      "extracted_entities": {
+        "district_name": "Pune",
+        "state_name": "MAHARASHTRA"
+      },
+      "selected_table": "ndap_school_infrastructure",
+      "selected_metric_columns": [
+        "schools_with_electricity"
+      ],
+      "generated_sql": "SELECT SUM(schools_with_electricity) AS electric_schools_count FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "sanitized_sql": "SELECT SUM(schools_with_electricity) AS electric_schools_count FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1476
+          ]
+        ],
+        "columns": [
+          "electric_schools_count"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+        "rows": [
+          [
+            4063
+          ]
+        ],
+        "columns": [
+          "total_electricity_schools"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `academic_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-016",
+      "original_question": "हरियाणा में कुल कितने प्राथमिक स्वास्थ्य केंद्र संचालित हैं?",
+      "language_detected": "hi",
+      "detected_script": "Devanagari",
+      "normalized_question": "हरियाणा में कुल कितने प्राथमिक स्वास्थ्य केंद्र संचालित हैं?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phcs"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-017",
+      "original_question": "कर्नाटक में निक्षय पोर्टल पर कुल कितने टीबी के मरीज अधिसूचित किए गए?",
+      "language_detected": "hi",
+      "detected_script": "Devanagari",
+      "normalized_question": "कर्नाटक में निक्षय पोर्टल पर कुल कितने टीबी के मरीज अधिसूचित किए गए?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_notified_patients_karnataka"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-hi-019",
+      "original_question": "कोयंबटूर जिले में मृदा स्वास्थ्य कार्ड योजना के तहत कितने मिट्टी के नमूनों की जांच की गई?",
+      "language_detected": "hi",
+      "detected_script": "Devanagari",
+      "normalized_question": "कोयंबटूर जिले में मृदा स्वास्थ्य कार्ड योजना के तहत कितने मिट्टी के नमूनों की जांच की गई?",
+      "extracted_entities": {
+        "district_name": "Coimbatore",
+        "state_name": "TAMIL NADU"
+      },
+      "selected_table": "ndap_soil_health_records",
+      "selected_metric_columns": [
+        "samples_tested",
+        "soil_health_card_issued",
+        "cards_issued"
+      ],
+      "generated_sql": "SELECT SUM(cards_issued) AS total_cards_issued FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+      "sanitized_sql": "SELECT SUM(cards_issued) AS total_cards_issued FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            118853
+          ]
+        ],
+        "columns": [
+          "total_cards_issued"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+        "rows": [
+          [
+            243640
+          ]
+        ],
+        "columns": [
+          "total_samples"
+        ]
+      },
+      "exact_failure_reason": "Target column confusion: Model aggregated `cards_issued` instead of `samples_tested` in ndap_soil_health_records when citizen asked about soil sample testing.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-mr-005",
+      "original_question": "महाराष्ट्रातील बाजार समित्यांमध्ये गव्हाचा सरासरी भाव काय होता?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "महाराष्ट्रातील बाजार समित्यांमध्ये गव्हाचा सरासरी भाव काय होता?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr"
+      ],
+      "generated_sql": "SELECT MAX(modal_price_inr) AS highest_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+      "sanitized_sql": "SELECT MAX(modal_price_inr) AS highest_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "highest_price_inr"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Query asked for average price, but model generated `MAX(modal_price_inr)` with an arrival_date subquery.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-mr-012",
+      "original_question": "पुणे जिल्ह्यातील वीज सुविधा असलेल्या शाळांची संख्या किती आहे?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "पुणे जिल्ह्यातील वीज सुविधा असलेल्या शाळांची संख्या किती आहे?",
+      "extracted_entities": {
+        "district_name": "Pune",
+        "state_name": "MAHARASHTRA"
+      },
+      "selected_table": "ndap_school_infrastructure",
+      "selected_metric_columns": [
+        "schools_with_electricity"
+      ],
+      "generated_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "sanitized_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1476
+          ]
+        ],
+        "columns": [
+          "total_schools_with_electricity"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+        "rows": [
+          [
+            4063
+          ]
+        ],
+        "columns": [
+          "total_electricity_schools"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `academic_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-mr-016",
+      "original_question": "हरियाणामध्ये एकूण किती प्राथमिक आरोग्य केंद्रे कार्यरत आहेत?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "हरियाणामध्ये एकूण किती प्राथमिक आरोग्य केंद्रे कार्यरत आहेत?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phcs"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-mr-017",
+      "original_question": "कर्नाटकात एकूण किती क्षयरोग रुग्णांची नोंद करण्यात आली?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "कर्नाटकात एकूण किती क्षयरोग रुग्णांची नोंद करण्यात आली?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_notified_patients_karnataka"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-mr-018",
+      "original_question": "एनएफएचएस-५ नुसार आंध्र प्रदेशात संस्थात्मक प्रसूतीचे सरासरी प्रमाण किती टक्के आहे?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "एनएफएचएस-५ नुसार आंध्र प्रदेशात संस्थात्मक प्रसूतीचे सरासरी प्रमाण किती टक्के आहे?",
+      "extracted_entities": {
+        "state_name": "ANDHRA PRADESH"
+      },
+      "selected_table": "ndap_nfhs5_health_indicators",
+      "selected_metric_columns": [
+        "institutional_births_pct"
+      ],
+      "generated_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+      "sanitized_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            541.8000000000001
+          ]
+        ],
+        "columns": [
+          "total_institutional_births"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+        "rows": [
+          [
+            90.30000000000001
+          ]
+        ],
+        "columns": [
+          "avg_institutional_births"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Model selected `SUM()` instead of `AVG()` when aggregating a percentage rate metric (institutional_births_pct), yielding meaningless cumulative sums > 100%.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-mr-019",
+      "original_question": "कोईम्बतूर जिल्ह्यात मृदा आरोग्य पत्रिका अंतर्गत मातीचे किती नमुने तपासण्यात आले?",
+      "language_detected": "mr",
+      "detected_script": "Devanagari",
+      "normalized_question": "कोईम्बतूर जिल्ह्यात मृदा आरोग्य पत्रिका अंतर्गत मातीचे किती नमुने तपासण्यात आले?",
+      "extracted_entities": {
+        "district_name": "Coimbatore",
+        "state_name": "TAMIL NADU"
+      },
+      "selected_table": "ndap_soil_health_records",
+      "selected_metric_columns": [
+        "soil_health_card_issued"
+      ],
+      "generated_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+      "sanitized_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            118853
+          ]
+        ],
+        "columns": [
+          "total_cards"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+        "rows": [
+          [
+            243640
+          ]
+        ],
+        "columns": [
+          "total_samples"
+        ]
+      },
+      "exact_failure_reason": "Target column confusion: Model aggregated `cards_issued` instead of `samples_tested` in ndap_soil_health_records when citizen asked about soil sample testing.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-bn-005",
+      "original_question": "মহারাষ্ট্রের বাজারগুলিতে গমের গড় মূল্য কত ছিল?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "মহারাষ্ট্রের বাজারগুলিতে গমের গড় মূল্য কত ছিল?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr"
+      ],
+      "generated_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY average_price ASC LIMIT 1;",
+      "sanitized_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY average_price ASC LIMIT 1;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [],
+        "columns": [
+          "state_name",
+          "district_name",
+          "commodity",
+          "average_price"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Unsolicited multi-column grouping: Model injected unsolicited `GROUP BY` clause and non-aggregated projected dimensions, returning a multi-row breakdown or localized extreme instead of the requested state-level scalar aggregate.",
+      "primary_category": "GROUP BY / aggregation logic"
+    },
+    {
+      "query_id": "unseen-bn-006",
+      "original_question": "বিহারে ১০০ দিনের কাজের প্রকল্পে মোট কত কর্মদিবস তৈরি হয়েছে?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "বিহারে ১০০ দিনের কাজের প্রকল্পে মোট কত কর্মদিবস তৈরি হয়েছে?",
+      "extracted_entities": {
+        "state_name": "BIHAR"
+      },
+      "selected_table": "mgnrega_state_annual_employment",
+      "selected_metric_columns": [
+        "total_mandays_generated"
+      ],
+      "generated_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR' AND total_mandays_generated = 100;",
+      "sanitized_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR' AND total_mandays_generated = 100;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "total_mandays"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+        "rows": [
+          [
+            1084897541
+          ]
+        ],
+        "columns": [
+          "total_mandays"
+        ]
+      },
+      "exact_failure_reason": "Idiomatic number extraction flaw: The Bengali colloquial phrase for MGNREGA ('১০০ দিনের কাজ' / 100 Days Work) was mistakenly parsed as a numerical WHERE filter `total_mandays_generated = 100` instead of recognizing the scheme entity.",
+      "primary_category": "Filtering logic"
+    },
+    {
+      "query_id": "unseen-bn-010",
+      "original_question": "বিহারের কোন জেলায় মহিলা সাক্ষরতার হার সবচেয়ে কম রেকর্ড করা হয়েছে?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "বিহারের কোন জেলায় মহিলা সাক্ষরতার হার সবচেয়ে কম রেকর্ড করা হয়েছে?",
+      "extracted_entities": {
+        "state_name": "BIHAR"
+      },
+      "selected_table": "ndap_education_stats",
+      "selected_metric_columns": [
+        "female_literacy_rate"
+      ],
+      "generated_sql": "SELECT state_name, district_name, census_year, MIN(female_literacy_rate) AS lowest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' GROUP BY state_name, district_name, census_year ORDER BY lowest_female_literacy_rate ASC LIMIT 1;",
+      "sanitized_sql": "SELECT state_name, district_name, census_year, MIN(female_literacy_rate) AS lowest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' GROUP BY state_name, district_name, census_year ORDER BY lowest_female_literacy_rate ASC LIMIT 1;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            "BIHAR",
+            "Purnia",
+            2024,
+            62.2
+          ]
+        ],
+        "columns": [
+          "state_name",
+          "district_name",
+          "census_year",
+          "lowest_female_literacy_rate"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+        "rows": [
+          [
+            "Purnia",
+            62.2
+          ]
+        ],
+        "columns": [
+          "district_name",
+          "female_literacy_rate"
+        ]
+      },
+      "exact_failure_reason": "Unsolicited multi-column grouping: Model injected unsolicited `GROUP BY` clause and non-aggregated projected dimensions, returning a multi-row breakdown or localized extreme instead of the requested state-level scalar aggregate.",
+      "primary_category": "GROUP BY / aggregation logic"
+    },
+    {
+      "query_id": "unseen-bn-012",
+      "original_question": "পুনে জেলায় বিদ্যুৎ সংযোগ থাকা স্কুলের সংখ্যা কত?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "পুনে জেলায় বিদ্যুৎ সংযোগ থাকা স্কুলের সংখ্যা কত?",
+      "extracted_entities": {
+        "district_name": "Pune",
+        "state_name": "MAHARASHTRA"
+      },
+      "selected_table": "ndap_school_infrastructure",
+      "selected_metric_columns": [
+        "schools_with_electricity"
+      ],
+      "generated_sql": "SELECT SUM(schools_with_electricity) AS electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "sanitized_sql": "SELECT SUM(schools_with_electricity) AS electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1476
+          ]
+        ],
+        "columns": [
+          "electricity_schools"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+        "rows": [
+          [
+            4063
+          ]
+        ],
+        "columns": [
+          "total_electricity_schools"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `academic_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-bn-016",
+      "original_question": "হরিয়ানায় মোট কতগুলি প্রাথমিক স্বাস্থ্য কেন্দ্র চালু রয়েছে?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "হরিয়ানায় মোট কতগুলি প্রাথমিক স্বাস্থ্য কেন্দ্র চালু রয়েছে?",
+      "extracted_entities": {
+        "state_name": "HARYANA",
+        "commodity": "RICE"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc",
+        "production_tonnes"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-bn-017",
+      "original_question": "কর্ণাটকে মোট কতজন যক্ষ্মা রোগী সরকারিভাবে নথিভুক্ত হয়েছেন?",
+      "language_detected": "bn",
+      "detected_script": "Bengali",
+      "normalized_question": "কর্ণাটকে মোট কতজন যক্ষ্মা রোগী সরকারিভাবে নথিভুক্ত হয়েছেন?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_notified_patients_karnataka"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-ta-005",
+      "original_question": "மகாராஷ்டிரா சந்தைகளில் கோதுமையின் சராசரி மாதிரி விலை என்ன?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "மகாராஷ்டிரா சந்தைகளில் கோதுமையின் சராசரி மாதிரி விலை என்ன?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr"
+      ],
+      "generated_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS avg_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY avg_price_inr DESC LIMIT 1;",
+      "sanitized_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS avg_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY avg_price_inr DESC LIMIT 1;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [],
+        "columns": [
+          "state_name",
+          "district_name",
+          "commodity",
+          "avg_price_inr"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Unsolicited multi-column grouping: Model injected unsolicited `GROUP BY` clause and non-aggregated projected dimensions, returning a multi-row breakdown or localized extreme instead of the requested state-level scalar aggregate.",
+      "primary_category": "GROUP BY / aggregation logic"
+    },
+    {
+      "query_id": "unseen-ta-006",
+      "original_question": "பீகாரில் மகாத்மா காந்தி ஊரக வேலை திட்டத்தில் உருவாக்கப்பட்ட மொத்த மனித வேலை நாட்கள் எத்தனை?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "பீகாரில் மகாத்மா காந்தி ஊரக வேலை திட்டத்தில் உருவாக்கப்பட்ட மொத்த மனித வேலை நாட்கள் எத்தனை?",
+      "extracted_entities": {
+        "state_name": "BIHAR"
+      },
+      "selected_table": "mgnrega_state_annual_employment",
+      "selected_metric_columns": [
+        "total_mandays_generated"
+      ],
+      "generated_sql": "SELECT MAX(total_mandays_generated) AS max_mandays_generated FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+      "sanitized_sql": "SELECT MAX(total_mandays_generated) AS max_mandays_generated FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            390269311
+          ]
+        ],
+        "columns": [
+          "max_mandays_generated"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+        "rows": [
+          [
+            1084897541
+          ]
+        ],
+        "columns": [
+          "total_mandays"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Model selected `MAX()` instead of `SUM()` for total volume/mandays aggregation.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-ta-008",
+      "original_question": "மத்தியப் பிரதேசத்தில் கிராமப்புற சாலை திட்டத்தில் முடிக்கப்பட்ட மொத்த சாலை நீளம் எத்தனை கி.மீ?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "மத்தியப் பிரதேசத்தில் கிராமப்புற சாலை திட்டத்தில் முடிக்கப்பட்ட மொத்த சாலை நீளம் எத்தனை கி.மீ?",
+      "extracted_entities": {
+        "state_name": "MADHYA PRADESH"
+      },
+      "selected_table": "ndap_pmgsy_rural_roads",
+      "selected_metric_columns": [
+        "completed_road_length_km"
+      ],
+      "generated_sql": "SELECT MAX(completed_road_length_km) AS max_completed_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+      "sanitized_sql": "SELECT MAX(completed_road_length_km) AS max_completed_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            375.5
+          ]
+        ],
+        "columns": [
+          "max_completed_length_km"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+        "rows": [
+          [
+            2792.2799999999993
+          ]
+        ],
+        "columns": [
+          "total_length_km"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Model selected `MAX()` instead of `SUM()` for total volume/mandays aggregation.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-ta-012",
+      "original_question": "புனே மாவட்டத்தில் மின்சார வசதி கொண்ட பள்ளிகள் எத்தனை?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "புனே மாவட்டத்தில் மின்சார வசதி கொண்ட பள்ளிகள் எத்தனை?",
+      "extracted_entities": {
+        "district_name": "Pune",
+        "state_name": "MAHARASHTRA"
+      },
+      "selected_table": "ndap_school_infrastructure",
+      "selected_metric_columns": [
+        "schools_with_electricity"
+      ],
+      "generated_sql": "SELECT SUM(schools_with_electricity) AS electricity_compliance FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "sanitized_sql": "SELECT SUM(schools_with_electricity) AS electricity_compliance FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1476
+          ]
+        ],
+        "columns": [
+          "electricity_compliance"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+        "rows": [
+          [
+            4063
+          ]
+        ],
+        "columns": [
+          "total_electricity_schools"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `academic_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-ta-016",
+      "original_question": "ஹரியானாவில் செயல்படும் மொத்த ஆரம்ப சுகாதார நிலையங்கள் எத்தனை?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "ஹரியானாவில் செயல்படும் மொத்த ஆரம்ப சுகாதார நிலையங்கள் எத்தனை?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-ta-017",
+      "original_question": "கர்நாடகாவில் பதிவு செய்யப்பட்ட மொத்த காசநோய் நோயாளிகள் எத்தனை பேர்?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "கர்நாடகாவில் பதிவு செய்யப்பட்ட மொத்த காசநோய் நோயாளிகள் எத்தனை பேர்?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_patients"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-ta-020",
+      "original_question": "ஜார்கண்டில் தொழிற்கல்வி திறன் பயிற்சியில் தேர்ச்சி பெற்று சான்றிதழ் பெற்றவர்கள் எத்தனை பேர்?",
+      "language_detected": "ta",
+      "detected_script": "Tamil",
+      "normalized_question": "ஜார்கண்டில் தொழிற்கல்வி திறன் பயிற்சியில் தேர்ச்சி பெற்று சான்றிதழ் பெற்றவர்கள் எத்தனை பேர்?",
+      "extracted_entities": {
+        "state_name": "JHARKHAND"
+      },
+      "selected_table": "ndap_vocational_skill_training",
+      "selected_metric_columns": [
+        "certified_candidates"
+      ],
+      "generated_sql": "SELECT SUM(placed_candidates) AS total_recruits FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' AND sector_skill_council = 'Agriculture';",
+      "sanitized_sql": "SELECT SUM(placed_candidates) AS total_recruits FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' AND sector_skill_council = 'Agriculture';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            42467
+          ]
+        ],
+        "columns": [
+          "total_recruits"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+        "rows": [
+          [
+            170007
+          ]
+        ],
+        "columns": [
+          "total_certified"
+        ]
+      },
+      "exact_failure_reason": "Target column confusion: Model selected `placed_candidates` instead of `certified_candidates` when citizen asked for certified skill trainees.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-te-005",
+      "original_question": "మహారాష్ట్ర మార్కెట్లలో గోధుమల సగటు ధర ఎంత?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "మహారాష్ట్ర మార్కెట్లలో గోధుమల సగటు ధర ఎంత?",
+      "extracted_entities": {
+        "state_name": "MAHARASHTRA",
+        "commodity": "WHEAT"
+      },
+      "selected_table": "ndap_mandi_commodity_prices",
+      "selected_metric_columns": [
+        "modal_price_inr"
+      ],
+      "generated_sql": "SELECT MAX(modal_price_inr) AS highest_price_in_maharashtra_wheat FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+      "sanitized_sql": "SELECT MAX(modal_price_inr) AS highest_price_in_maharashtra_wheat FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            null
+          ]
+        ],
+        "columns": [
+          "highest_price_in_maharashtra_wheat"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+        "rows": [
+          [
+            2963.93
+          ]
+        ],
+        "columns": [
+          "avg_price"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Query asked for average price, but model generated `MAX(modal_price_inr)` with an arrival_date subquery.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-te-010",
+      "original_question": "బీహార్‌లో మహిళా అక్షరాస్యత రేటు అత్యల్పంగా నమోదైన జిల్లా ఏది?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "బీహార్‌లో మహిళా అక్షరాస్యత రేటు అత్యల్పంగా నమోదైన జిల్లా ఏది?",
+      "extracted_entities": {
+        "state_name": "BIHAR"
+      },
+      "selected_table": "ndap_education_stats",
+      "selected_metric_columns": [
+        "female_literacy_rate"
+      ],
+      "generated_sql": "SELECT MAX(female_literacy_rate) AS highest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR';",
+      "sanitized_sql": "SELECT MAX(female_literacy_rate) AS highest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            95.9
+          ]
+        ],
+        "columns": [
+          "highest_female_literacy_rate"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+        "rows": [
+          [
+            "Purnia",
+            62.2
+          ]
+        ],
+        "columns": [
+          "district_name",
+          "female_literacy_rate"
+        ]
+      },
+      "exact_failure_reason": "Superlative direction mismatch: Query asked for lowest female literacy district, but model returned scalar `MAX()` instead of `ORDER BY female_literacy_rate ASC LIMIT 1`.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-te-012",
+      "original_question": "పుణే జిల్లాలో విద్యుత్ సదుపాయం ఉన్న పాఠశాలల సంఖ్య ఎంత?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "పుణే జిల్లాలో విద్యుత్ సదుపాయం ఉన్న పాఠశాలల సంఖ్య ఎంత?",
+      "extracted_entities": {
+        "district_name": "Pune",
+        "state_name": "MAHARASHTRA"
+      },
+      "selected_table": "ndap_school_infrastructure",
+      "selected_metric_columns": [
+        "schools_with_electricity"
+      ],
+      "generated_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "sanitized_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1476
+          ]
+        ],
+        "columns": [
+          "total_schools_with_electricity"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+        "rows": [
+          [
+            4063
+          ]
+        ],
+        "columns": [
+          "total_electricity_schools"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `academic_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-te-016",
+      "original_question": "హర్యానాలో పనిచేస్తున్న మొత్తం ప్రాథమిక ఆరోగ్య కేంద్రాల సంఖ్య ఎంత?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "హర్యానాలో పనిచేస్తున్న మొత్తం ప్రాథమిక ఆరోగ్య కేంద్రాల సంఖ్య ఎంత?",
+      "extracted_entities": {
+        "state_name": "HARYANA"
+      },
+      "selected_table": "ndap_rural_health_infrastructure",
+      "selected_metric_columns": [
+        "primary_health_centres_phc"
+      ],
+      "generated_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            1462
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+        "rows": [
+          [
+            3298
+          ]
+        ],
+        "columns": [
+          "total_phc"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-te-017",
+      "original_question": "కర్ణాటకలో నోటిఫై చేయబడిన మొత్తం టీబీ రోగుల సంఖ్య ఎంత?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "కర్ణాటకలో నోటిఫై చేయబడిన మొత్తం టీబీ రోగుల సంఖ్య ఎంత?",
+      "extracted_entities": {
+        "state_name": "KARNATAKA"
+      },
+      "selected_table": "ndap_national_tuberculosis_portal",
+      "selected_metric_columns": [
+        "total_notified_patients"
+      ],
+      "generated_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "sanitized_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            70218
+          ]
+        ],
+        "columns": [
+          "total_notified_patients_karnataka"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+        "rows": [
+          [
+            123116
+          ]
+        ],
+        "columns": [
+          "total_tb_cases"
+        ]
+      },
+      "exact_failure_reason": "Unprompted temporal constraint injection: The query requested cumulative or lifetime totals without specifying any year or time boundary. The pipeline incorrectly injected `reporting_year` condition, drastically truncating the dataset to a single reporting period and returning partial counts.",
+      "primary_category": "Temporal filter handling"
+    },
+    {
+      "query_id": "unseen-te-018",
+      "original_question": "ఎన్ఎఫ్ హెచ్ ఎస్-5 ప్రకారం ఆంధ్రప్రదేశ్‌లో సంస్థాగత ప్రసవాల సగటు శాతం ఎంత?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "ఎన్ఎఫ్ హెచ్ ఎస్-5 ప్రకారం ఆంధ్రప్రదేశ్‌లో సంస్థాగత ప్రసవాల సగటు శాతం ఎంత?",
+      "extracted_entities": {
+        "state_name": "ANDHRA PRADESH"
+      },
+      "selected_table": "ndap_nfhs5_health_indicators",
+      "selected_metric_columns": [
+        "institutional_births_pct"
+      ],
+      "generated_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births_pct FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+      "sanitized_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births_pct FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            541.8000000000001
+          ]
+        ],
+        "columns": [
+          "total_institutional_births_pct"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+        "rows": [
+          [
+            90.30000000000001
+          ]
+        ],
+        "columns": [
+          "avg_institutional_births"
+        ]
+      },
+      "exact_failure_reason": "Aggregation function mismatch: Model selected `SUM()` instead of `AVG()` when aggregating a percentage rate metric (institutional_births_pct), yielding meaningless cumulative sums > 100%.",
+      "primary_category": "Metric/aggregation selection"
+    },
+    {
+      "query_id": "unseen-te-019",
+      "original_question": "కోయంబత్తూర్ జిల్లాలో సాయిల్ హెల్త్ కార్డ్ పథకం కింద ఎన్ని నేల నమూనాలను పరీక్షించారు?",
+      "language_detected": "te",
+      "detected_script": "Telugu",
+      "normalized_question": "కోయంబత్తూర్ జిల్లాలో సాయిల్ హెల్త్ కార్డ్ పథకం కింద ఎన్ని నేల నమూనాలను పరీక్షించారు?",
+      "extracted_entities": {
+        "district_name": "Coimbatore",
+        "state_name": "TAMIL NADU"
+      },
+      "selected_table": "ndap_soil_health_records",
+      "selected_metric_columns": [
+        "soil_health_card_issued",
+        "samples_tested"
+      ],
+      "generated_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+      "sanitized_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+      "critic_validation": {
+        "syntax_valid": true,
+        "feedback": null
+      },
+      "duckdb_execution_result": {
+        "rows": [
+          [
+            237761
+          ]
+        ],
+        "columns": [
+          "total_cards"
+        ],
+        "error": null
+      },
+      "gold_sql_and_result": {
+        "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+        "rows": [
+          [
+            243640
+          ]
+        ],
+        "columns": [
+          "total_samples"
+        ]
+      },
+      "exact_failure_reason": "Target column confusion: Model aggregated `cards_issued` instead of `samples_tested` in ndap_soil_health_records when citizen asked about soil sample testing.",
+      "primary_category": "Metric/aggregation selection"
+    }
+  ]
+}

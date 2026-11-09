@@ -1,0 +1,980 @@
+{
+  "timestamp": "2026-11-08T17:53:55Z",
+  "total_queries": 140,
+  "overall_metrics": {
+    "grounding_accuracy_pct": 100.0,
+    "table_routing_accuracy_pct": 100.0,
+    "execution_accuracy_pct": 71.43,
+    "verbalization_accuracy_pct": 98.57,
+    "avg_latency_ms": 2714.19,
+    "total_benchmark_seconds": 380.14
+  },
+  "language_scorecards": {
+    "en": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 85.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2139.62,
+      "failures": [
+        {
+          "query_id": "unseen-en-005",
+          "query": "What was the average mandi price of wheat in Maharashtra?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT AVG(modal_price_inr) AS avg_mandi_price_wheat_maharashtra FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-en-016",
+          "query": "How many primary health centres (PHCs) are operational in Haryana?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS operational_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-en-017",
+          "query": "What is the total number of TB patients notified in Karnataka?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_tuberculosis_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2023;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              52898
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "hi-en": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 70.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2229.2,
+      "failures": [
+        {
+          "query_id": "unseen-hi-en-005",
+          "query": "Maharashtra ki mandis me wheat ka average price kya raha?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-en-008",
+          "query": "Madhya Pradesh me PMGSY ke under total kitne km road construct hui?",
+          "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+          "pred_sql": "SELECT MAX(completed_road_length_km) AS max_constructed_road_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+          "gold_rows": [
+            [
+              2792.2799999999993
+            ]
+          ],
+          "pred_rows": [
+            [
+              375.5
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MADHYA PRADESH"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-en-013",
+          "query": "Tamil Nadu me higher education me total kitne faculty members hain?",
+          "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+          "pred_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU' AND survey_year IN ('2022-23');",
+          "gold_rows": [
+            [
+              148486
+            ]
+          ],
+          "pred_rows": [
+            [
+              72303
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "TAMIL NADU"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-en-016",
+          "query": "Haryana me total kitne primary health centres (PHC) chal rahe hain?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-en-017",
+          "query": "Karnataka me Nikshay portal par total kitne TB patients notify hue?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-en-019",
+          "query": "Coimbatore district me Soil Health Card yojana ke under kitne soil samples test hue?",
+          "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "pred_sql": "SELECT SUM(cards_issued) AS total_samples_tested FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "gold_rows": [
+            [
+              243640
+            ]
+          ],
+          "pred_rows": [
+            [
+              237761
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Coimbatore",
+            "state_name": "TAMIL NADU"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "hi": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 75.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 4356.33,
+      "failures": [
+        {
+          "query_id": "unseen-hi-005",
+          "query": "महाराष्ट्र की मंडियों में गेहूं का औसत मॉडल भाव क्या रहा?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT AVG(modal_price_inr) AS average_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT';",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-012",
+          "query": "पुणे जिले में बिजली सुविधा वाले स्कूलों की संख्या कितनी है?",
+          "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+          "pred_sql": "SELECT SUM(schools_with_electricity) AS electric_schools_count FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+          "gold_rows": [
+            [
+              4063
+            ]
+          ],
+          "pred_rows": [
+            [
+              1476
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Pune",
+            "state_name": "MAHARASHTRA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-016",
+          "query": "हरियाणा में कुल कितने प्राथमिक स्वास्थ्य केंद्र संचालित हैं?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-017",
+          "query": "कर्नाटक में निक्षय पोर्टल पर कुल कितने टीबी के मरीज अधिसूचित किए गए?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-hi-019",
+          "query": "कोयंबटूर जिले में मृदा स्वास्थ्य कार्ड योजना के तहत कितने मिट्टी के नमूनों की जांच की गई?",
+          "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "pred_sql": "SELECT SUM(cards_issued) AS total_cards_issued FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+          "gold_rows": [
+            [
+              243640
+            ]
+          ],
+          "pred_rows": [
+            [
+              118853
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Coimbatore",
+            "state_name": "TAMIL NADU"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "mr": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 70.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2466.19,
+      "failures": [
+        {
+          "query_id": "unseen-mr-005",
+          "query": "महाराष्ट्रातील बाजार समित्यांमध्ये गव्हाचा सरासरी भाव काय होता?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT MAX(modal_price_inr) AS highest_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-mr-012",
+          "query": "पुणे जिल्ह्यातील वीज सुविधा असलेल्या शाळांची संख्या किती आहे?",
+          "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+          "pred_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+          "gold_rows": [
+            [
+              4063
+            ]
+          ],
+          "pred_rows": [
+            [
+              1476
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Pune",
+            "state_name": "MAHARASHTRA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-mr-016",
+          "query": "हरियाणामध्ये एकूण किती प्राथमिक आरोग्य केंद्रे कार्यरत आहेत?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phcs FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-mr-017",
+          "query": "कर्नाटकात एकूण किती क्षयरोग रुग्णांची नोंद करण्यात आली?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-mr-018",
+          "query": "एनएफएचएस-५ नुसार आंध्र प्रदेशात संस्थात्मक प्रसूतीचे सरासरी प्रमाण किती टक्के आहे?",
+          "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+          "pred_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+          "gold_rows": [
+            [
+              90.30000000000001
+            ]
+          ],
+          "pred_rows": [
+            [
+              541.8000000000001
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "ANDHRA PRADESH"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-mr-019",
+          "query": "कोईम्बतूर जिल्ह्यात मृदा आरोग्य पत्रिका अंतर्गत मातीचे किती नमुने तपासण्यात आले?",
+          "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "pred_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore' AND cycle_year = 2022;",
+          "gold_rows": [
+            [
+              243640
+            ]
+          ],
+          "pred_rows": [
+            [
+              118853
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Coimbatore",
+            "state_name": "TAMIL NADU"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "bn": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 70.0,
+      "verbalization_accuracy_pct": 95.0,
+      "avg_latency_ms": 2540.17,
+      "failures": [
+        {
+          "query_id": "unseen-bn-005",
+          "query": "মহারাষ্ট্রের বাজারগুলিতে গমের গড় মূল্য কত ছিল?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS average_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY average_price ASC LIMIT 1;",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH",
+            "VERBALIZATION_MISSING_NUMERICAL_DATA"
+          ]
+        },
+        {
+          "query_id": "unseen-bn-006",
+          "query": "বিহারে ১০০ দিনের কাজের প্রকল্পে মোট কত কর্মদিবস তৈরি হয়েছে?",
+          "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+          "pred_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR' AND total_mandays_generated = 100;",
+          "gold_rows": [
+            [
+              1084897541
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "BIHAR"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-bn-010",
+          "query": "বিহারের কোন জেলায় মহিলা সাক্ষরতার হার সবচেয়ে কম রেকর্ড করা হয়েছে?",
+          "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+          "pred_sql": "SELECT state_name, district_name, census_year, MIN(female_literacy_rate) AS lowest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' GROUP BY state_name, district_name, census_year ORDER BY lowest_female_literacy_rate ASC LIMIT 1;",
+          "gold_rows": [
+            [
+              "Purnia",
+              62.2
+            ]
+          ],
+          "pred_rows": [
+            [
+              "BIHAR",
+              "Purnia",
+              2024,
+              62.2
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "BIHAR"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-bn-012",
+          "query": "পুনে জেলায় বিদ্যুৎ সংযোগ থাকা স্কুলের সংখ্যা কত?",
+          "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+          "pred_sql": "SELECT SUM(schools_with_electricity) AS electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+          "gold_rows": [
+            [
+              4063
+            ]
+          ],
+          "pred_rows": [
+            [
+              1476
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Pune",
+            "state_name": "MAHARASHTRA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-bn-016",
+          "query": "হরিয়ানায় মোট কতগুলি প্রাথমিক স্বাস্থ্য কেন্দ্র চালু রয়েছে?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA",
+            "commodity": "RICE"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-bn-017",
+          "query": "কর্ণাটকে মোট কতজন যক্ষ্মা রোগী সরকারিভাবে নথিভুক্ত হয়েছেন?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "ta": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 65.0,
+      "verbalization_accuracy_pct": 95.0,
+      "avg_latency_ms": 2655.08,
+      "failures": [
+        {
+          "query_id": "unseen-ta-005",
+          "query": "மகாராஷ்டிரா சந்தைகளில் கோதுமையின் சராசரி மாதிரி விலை என்ன?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT state_name, district_name, commodity, AVG(modal_price_inr) AS avg_price_inr FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' GROUP BY state_name, district_name, commodity ORDER BY avg_price_inr DESC LIMIT 1;",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH",
+            "VERBALIZATION_MISSING_NUMERICAL_DATA"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-006",
+          "query": "பீகாரில் மகாத்மா காந்தி ஊரக வேலை திட்டத்தில் உருவாக்கப்பட்ட மொத்த மனித வேலை நாட்கள் எத்தனை?",
+          "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+          "pred_sql": "SELECT MAX(total_mandays_generated) AS max_mandays_generated FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+          "gold_rows": [
+            [
+              1084897541
+            ]
+          ],
+          "pred_rows": [
+            [
+              390269311
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "BIHAR"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-008",
+          "query": "மத்தியப் பிரதேசத்தில் கிராமப்புற சாலை திட்டத்தில் முடிக்கப்பட்ட மொத்த சாலை நீளம் எத்தனை கி.மீ?",
+          "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+          "pred_sql": "SELECT MAX(completed_road_length_km) AS max_completed_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+          "gold_rows": [
+            [
+              2792.2799999999993
+            ]
+          ],
+          "pred_rows": [
+            [
+              375.5
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MADHYA PRADESH"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-012",
+          "query": "புனே மாவட்டத்தில் மின்சார வசதி கொண்ட பள்ளிகள் எத்தனை?",
+          "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+          "pred_sql": "SELECT SUM(schools_with_electricity) AS electricity_compliance FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+          "gold_rows": [
+            [
+              4063
+            ]
+          ],
+          "pred_rows": [
+            [
+              1476
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Pune",
+            "state_name": "MAHARASHTRA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-016",
+          "query": "ஹரியானாவில் செயல்படும் மொத்த ஆரம்ப சுகாதார நிலையங்கள் எத்தனை?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-017",
+          "query": "கர்நாடகாவில் பதிவு செய்யப்பட்ட மொத்த காசநோய் நோயாளிகள் எத்தனை பேர்?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_patients FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-ta-020",
+          "query": "ஜார்கண்டில் தொழிற்கல்வி திறன் பயிற்சியில் தேர்ச்சி பெற்று சான்றிதழ் பெற்றவர்கள் எத்தனை பேர்?",
+          "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+          "pred_sql": "SELECT SUM(placed_candidates) AS total_recruits FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' AND sector_skill_council = 'Agriculture';",
+          "gold_rows": [
+            [
+              170007
+            ]
+          ],
+          "pred_rows": [
+            [
+              42467
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "JHARKHAND"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "te": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 65.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2612.7,
+      "failures": [
+        {
+          "query_id": "unseen-te-005",
+          "query": "మహారాష్ట్ర మార్కెట్లలో గోధుమల సగటు ధర ఎంత?",
+          "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+          "pred_sql": "SELECT MAX(modal_price_inr) AS highest_price_in_maharashtra_wheat FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' AND arrival_date IN ( SELECT MAX(arrival_date) FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'WHEAT' );",
+          "gold_rows": [
+            [
+              2963.93
+            ]
+          ],
+          "pred_rows": [
+            [
+              null
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "MAHARASHTRA",
+            "commodity": "WHEAT"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-010",
+          "query": "బీహార్‌లో మహిళా అక్షరాస్యత రేటు అత్యల్పంగా నమోదైన జిల్లా ఏది?",
+          "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+          "pred_sql": "SELECT MAX(female_literacy_rate) AS highest_female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR';",
+          "gold_rows": [
+            [
+              "Purnia",
+              62.2
+            ]
+          ],
+          "pred_rows": [
+            [
+              95.9
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "BIHAR"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-012",
+          "query": "పుణే జిల్లాలో విద్యుత్ సదుపాయం ఉన్న పాఠశాలల సంఖ్య ఎంత?",
+          "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+          "pred_sql": "SELECT SUM(schools_with_electricity) AS total_schools_with_electricity FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune' AND academic_year = '2023-24';",
+          "gold_rows": [
+            [
+              4063
+            ]
+          ],
+          "pred_rows": [
+            [
+              1476
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Pune",
+            "state_name": "MAHARASHTRA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-016",
+          "query": "హర్యానాలో పనిచేస్తున్న మొత్తం ప్రాథమిక ఆరోగ్య కేంద్రాల సంఖ్య ఎంత?",
+          "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+          "pred_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              3298
+            ]
+          ],
+          "pred_rows": [
+            [
+              1462
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "HARYANA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-017",
+          "query": "కర్ణాటకలో నోటిఫై చేయబడిన మొత్తం టీబీ రోగుల సంఖ్య ఎంత?",
+          "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+          "pred_sql": "SELECT SUM(total_notified_patients) AS total_notified_patients_karnataka FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA' AND reporting_year = 2022;",
+          "gold_rows": [
+            [
+              123116
+            ]
+          ],
+          "pred_rows": [
+            [
+              70218
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "KARNATAKA"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-018",
+          "query": "ఎన్ఎఫ్ హెచ్ ఎస్-5 ప్రకారం ఆంధ్రప్రదేశ్‌లో సంస్థాగత ప్రసవాల సగటు శాతం ఎంత?",
+          "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+          "pred_sql": "SELECT SUM(institutional_births_pct) AS total_institutional_births_pct FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+          "gold_rows": [
+            [
+              90.30000000000001
+            ]
+          ],
+          "pred_rows": [
+            [
+              541.8000000000001
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "ANDHRA PRADESH"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        },
+        {
+          "query_id": "unseen-te-019",
+          "query": "కోయంబత్తూర్ జిల్లాలో సాయిల్ హెల్త్ కార్డ్ పథకం కింద ఎన్ని నేల నమూనాలను పరీక్షించారు?",
+          "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "pred_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+          "gold_rows": [
+            [
+              243640
+            ]
+          ],
+          "pred_rows": [
+            [
+              237761
+            ]
+          ],
+          "grounded_entities": {
+            "district_name": "Coimbatore",
+            "state_name": "TAMIL NADU"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -32,6 +32,9 @@ def main():
         "--suite-280", "--pan-india", dest="suite_280", action="store_true", help="Use the comprehensive 280-query Pan-India benchmark suite"
     )
     parser.add_argument(
+        "--suite-relational", "--relational-50", dest="suite_relational", action="store_true", help="Use the 50-query Relational 3NF Star Schema multi-join benchmark suite"
+    )
+    parser.add_argument(
         "--limit", type=int, default=None, help="Limit evaluation to first N queries"
     )
     parser.add_argument(
@@ -48,7 +51,9 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.suite_280:
+    if args.suite_relational:
+        suite_path = REPO_ROOT / "data" / "benchmarks" / "indicdb_relational_50.json"
+    elif args.suite_280:
         suite_path = REPO_ROOT / "data" / "benchmarks" / "indicdb_eval_suite_pan_india_280.json"
     elif args.suite_expanded:
         suite_path = REPO_ROOT / "data" / "benchmarks" / "indicdb_eval_suite_expanded.json"

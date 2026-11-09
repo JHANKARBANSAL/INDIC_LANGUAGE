@@ -1,0 +1,583 @@
+#!/usr/bin/env python3
+"""
+scripts/build_relational_benchmark_50.py
+Generates the 50-Query Relational Star Schema Benchmark Suite.
+Tests multi-table JOINs (dim_geography, dim_time, fact_*) and verified
+dynamic entity grounding across 7 languages.
+"""
+
+import json
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = REPO_ROOT / "data" / "benchmarks" / "indicdb_relational_50.json"
+OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+# 50 Relational Multi-Join Queries across 7 Languages
+QUERIES = [
+    # -------------------------------------------------------------------------
+    # 1. Hindi (hi) - Relational 1-Join and 2-Join Queries
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-hi-001",
+        "query": "उत्तर प्रदेश में कुल कितने किसानों को पीएम-किसान का लाभ मिला?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'UTTAR PRADESH';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-hi-002",
+        "query": "बिहार में वित्तीय वर्ष 2023-24 में पीएम-किसान के तहत कुल कितनी धनराशि वितरित की गई?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) AS total_amount FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id JOIN dim_time t ON f.time_id = t.time_id WHERE g.state_name = 'BIHAR' AND t.financial_year = '2023-24';",
+        "difficulty": "medium",
+        "target_columns": ["amount_inr", "state_name", "financial_year"]
+    },
+    {
+        "query_id": "rel-hi-003",
+        "query": "पंजाब में गेहूं का कुल उत्पादन कितने टन हुआ?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'PUNJAB' AND f.crop_name = 'WHEAT';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-hi-004",
+        "query": "बिहार के किस जिले में महिला साक्षरता दर सबसे कम है?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT g.district_name, f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'BIHAR' ORDER BY f.female_literacy_rate ASC LIMIT 1;",
+        "difficulty": "hard",
+        "target_columns": ["district_name", "female_literacy_rate", "state_name"]
+    },
+    {
+        "query_id": "rel-hi-005",
+        "query": "वाराणसी जिले में कुल कितने छात्र नामांकित हैं?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Varanasi';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-hi-006",
+        "query": "मध्य प्रदेश में सोयाबीन की खेती का कुल क्षेत्रफल कितने हेक्टेयर है?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.area_hectares) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'MADHYA PRADESH' AND f.crop_name = 'SOYBEAN';",
+        "difficulty": "medium",
+        "target_columns": ["area_hectares", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-hi-007",
+        "query": "उत्तरी क्षेत्र (North Zone) में पीएम-किसान के कुल कितने लाभार्थी हैं?",
+        "language": "hi",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.zone = 'North';",
+        "difficulty": "medium",
+        "target_columns": ["farmer_beneficiaries", "zone"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 2. Telugu (te) - Testing Non-Metro Districts & Cross-Script Grounding
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-te-001",
+        "query": "ఆంధ్రప్రదేశ్‌లో పీఎం-కిసాన్ పథకం ద్వారా ఎంతమంది రైతులకు లబ్ధి చేకూరింది?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'ANDHRA PRADESH';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-te-002",
+        "query": "తెలంగాణలో పీఎం-కిసాన్ లబ్ధిదారుల సంఖ్య ఎంత?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'TELANGANA';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-te-003",
+        "query": "ఆంధ్రప్రదేశ్‌లో వరి పంట మొత్తం ఉత్పత్తి ఎన్ని టన్నులు?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'ANDHRA PRADESH' AND f.crop_name = 'RICE';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-te-004",
+        "query": "తెలంగాణలో పత్తి సాగు విస్తీర్ణం ఎన్ని హెక్టార్లు?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.area_hectares) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'TELANGANA' AND f.crop_name = 'COTTON';",
+        "difficulty": "medium",
+        "target_columns": ["area_hectares", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-te-005",
+        "query": "కర్నూలు జిల్లాలో వేరుశనగ ఉత్పత్తి ఎన్ని టన్నులు?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Kurnool' AND f.crop_name = 'GROUNDNUT';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "district_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-te-006",
+        "query": "నెల్లూరు జిల్లాలో పీఎం-కిసాన్ నిధుల మొత్తం ఎంత?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Nellore';",
+        "difficulty": "easy",
+        "target_columns": ["amount_inr", "district_name"]
+    },
+    {
+        "query_id": "rel-te-007",
+        "query": "గుంటూరు జిల్లాలో పాఠశాలల్లో మొత్తం విద్యార్థుల సంఖ్య ఎంత?",
+        "language": "te",
+        "script": "Telugu",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Guntur';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 3. Bengali (bn) - Testing Non-Metro Districts & Crops
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-bn-001",
+        "query": "পশ্চিমবঙ্গে মোট কতজন কৃষক পিএম-কিষানের সুবিধা পেয়েছেন?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'WEST BENGAL';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-bn-002",
+        "query": "পশ্চিমবঙ্গে ধান ফসলের মোট উৎপাদন কত টন হয়েছে?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'WEST BENGAL' AND f.crop_name = 'RICE';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-bn-003",
+        "query": "পশ্চিমবঙ্গে পাটের মোট চাষের এলাকা কত হেক্টর?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.area_hectares) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'WEST BENGAL' AND f.crop_name = 'JUTE';",
+        "difficulty": "medium",
+        "target_columns": ["area_hectares", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-bn-004",
+        "query": "মুর্শিদাবাদ জেলায় মোট ছাত্র সংখ্যা কত?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Murshidabad';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-bn-005",
+        "query": "কলকাতা জেলায় পিএম-কিষানের মোট সুবিধাভোগী কৃষক কত?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Kolkata';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "district_name"]
+    },
+    {
+        "query_id": "rel-bn-006",
+        "query": "পশ্চিমবঙ্গের কোন জেলায় নারী সাক্ষরতার হার সবচেয়ে কম?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT g.district_name, f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'WEST BENGAL' ORDER BY f.female_literacy_rate ASC LIMIT 1;",
+        "difficulty": "hard",
+        "target_columns": ["district_name", "female_literacy_rate", "state_name"]
+    },
+    {
+        "query_id": "rel-bn-007",
+        "query": "হাওড়া জেলায় মোট শিক্ষার্থীর সংখ্যা কত?",
+        "language": "bn",
+        "script": "Bengali",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Howrah';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 4. Marathi (mr) - Western Zone Queries
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-mr-001",
+        "query": "महाराष्ट्रात एकूण किती शेतकऱ्यांना पीएम-किसान योजनेचा लाभ मिळाला?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'MAHARASHTRA';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-mr-002",
+        "query": "महाराष्ट्रात कापूस पिकाचे एकूण उत्पादन किती टन झाले?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'MAHARASHTRA' AND f.crop_name = 'COTTON';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-mr-003",
+        "query": "पुणे जिल्ह्यात एकूण विद्यार्थ्यांची संख्या किती आहे?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Pune';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-mr-004",
+        "query": "नाशिक जिल्ह्यात पीएम-किसान अंतर्गत एकूण किती निधी वितरित झाला?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Nashik';",
+        "difficulty": "easy",
+        "target_columns": ["amount_inr", "district_name"]
+    },
+    {
+        "query_id": "rel-mr-005",
+        "query": "पश्चिम विभागात (West Zone) कापूस लागवडीचे एकूण क्षेत्र किती हेक्टर आहे?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.area_hectares) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.zone = 'West' AND f.crop_name = 'COTTON';",
+        "difficulty": "medium",
+        "target_columns": ["area_hectares", "zone", "crop_name"]
+    },
+    {
+        "query_id": "rel-mr-006",
+        "query": "सोलापूर जिल्ह्यात महिला साक्षरता दर किती आहे?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Solapur';",
+        "difficulty": "medium",
+        "target_columns": ["female_literacy_rate", "district_name"]
+    },
+    {
+        "query_id": "rel-mr-007",
+        "query": "गुजरातमध्ये भुईमूग (Groundnut) पिकाचे एकूण उत्पादन किती टन झाले?",
+        "language": "mr",
+        "script": "Devanagari",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'GUJARAT' AND f.crop_name = 'GROUNDNUT';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 5. Tamil (ta) - Southern Zone Queries
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-ta-001",
+        "query": "தமிழ்நாட்டில் பிஎம்-கிசான் திட்டத்தின் கீழ் பயனடைந்த விவசாயிகள் எத்தனை பேர்?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'TAMIL NADU';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-ta-002",
+        "query": "தமிழ்நாட்டில் நெல் உற்பத்தியின் மொத்த அளவு எத்தனை டன்கள்?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'TAMIL NADU' AND f.crop_name = 'RICE';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-ta-003",
+        "query": "மதுரை மாவட்டத்தில் மொத்த மாணவர் எண்ணிக்கை என்ன?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Madurai';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-ta-004",
+        "query": "சென்னை மாவட்டத்தில் பிஎம்-கிசான் திட்டத்தின் மூலம் வழங்கப்பட்ட மொத்த தொகை எவ்வளவு?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Chennai';",
+        "difficulty": "easy",
+        "target_columns": ["amount_inr", "district_name"]
+    },
+    {
+        "query_id": "rel-ta-005",
+        "query": "கோவை மாவட்டத்தில் பெண் எழுத்தறிவு விகிதம் என்ன?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Coimbatore';",
+        "difficulty": "medium",
+        "target_columns": ["female_literacy_rate", "district_name"]
+    },
+    {
+        "query_id": "rel-ta-006",
+        "query": "தென் மண்டலத்தில் (South Zone) கரும்பு உற்பத்தியின் மொத்த அளவு என்ன?",
+        "language": "ta",
+        "script": "Tamil",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.zone = 'South' AND f.crop_name = 'SUGARCANE';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "zone", "crop_name"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 6. Hinglish (hi-en) - Code-Mixed Queries
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-hien-001",
+        "query": "Maharashtra me PM-KISAN ke total kitne farmer beneficiaries hain?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'MAHARASHTRA';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-hien-002",
+        "query": "UP me financial year 2023-24 me PM-KISAN ka total disbursement amount kitna tha?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) AS total_amount FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id JOIN dim_time t ON f.time_id = t.time_id WHERE g.state_name = 'UTTAR PRADESH' AND t.financial_year = '2023-24';",
+        "difficulty": "medium",
+        "target_columns": ["amount_inr", "state_name", "financial_year"]
+    },
+    {
+        "query_id": "rel-hien-003",
+        "query": "Punjab me wheat ka total production kitne tonnes hua?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'PUNJAB' AND f.crop_name = 'WHEAT';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-hien-004",
+        "query": "Patna district me schools me total student enrollment kitna hai?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Patna';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-hien-005",
+        "query": "Bihar ke kis district me lowest female literacy rate record hui?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT g.district_name, f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'BIHAR' ORDER BY f.female_literacy_rate ASC LIMIT 1;",
+        "difficulty": "hard",
+        "target_columns": ["district_name", "female_literacy_rate", "state_name"]
+    },
+    {
+        "query_id": "rel-hien-006",
+        "query": "Jaipur district me female literacy rate kitna hai?",
+        "language": "hi-en",
+        "script": "Latin",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Jaipur';",
+        "difficulty": "medium",
+        "target_columns": ["female_literacy_rate", "district_name"]
+    },
+
+    # -------------------------------------------------------------------------
+    # 7. English (en) - Baseline Reference Queries
+    # -------------------------------------------------------------------------
+    {
+        "query_id": "rel-en-001",
+        "query": "What is the total number of farmer beneficiaries under PM-KISAN in Maharashtra?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) AS total_farmers FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'MAHARASHTRA';",
+        "difficulty": "easy",
+        "target_columns": ["farmer_beneficiaries", "state_name"]
+    },
+    {
+        "query_id": "rel-en-002",
+        "query": "What is the total amount disbursed under PM-KISAN in Uttar Pradesh for financial year 2023-24?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.amount_inr) AS total_amount FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id JOIN dim_time t ON f.time_id = t.time_id WHERE g.state_name = 'UTTAR PRADESH' AND t.financial_year = '2023-24';",
+        "difficulty": "medium",
+        "target_columns": ["amount_inr", "state_name", "financial_year"]
+    },
+    {
+        "query_id": "rel-en-003",
+        "query": "What is the total production of wheat in Punjab in tonnes?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.production_tonnes) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'PUNJAB' AND f.crop_name = 'WHEAT';",
+        "difficulty": "medium",
+        "target_columns": ["production_tonnes", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-en-004",
+        "query": "What is the total cultivation area of cotton in Gujarat in hectares?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_crop_production",
+        "gold_sql": "SELECT SUM(f.area_hectares) FROM fact_crop_production f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'GUJARAT' AND f.crop_name = 'COTTON';",
+        "difficulty": "medium",
+        "target_columns": ["area_hectares", "state_name", "crop_name"]
+    },
+    {
+        "query_id": "rel-en-005",
+        "query": "Which district in Bihar recorded the lowest female literacy rate?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT g.district_name, f.female_literacy_rate FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.state_name = 'BIHAR' ORDER BY f.female_literacy_rate ASC LIMIT 1;",
+        "difficulty": "hard",
+        "target_columns": ["district_name", "female_literacy_rate", "state_name"]
+    },
+    {
+        "query_id": "rel-en-006",
+        "query": "What is the total student enrollment count in schools in Pune district?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Education",
+        "target_table": "fact_education_stats",
+        "gold_sql": "SELECT SUM(f.student_count) FROM fact_education_stats f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.district_name = 'Pune';",
+        "difficulty": "easy",
+        "target_columns": ["student_count", "district_name"]
+    },
+    {
+        "query_id": "rel-en-007",
+        "query": "What is the total farmer beneficiaries count across the South Zone?",
+        "language": "en",
+        "script": "Latin",
+        "domain": "Agriculture",
+        "target_table": "fact_pm_kisan_disbursement",
+        "gold_sql": "SELECT SUM(f.farmer_beneficiaries) FROM fact_pm_kisan_disbursement f JOIN dim_geography g ON f.geo_id = g.geo_id WHERE g.zone = 'South';",
+        "difficulty": "medium",
+        "target_columns": ["farmer_beneficiaries", "zone"]
+    }
+]
+
+
+def main():
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(QUERIES, f, ensure_ascii=False, indent=2)
+
+    print("=" * 80)
+    print("🇮🇳 IndicSQL: 50-Query Relational Star Schema Benchmark Suite Generated")
+    print("=" * 80)
+    print(f"Total Queries: {len(QUERIES)}")
+    print(f"Saved to:      {OUTPUT_PATH}")
+    print("Language Breakdown:")
+    from collections import Counter
+    counts = Counter(q["language"] for q in QUERIES)
+    for lang, c in counts.items():
+        print(f"   - {lang}: {c} queries")
+
+
+if __name__ == "__main__":
+    main()
+

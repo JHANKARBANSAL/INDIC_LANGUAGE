@@ -335,6 +335,80 @@ class NDAPCatalog:
         },
     }
 
+    # Normalized 3NF Relational Star Schema Tables (Multi-Join Benchmark)
+    _RELATIONAL_TABLES: Dict[str, Dict[str, Any]] = {
+        "dim_geography": {
+            "domain": "Cross-Domain Dimension",
+            "title": "Geographic Hierarchy Dimension",
+            "description": "Standardized geographic entity mapping: State, District, and Administrative Zone.",
+            "primary_key": ["geo_id"],
+            "columns": {
+                "geo_id": "BIGINT - Unique geographic surrogate key",
+                "state_name": "VARCHAR - State/UT name in UPPERCASE (e.g. UTTAR PRADESH, BIHAR)",
+                "district_name": "VARCHAR - Administrative district name",
+                "zone": "VARCHAR - Regional geographic zone (North, South, East, West, Central, North-East)",
+            },
+        },
+        "dim_time": {
+            "domain": "Cross-Domain Dimension",
+            "title": "Temporal Interval Dimension",
+            "description": "Standardized fiscal and seasonal temporal hierarchy.",
+            "primary_key": ["time_id"],
+            "columns": {
+                "time_id": "BIGINT - Unique temporal surrogate key",
+                "financial_year": "VARCHAR - Fiscal accounting year (e.g. 2022-23, 2023-24)",
+                "calendar_year": "INTEGER - Gregorian calendar year",
+                "season": "VARCHAR - Agricultural season (Kharif, Rabi, Zaid)",
+            },
+        },
+        "fact_pm_kisan_disbursement": {
+            "domain": "Agriculture",
+            "title": "PM-KISAN Disbursement Fact Table",
+            "description": "Normalized DBT payments with foreign keys referencing dim_geography and dim_time.",
+            "primary_key": ["fact_id"],
+            "foreign_keys": {"geo_id": "dim_geography.geo_id", "time_id": "dim_time.time_id"},
+            "columns": {
+                "fact_id": "BIGINT - Primary surrogate key",
+                "geo_id": "BIGINT - Foreign key to dim_geography(geo_id)",
+                "time_id": "BIGINT - Foreign key to dim_time(time_id)",
+                "farmer_beneficiaries": "BIGINT - Count of credited farmers",
+                "amount_inr": "DOUBLE - Total funds disbursed in INR",
+            },
+        },
+        "fact_crop_production": {
+            "domain": "Agriculture",
+            "title": "Crop Production Census Fact Table",
+            "description": "Normalized crop harvest metrics with foreign keys referencing dim_geography and dim_time.",
+            "primary_key": ["fact_id"],
+            "foreign_keys": {"geo_id": "dim_geography.geo_id", "time_id": "dim_time.time_id"},
+            "columns": {
+                "fact_id": "BIGINT - Primary surrogate key",
+                "geo_id": "BIGINT - Foreign key to dim_geography(geo_id)",
+                "time_id": "BIGINT - Foreign key to dim_time(time_id)",
+                "crop_name": "VARCHAR - Crop commodity in UPPERCASE (e.g. WHEAT, RICE, COTTON)",
+                "area_hectares": "DOUBLE - Cultivation area in hectares",
+                "production_tonnes": "DOUBLE - Metric tonnes produced",
+                "yield_kg_per_hectare": "DOUBLE - Productivity yield per hectare",
+            },
+        },
+        "fact_education_stats": {
+            "domain": "Education",
+            "title": "Educational Statistics Fact Table",
+            "description": "Normalized school and literacy metrics with foreign keys referencing dim_geography and dim_time.",
+            "primary_key": ["fact_id"],
+            "foreign_keys": {"geo_id": "dim_geography.geo_id", "time_id": "dim_time.time_id"},
+            "columns": {
+                "fact_id": "BIGINT - Primary surrogate key",
+                "geo_id": "BIGINT - Foreign key to dim_geography(geo_id)",
+                "time_id": "BIGINT - Foreign key to dim_time(time_id)",
+                "student_count": "BIGINT - Total enrolled student population",
+                "male_literacy_rate": "DOUBLE - Male literacy rate percentage",
+                "female_literacy_rate": "DOUBLE - Female literacy rate percentage",
+                "pupil_teacher_ratio": "DOUBLE - Ratio of pupils to teachers",
+            },
+        },
+    }
+
     @classmethod
     def list_tables(cls) -> List[str]:
         """Returns all 20 registered table names."""
@@ -343,7 +417,9 @@ class NDAPCatalog:
     @classmethod
     def get_table_schema(cls, table_name: str) -> Dict[str, Any]:
         """Returns the schema dictionary for a specific table."""
-        return cls._TABLES.get(table_name, {})
+        if table_name in cls._TABLES:
+            return cls._TABLES[table_name]
+        return cls._RELATIONAL_TABLES.get(table_name, {})
 
     @classmethod
     def list_domains(cls) -> List[str]:

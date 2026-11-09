@@ -1,0 +1,100 @@
+{
+  "timestamp": "2026-11-09T14:34:43Z",
+  "total_queries": 140,
+  "overall_metrics": {
+    "grounding_accuracy_pct": 100.0,
+    "table_routing_accuracy_pct": 100.0,
+    "execution_accuracy_pct": 99.29,
+    "verbalization_accuracy_pct": 100.0,
+    "avg_latency_ms": 2880.19,
+    "total_benchmark_seconds": 403.35
+  },
+  "language_scorecards": {
+    "en": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2473.67,
+      "failures": []
+    },
+    "hi-en": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2493.82,
+      "failures": []
+    },
+    "hi": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2662.56,
+      "failures": []
+    },
+    "mr": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2516.91,
+      "failures": []
+    },
+    "bn": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2440.64,
+      "failures": []
+    },
+    "ta": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 95.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 2655.67,
+      "failures": [
+        {
+          "query_id": "unseen-ta-020",
+          "query": "ஜார்கண்டில் தொழிற்கல்வி திறன் பயிற்சியில் தேர்ச்சி பெற்று சான்றிதழ் பெற்றவர்கள் எத்தனை பேர்?",
+          "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+          "pred_sql": "SELECT SUM(certified_candidates) AS total_certified_candidates FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' AND sector_skill_council = 'Agriculture';",
+          "gold_rows": [
+            [
+              170007
+            ]
+          ],
+          "pred_rows": [
+            [
+              57918
+            ]
+          ],
+          "grounded_entities": {
+            "state_name": "JHARKHAND"
+          },
+          "categories": [
+            "SEMANTIC_LOGIC_MISMATCH"
+          ]
+        }
+      ]
+    },
+    "te": {
+      "total_queries": 20,
+      "grounding_accuracy_pct": 100.0,
+      "table_routing_accuracy_pct": 100.0,
+      "execution_accuracy_pct": 100.0,
+      "verbalization_accuracy_pct": 100.0,
+      "avg_latency_ms": 4918.09,
+      "failures": []
+    }
+  }
+}

@@ -76,7 +76,11 @@ def schema_linker_node(state: IndicSQLState) -> Dict[str, Any]:
     lang = state.get("detected_lang", "en")
 
     pruned = link_schema_elements(canonical_query, lang)
-    primary_table = pruned[0]["table_name"] if pruned else "ndap_default_table"
+    existing_target = state.get("target_database")
+    if existing_target:
+        primary_table = existing_target
+    else:
+        primary_table = pruned[0]["table_name"] if pruned else "ndap_default_table"
     matched_cols = [el["column_name"] for el in pruned]
 
     # Dynamic schema-linking confidence score based on match count and specificity

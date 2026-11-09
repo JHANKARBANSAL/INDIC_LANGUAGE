@@ -1,0 +1,2011 @@
+[
+  {
+    "query_id": "unseen-en-001",
+    "query": "How many total farmer beneficiaries received PM-Kisan support in Rajasthan?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-001",
+    "query": "Rajasthan me PM-Kisan ke under total kitne farmers ko benefit mila?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-001",
+    "query": "राजस्थान में पीएम-किसान के तहत कुल कितने किसानों को लाभ मिला?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-001",
+    "query": "राजस्थानमध्ये पीएम-किसान योजनेचा लाभ एकूण किती शेतकऱ्यांना मिळाला?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-001",
+    "query": "রাজস্থানে পিএম-কিষাণ প্রকল্পে মোট কতজন কৃষক সুবিধা পেয়েছেন?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-001",
+    "query": "ராஜஸ்தானில் பிஎம்-கிசான் திட்டத்தின் கீழ் பயனடைந்த மொத்த விவசாயிகள் எத்தனை பேர்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-001",
+    "query": "రాజస్థాన్‌లో పీఎం-కిసాన్ పథకం ద్వారా మొత్తం ఎంతమంది రైతులకు లబ్ధి చేకూరింది?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_pm_kisan_disbursement",
+    "gold_sql": "SELECT SUM(farmer_beneficiaries) AS total_farmers FROM ndap_pm_kisan_disbursement WHERE state_name = 'RAJASTHAN';",
+    "difficulty": "easy",
+    "target_columns": [
+      "farmer_beneficiaries",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-002",
+    "query": "What was the total production of soybean in Gujarat in tonnes?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-002",
+    "query": "Gujarat me soybean crop ka total production kitna hua?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-002",
+    "query": "गुजरात में सोयाबीन का कुल उत्पादन कितने टन हुआ?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-002",
+    "query": "गुजरातमध्ये सोयाबीनचे एकूण उत्पादन किती टन झाले?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-002",
+    "query": "গুজরাটে সয়াবিনের মোট উৎপাদন কত মেট্রিক টন হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-002",
+    "query": "குஜராத்தில் சோயாபீனின் மொத்த உற்பத்தி எத்தனை டன்கள்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-002",
+    "query": "గుజరాత్‌లో సోయాబీన్ మొత్తం ఉత్పత్తి ఎన్ని టన్నులు?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(production_tonnes) AS total_production FROM ndap_crop_production_census WHERE state_name = 'GUJARAT' AND crop_name = 'SOYBEAN';",
+    "difficulty": "medium",
+    "target_columns": [
+      "production_tonnes",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-003",
+    "query": "What is the total cultivation area of wheat in Punjab in hectares?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-003",
+    "query": "Punjab me wheat cultivation ka total area kitne hectares hai?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-003",
+    "query": "पंजाब में गेहूं की खेती का कुल क्षेत्रफल कितने हेक्टेयर है?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-003",
+    "query": "पंजाबमध्ये गव्हाची लागवड किती हेक्टर क्षेत्रावर झाली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-003",
+    "query": "পাঞ্জাবে গমের মোট চাষের এলাকা কত হেক্টর?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-003",
+    "query": "பஞ்சாபில் கோதுமை சாகுபடி பரப்பளவு எத்தனை ஹெக்டேர்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-003",
+    "query": "పంజాబ్‌లో గోధుమ సాగు విస్తీర్ణం ఎన్ని హెక్టార్లు?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_crop_production_census",
+    "gold_sql": "SELECT SUM(area_hectares) AS total_area FROM ndap_crop_production_census WHERE state_name = 'PUNJAB' AND crop_name = 'WHEAT';",
+    "difficulty": "medium",
+    "target_columns": [
+      "area_hectares",
+      "crop_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-004",
+    "query": "What were the total sales of DAP fertilizer in Uttar Pradesh in tonnes?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-004",
+    "query": "Uttar Pradesh me DAP fertilizer ki total sales kitni tonnes hui?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-004",
+    "query": "उत्तर प्रदेश में डीएपी खाद की कुल बिक्री कितने टन हुई?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-004",
+    "query": "उत्तर प्रदेशात डीएपी खताची एकूण विक्री किती टन झाली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-004",
+    "query": "উত্তর প্রদেশে ডিএপি সারের মোট বিক্রি কত মেট্রিক টন?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-004",
+    "query": "உத்தரபிரதேசத்தில் டிஏபி உரத்தின் மொத்த விற்பனை எத்தனை டன்கள்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-004",
+    "query": "ఉత్తరప్రదేశ్‌లో డీఏపీ ఎరువుల మొత్తం అమ్మకాలు ఎన్ని టన్నులు?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_fertilizer_distribution",
+    "gold_sql": "SELECT SUM(sales_tonnes) AS total_sales FROM ndap_fertilizer_distribution WHERE state_name = 'UTTAR PRADESH' AND fertilizer_type = 'DAP';",
+    "difficulty": "medium",
+    "target_columns": [
+      "sales_tonnes",
+      "fertilizer_type",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-005",
+    "query": "What was the average mandi price of wheat in Maharashtra?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-005",
+    "query": "Maharashtra ki mandis me wheat ka average price kya raha?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-005",
+    "query": "महाराष्ट्र की मंडियों में गेहूं का औसत मॉडल भाव क्या रहा?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-005",
+    "query": "महाराष्ट्रातील बाजार समित्यांमध्ये गव्हाचा सरासरी भाव काय होता?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-005",
+    "query": "মহারাষ্ট্রের বাজারগুলিতে গমের গড় মূল্য কত ছিল?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-005",
+    "query": "மகாராஷ்டிரா சந்தைகளில் கோதுமையின் சராசரி மாதிரி விலை என்ன?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-005",
+    "query": "మహారాష్ట్ర మార్కెట్లలో గోధుమల సగటు ధర ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_mandi_commodity_prices",
+    "gold_sql": "SELECT AVG(modal_price_inr) AS avg_price FROM ndap_mandi_commodity_prices WHERE state_name = 'MAHARASHTRA' AND commodity = 'Wheat';",
+    "difficulty": "medium",
+    "target_columns": [
+      "modal_price_inr",
+      "commodity",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-006",
+    "query": "How many total mandays were generated under MGNREGA in Bihar?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-006",
+    "query": "Bihar me MGNREGA scheme me total kitne mandays generate hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-006",
+    "query": "बिहार में मनरेगा योजना के तहत कुल कितने कार्य दिवस उत्पन्न किए गए?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-006",
+    "query": "बिहारमध्ये मनरेगा अंतर्गत एकूण किती मनुष्य दिन रोजगार निर्माण झाला?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-006",
+    "query": "বিহারে ১০০ দিনের কাজের প্রকল্পে মোট কত কর্মদিবস তৈরি হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-006",
+    "query": "பீகாரில் மகாத்மா காந்தி ஊரக வேலை திட்டத்தில் உருவாக்கப்பட்ட மொத்த மனித வேலை நாட்கள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-006",
+    "query": "బీహార్‌లో ఉపాధి హామీ పథకం కింద ఎన్ని పనిదినాలు కల్పించబడ్డాయి?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Rural Development",
+    "target_table": "mgnrega_state_annual_employment",
+    "gold_sql": "SELECT SUM(total_mandays_generated) AS total_mandays FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_mandays_generated",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-007",
+    "query": "How many rural houses were completed under PMAY in Odisha?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-007",
+    "query": "Odisha me PMAY Gramin ke under total kitne houses complete hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-007",
+    "query": "ओडिशा में पीएम आवास योजना ग्रामीण के तहत कुल कितने घर पूरे हुए?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-007",
+    "query": "ओडिशामध्ये पीएम आवास ग्रामीण अंतर्गत एकूण किती घरे पूर्ण झाली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-007",
+    "query": "ওড়িশায় গ্রামীণ আবাস যোজনায় মোট কতগুলি বাড়ি তৈরি সম্পন্ন হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-007",
+    "query": "ஒடிசாவில் பிரதம மந்திரி ஊரக குடியிருப்பு திட்டத்தில் கட்டி முடிக்கப்பட்ட வீடுகள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-007",
+    "query": "ఒడిశాలో పీఎంఏవై గ్రామీణ పథకం కింద పూర్తయిన మొత్తం ఇళ్ళు ఎన్ని?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmay_rural_housing",
+    "gold_sql": "SELECT SUM(houses_completed) AS total_houses FROM ndap_pmay_rural_housing WHERE state_name = 'ODISHA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "houses_completed",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-008",
+    "query": "What is the total length of rural roads completed in Madhya Pradesh under PMGSY?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-008",
+    "query": "Madhya Pradesh me PMGSY ke under total kitne km road construct hui?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-008",
+    "query": "मध्य प्रदेश में पीएमजीएसवाई के तहत कुल कितने किलोमीटर सड़क का निर्माण हुआ?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-008",
+    "query": "मध्य प्रदेशात पीएमजीएसवाय अंतर्गत एकूण किती किलोमीटर रस्त्यांचे बांधकाम पूर्ण झाले?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-008",
+    "query": "মধ্যপ্রদেশে গ্রামীণ সড়ক যোজনায় মোট কত কিলোমিটার রাস্তা তৈরি হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-008",
+    "query": "மத்தியப் பிரதேசத்தில் கிராமப்புற சாலை திட்டத்தில் முடிக்கப்பட்ட மொத்த சாலை நீளம் எத்தனை கி.மீ?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-008",
+    "query": "మధ్యప్రదేశ్‌లో గ్రామీణ రహదారుల పథకం కింద నిర్మించిన మొత్తం రోడ్ల పొడవు ఎన్ని కి.మీ?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Rural Development",
+    "target_table": "ndap_pmgsy_rural_roads",
+    "gold_sql": "SELECT SUM(completed_road_length_km) AS total_length_km FROM ndap_pmgsy_rural_roads WHERE state_name = 'MADHYA PRADESH';",
+    "difficulty": "easy",
+    "target_columns": [
+      "completed_road_length_km",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-009",
+    "query": "How many rural households have tap water connections under Jal Jeevan Mission in Telangana?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-009",
+    "query": "Telangana me Jal Jeevan Mission ke under kitne households ko tap water connection mila?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-009",
+    "query": "तेलंगाना में जल जीवन मिशन के तहत कुल कितने ग्रामीण परिवारों को नल जल कनेक्शन मिला?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-009",
+    "query": "तेलंगणामध्ये जल जीवन मिशन अंतर्गत एकूण किती कुटुंबांना नळजोडणी मिळाली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-009",
+    "query": "তেলেঙ্গানায় জল জীবন মিশনে মোট কতগুলি গ্রামীণ পরিবারে ট্যাপ সংযোগ রয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-009",
+    "query": "தெலுங்கானாவில் ஜல் ஜீவன் திட்டத்தின் கீழ் குழாய் குடிநீர் இணைப்பு பெற்ற மொத்த கிராமப்புற குடும்பங்கள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-009",
+    "query": "తెలంగాణలో జల్ జీవన్ మిషన్ కింద కుళాయి కనెక్షన్లు పొందిన మొత్తం గ్రామీణ గృహాలు ఎన్ని?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Water & Sanitation",
+    "target_table": "ndap_jal_jeevan_tap_water",
+    "gold_sql": "SELECT SUM(households_with_tap_connection) AS total_connections FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "households_with_tap_connection",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-010",
+    "query": "Which district in Bihar recorded the lowest female literacy rate?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-010",
+    "query": "Bihar ke kis district me female literacy rate sabse kam record hua?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-010",
+    "query": "बिहार के किस जिले में सबसे कम महिला साक्षरता दर दर्ज की गई?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-010",
+    "query": "बिहारमधील कोणत्या जिल्ह्यात महिला साक्षरतेचे प्रमाण सर्वात कमी नोंदवले गेले?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-010",
+    "query": "বিহারের কোন জেলায় মহিলা সাক্ষরতার হার সবচেয়ে কম রেকর্ড করা হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-010",
+    "query": "பீகாரில் பெண் கல்வியறிவு விகிதம் மிகக் குறைவாக பதிவான மாவட்டம் எது?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-010",
+    "query": "బీహార్‌లో మహిళా అక్షరాస్యత రేటు అత్యల్పంగా నమోదైన జిల్లా ఏది?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Education",
+    "target_table": "ndap_education_stats",
+    "gold_sql": "SELECT district_name, female_literacy_rate FROM ndap_education_stats WHERE state_name = 'BIHAR' ORDER BY female_literacy_rate ASC LIMIT 1;",
+    "difficulty": "hard",
+    "target_columns": [
+      "female_literacy_rate",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-011",
+    "query": "How many schools in Kerala have functional computer labs?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-011",
+    "query": "Kerala me computer lab facility wale total kitne schools hain?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-011",
+    "query": "केरल में कंप्यूटर लैब की सुविधा वाले कुल कितने स्कूल हैं?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-011",
+    "query": "केरळमध्ये संगणक प्रयोगशाळा सुविधा असलेल्या एकूण शाळांची संख्या किती?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-011",
+    "query": "কেরালাতে কম্পিউটার ল্যাব সুবিধা থাকা স্কুলের মোট সংখ্যা কত?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-011",
+    "query": "கேரளாவில் கணினி ஆய்வக வசதி கொண்ட மொத்த பள்ளிகள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-011",
+    "query": "కేరళలో కంప్యూటర్ ల్యాబ్ సదుపాయం ఉన్న పాఠశాలల మొత్తం సంఖ్య ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_computer_labs) AS total_schools FROM ndap_school_infrastructure WHERE state_name = 'KERALA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "schools_with_computer_labs",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-012",
+    "query": "How many schools in Pune district have electricity facility?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-012",
+    "query": "Pune district me electricity facility wale schools kitne hain?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-012",
+    "query": "पुणे जिले में बिजली सुविधा वाले स्कूलों की संख्या कितनी है?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-012",
+    "query": "पुणे जिल्ह्यातील वीज सुविधा असलेल्या शाळांची संख्या किती आहे?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-012",
+    "query": "পুনে জেলায় বিদ্যুৎ সংযোগ থাকা স্কুলের সংখ্যা কত?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-012",
+    "query": "புனே மாவட்டத்தில் மின்சார வசதி கொண்ட பள்ளிகள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-012",
+    "query": "పుణే జిల్లాలో విద్యుత్ సదుపాయం ఉన్న పాఠశాలల సంఖ్య ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Education",
+    "target_table": "ndap_school_infrastructure",
+    "gold_sql": "SELECT SUM(schools_with_electricity) AS total_electricity_schools FROM ndap_school_infrastructure WHERE state_name = 'MAHARASHTRA' AND district_name = 'Pune';",
+    "difficulty": "medium",
+    "target_columns": [
+      "schools_with_electricity",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-013",
+    "query": "What is the total number of college faculty members in Tamil Nadu?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-013",
+    "query": "Tamil Nadu me higher education me total kitne faculty members hain?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-013",
+    "query": "तमिलनाडु में उच्च शिक्षा संस्थानों में कुल कितने शिक्षक कार्यरत हैं?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-013",
+    "query": "तामिळनाडूमध्ये उच्च शिक्षण संस्थांमध्ये एकूण किती प्राध्यापक कार्यरत आहेत?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-013",
+    "query": "তামিলনাড়ুতে উচ্চশিক্ষা প্রতিষ্ঠানগুলিতে মোট কতজন শিক্ষক রয়েছেন?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-013",
+    "query": "தமிழ்நாட்டில் உள்ள கல்லூரிகளில் பணிபுரியும் மொத்த பேராசிரியர்களின் எண்ணிக்கை என்ன?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-013",
+    "query": "తమిళనాడులోని కళాశాలల్లో మొత్తం ఎంతమంది అధ్యాపకులు పనిచేస్తున్నారు?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Education",
+    "target_table": "ndap_higher_education_aishe",
+    "gold_sql": "SELECT SUM(total_faculty_count) AS total_faculty FROM ndap_higher_education_aishe WHERE state_name = 'TAMIL NADU';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_faculty_count",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-014",
+    "query": "How many primary school children benefited from the Midday Meal Scheme in West Bengal?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-014",
+    "query": "West Bengal me Midday Meal scheme se kitne primary school students ko labh mila?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-014",
+    "query": "पश्चिम बंगाल में मध्याह्न भोजन योजना से लाभान्वित प्राथमिक छात्रों की कुल संख्या कितनी है?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-014",
+    "query": "पश्चिम बंगालमध्ये माध्यान्ह भोजन योजनेचा लाभ मिळालेल्या प्राथमिक विद्यार्थ्यांची संख्या किती?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-014",
+    "query": "পশ্চিমবঙ্গে মিড ডে মিল প্রকল্পের সুবিধাভোগী প্রাথমিক শিক্ষার্থীদের সংখ্যা কত?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-014",
+    "query": "மேற்கு வங்கத்தில் மதிய உணவுத் திட்டத்தால் பயனடைந்த தொடக்கப்பள்ளி மாணவர்கள் எத்தனை பேர்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-014",
+    "query": "పశ్చిమ బెంగాల్‌లో మధ్యాహ్న భోజన పథకం ద్వారా ప్రయోజనం పొందిన ప్రాథమిక విద్యార్థులు ఎంతమంది?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Education & Nutrition",
+    "target_table": "ndap_midday_meal_scheme",
+    "gold_sql": "SELECT SUM(primary_students_benefited) AS total_students FROM ndap_midday_meal_scheme WHERE state_name = 'WEST BENGAL';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_students_benefited",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-015",
+    "query": "How many Ayushman Bharat PM-JAY cards were issued in Assam?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-015",
+    "query": "Assam me Ayushman Bharat PM-JAY ke total kitne cards issue hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-015",
+    "query": "असम में आयुष्मान भारत पीएम-जय के तहत कुल कितने कार्ड जारी किए गए?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-015",
+    "query": "आसाममध्ये आयुष्मान भारत योजनेअंतर्गत एकूण किती कार्ड्स जारी करण्यात आली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-015",
+    "query": "আসামে আয়ুষ্মান ভারত প্রকল্পে মোট কতগুলি কার্ড ইস্যু করা হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-015",
+    "query": "அசாமில் ஆயுஷ்மான் பாரத் திட்டத்தின் கீழ் வழங்கப்பட்ட மொத்த அட்டைகள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-015",
+    "query": "అస్సాంలో ఆయుష్మాన్ భారత్ పథకం కింద జారీ చేసిన మొత్తం కార్డుల సంఖ్య ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Healthcare",
+    "target_table": "ndap_ayushman_bharat_pmjay",
+    "gold_sql": "SELECT SUM(cards_issued) AS total_cards FROM ndap_ayushman_bharat_pmjay WHERE state_name = 'ASSAM';",
+    "difficulty": "easy",
+    "target_columns": [
+      "cards_issued",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-016",
+    "query": "How many primary health centres (PHCs) are operational in Haryana?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-016",
+    "query": "Haryana me total kitne primary health centres (PHC) chal rahe hain?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-016",
+    "query": "हरियाणा में कुल कितने प्राथमिक स्वास्थ्य केंद्र संचालित हैं?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-016",
+    "query": "हरियाणामध्ये एकूण किती प्राथमिक आरोग्य केंद्रे कार्यरत आहेत?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-016",
+    "query": "হরিয়ানায় মোট কতগুলি প্রাথমিক স্বাস্থ্য কেন্দ্র চালু রয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-016",
+    "query": "ஹரியானாவில் செயல்படும் மொத்த ஆரம்ப சுகாதார நிலையங்கள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-016",
+    "query": "హర్యానాలో పనిచేస్తున్న మొత్తం ప్రాథమిక ఆరోగ్య కేంద్రాల సంఖ్య ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Healthcare",
+    "target_table": "ndap_rural_health_infrastructure",
+    "gold_sql": "SELECT SUM(primary_health_centres_phc) AS total_phc FROM ndap_rural_health_infrastructure WHERE state_name = 'HARYANA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "primary_health_centres_phc",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-017",
+    "query": "What is the total number of TB patients notified in Karnataka?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-017",
+    "query": "Karnataka me Nikshay portal par total kitne TB patients notify hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-017",
+    "query": "कर्नाटक में निक्षय पोर्टल पर कुल कितने टीबी के मरीज अधिसूचित किए गए?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-017",
+    "query": "कर्नाटकात एकूण किती क्षयरोग रुग्णांची नोंद करण्यात आली?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-017",
+    "query": "কর্ণাটকে মোট কতজন যক্ষ্মা রোগী সরকারিভাবে নথিভুক্ত হয়েছেন?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-017",
+    "query": "கர்நாடகாவில் பதிவு செய்யப்பட்ட மொத்த காசநோய் நோயாளிகள் எத்தனை பேர்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-017",
+    "query": "కర్ణాటకలో నోటిఫై చేయబడిన మొత్తం టీబీ రోగుల సంఖ్య ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Healthcare",
+    "target_table": "ndap_national_tuberculosis_portal",
+    "gold_sql": "SELECT SUM(total_notified_patients) AS total_tb_cases FROM ndap_national_tuberculosis_portal WHERE state_name = 'KARNATAKA';",
+    "difficulty": "easy",
+    "target_columns": [
+      "total_notified_patients",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-018",
+    "query": "What is the average percentage of institutional deliveries in Andhra Pradesh according to NFHS-5?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-018",
+    "query": "NFHS-5 ke according Andhra Pradesh me institutional delivery ka average percentage kya hai?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-018",
+    "query": "एनएफएचएस-5 के अनुसार आंध्र प्रदेश में संस्थागत प्रसव का औसत प्रतिशत क्या है?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-018",
+    "query": "एनएफएचएस-५ नुसार आंध्र प्रदेशात संस्थात्मक प्रसूतीचे सरासरी प्रमाण किती टक्के आहे?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-018",
+    "query": "এনএফএইচএস-৫ অনুসারে অন্ধ্রপ্রদেশে প্রাতিষ্ঠানিক প্রসবের গড় হার কত শতাংশ?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-018",
+    "query": "தேசிய குடும்ப சுகாதார ஆய்வின்படி ஆந்திராவில் மருத்துவமனைகளில் நிகழ்ந்த பிரசவங்களின் சராசரி சதவீதம் என்ன?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-018",
+    "query": "ఎన్ఎఫ్ హెచ్ ఎస్-5 ప్రకారం ఆంధ్రప్రదేశ్‌లో సంస్థాగత ప్రసవాల సగటు శాతం ఎంత?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Healthcare",
+    "target_table": "ndap_nfhs5_health_indicators",
+    "gold_sql": "SELECT AVG(institutional_births_pct) AS avg_institutional_births FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+    "difficulty": "medium",
+    "target_columns": [
+      "institutional_births_pct",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-019",
+    "query": "How many soil samples were tested in Coimbatore district under Soil Health Card Scheme?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-019",
+    "query": "Coimbatore district me Soil Health Card yojana ke under kitne soil samples test hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-019",
+    "query": "कोयंबटूर जिले में मृदा स्वास्थ्य कार्ड योजना के तहत कितने मिट्टी के नमूनों की जांच की गई?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-019",
+    "query": "कोईम्बतूर जिल्ह्यात मृदा आरोग्य पत्रिका अंतर्गत मातीचे किती नमुने तपासण्यात आले?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-019",
+    "query": "কোয়েম্বাটোর জেলায় সয়েল হেলথ কার্ড প্রকল্পের অধীনে কতগুলি মাটির নমুনা পরীক্ষা করা হয়েছে?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-019",
+    "query": "கோயம்புத்தூர் மாவட்டத்தில் ஆய்வு செய்யப்பட்ட மண் மாதிரிகள் எத்தனை?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-019",
+    "query": "కోయంబత్తూర్ జిల్లాలో సాయిల్ హెల్త్ కార్డ్ పథకం కింద ఎన్ని నేల నమూనాలను పరీక్షించారు?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Agriculture",
+    "target_table": "ndap_soil_health_records",
+    "gold_sql": "SELECT SUM(samples_tested) AS total_samples FROM ndap_soil_health_records WHERE state_name = 'TAMIL NADU' AND district_name = 'Coimbatore';",
+    "difficulty": "medium",
+    "target_columns": [
+      "samples_tested",
+      "district_name",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-en-020",
+    "query": "How many candidates received skill certification under vocational training in Jharkhand?",
+    "language": "en",
+    "script": "Latin",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-en-020",
+    "query": "Jharkhand me vocational skill training ke under total kitne candidates certified hue?",
+    "language": "hi-en",
+    "script": "Latin",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-hi-020",
+    "query": "झारखंड में व्यावसायिक कौशल प्रशिक्षण के तहत कुल कितने उम्मीदवार प्रमाणित हुए?",
+    "language": "hi",
+    "script": "Devanagari",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-mr-020",
+    "query": "झारखंडमध्ये व्यावसायिक कौशल्य प्रशिक्षणांतर्गत एकूण किती उमेदवार प्रमाणित झाले?",
+    "language": "mr",
+    "script": "Devanagari",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-bn-020",
+    "query": "ঝাড়খণ্ডে বৃত্তিমূলক দক্ষতা প্রশিক্ষণের অধীনে মোট কতজন প্রার্থী সনদপ্রাপ্ত হয়েছেন?",
+    "language": "bn",
+    "script": "Bengali",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-ta-020",
+    "query": "ஜார்கண்டில் தொழிற்கல்வி திறன் பயிற்சியில் தேர்ச்சி பெற்று சான்றிதழ் பெற்றவர்கள் எத்தனை பேர்?",
+    "language": "ta",
+    "script": "Tamil",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  },
+  {
+    "query_id": "unseen-te-020",
+    "query": "జార్ఖండ్‌లో వృత్తి విద్యా నైపుణ్య శిక్షణ కింద సర్టిఫికేట్ పొందిన మొత్తం అభ్యర్థులు ఎంతమంది?",
+    "language": "te",
+    "script": "Telugu",
+    "domain": "Skill Development",
+    "target_table": "ndap_vocational_skill_training",
+    "gold_sql": "SELECT SUM(certified_candidates) AS total_certified FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+    "difficulty": "easy",
+    "target_columns": [
+      "certified_candidates",
+      "state_name"
+    ]
+  }
+]

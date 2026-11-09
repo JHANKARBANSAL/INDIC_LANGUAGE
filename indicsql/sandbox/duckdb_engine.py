@@ -42,7 +42,7 @@ class DuckDBSandbox:
 
             ingest_and_export_all_ndap_databases(parquet_dir=self.parquet_dir)
 
-        parquet_files = list(self.parquet_dir.glob("*.parquet"))
+        parquet_files = list(self.parquet_dir.glob("*.parquet")) + list(self.parquet_dir.glob("*/*.parquet"))
         if not parquet_files:
             raise FileNotFoundError(
                 f"No NDAP Parquet stores found in {self.parquet_dir}. "
