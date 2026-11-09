@@ -7,7 +7,9 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
+from pathlib import Path
 
 from indicsql import __version__
 from indicsql.graph.workflow import execute_indicsql_pipeline
@@ -49,12 +51,19 @@ class QueryResponse(BaseModel):
 
 
 @app.get("/")
-def root():
+@app.get("/ui")
+@app.get("/app")
+def serve_frontend_ui():
+    """Serves the interactive frontend web application matching the design mockup."""
+    frontend_path = Path(__file__).resolve().parent.parent.parent / "frontend" / "index.html"
+    if frontend_path.exists():
+        return FileResponse(frontend_path)
     return {
         "service": "IndicSQL Agent Swarm",
         "version": __version__,
         "status": "healthy",
         "supported_languages": ["hi", "bn", "ta", "te", "mr", "hi-en", "en"],
+        "ui_url": "/ui",
     }
 
 
