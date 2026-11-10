@@ -45,6 +45,7 @@ class IndicSQLState(TypedDict, total=False):
 
     # 3. SQL Synthesis & AST Verification
     generated_sql: str
+    raw_stochastic_sql: Optional[str]
     syntax_valid: bool
 
     # 4. Sandbox Execution & Self-Healing Reflection

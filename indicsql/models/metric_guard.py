@@ -39,6 +39,8 @@ class MetricIntent:
     is_vocational_certified: bool = False
     is_vocational_placed: bool = False
     has_grouping_intent: bool = False
+    limit_n: Optional[int] = None
+    is_ranking_query: bool = False
 
 
 # Known percentage/rate indicators across NDAP schemas
@@ -126,7 +128,7 @@ def extract_metric_intent(query: str) -> MetricIntent:
 
     # 4. Highest / Maximum Intent
     highest_patterns = [
-        r'\b(?:highest|maximum|most|max|peak|greatest)\b',
+        r'\b(?:highest|maximum|most|max|peak|greatest|top|best)\b',
         r'सबसे\s*ज्यादा', r'अधिकतम', r'सर्वाधिक',
         r'सर्वात\s*जास्त', r'कमाल', r'जास्त',
         r'সবচেয়ে\s*বেশি', r'সর্বাধিক',
@@ -135,6 +137,20 @@ def extract_metric_intent(query: str) -> MetricIntent:
     ]
     if any(re.search(p, clean_q, re.IGNORECASE) for p in highest_patterns):
         intent.is_highest = True
+
+    # 4b. Top-N or Bottom-N Ranking Intent
+    top_n_match = re.search(r'\b(?:top|first|best|शीर्ष|सर्वोच्च|अव्वल|முன்னணி|అగ్ర)\s*(\d+)\b', clean_q, re.IGNORECASE)
+    bottom_n_match = re.search(r'\b(?:bottom|lowest|least)\s*(\d+)\b', clean_q, re.IGNORECASE)
+    if top_n_match:
+        intent.is_highest = True
+        intent.limit_n = int(top_n_match.group(1))
+        intent.is_ranking_query = True
+        intent.has_grouping_intent = True
+    elif bottom_n_match:
+        intent.is_lowest = True
+        intent.limit_n = int(bottom_n_match.group(1))
+        intent.is_ranking_query = True
+        intent.has_grouping_intent = True
 
     # 5. Soil Health Disambiguation: Samples Tested vs Cards Issued
     soil_samples_patterns = [
@@ -181,7 +197,7 @@ def extract_metric_intent(query: str) -> MetricIntent:
 
     # 7. Grouping Intent
     grouping_patterns = [
-        r'\b(?:each|every|per|breakdown|by\s+state|by\s+district|by\s+year|state-wise|district-wise|year-wise|wise)\b',
+        r'\b(?:each|every|per|breakdown|by\s+state|by\s+district|by\s+year|state-wise|district-wise|year-wise|wise|top\s+\d+|bottom\s+\d+|districts\s+in|states\s+in)\b',
         r'वार', r'जिलेवार', r'राज्यवार', r'सालवार', r'प्रत्येक', r'हर\s*एक',
         r'जिल्हानिहाय', r'राज्यनिहाय',
         r'প্রতিটি', r'অনুসারে',
@@ -337,6 +353,55 @@ def sanitize_metric_aggregations(
                 modified = True
 
     # -------------------------------------------------------------------------
+    # 3b. Top-N / Bottom-N Ranking Queries (e.g. "list top 5 districts in UP")
+    # -------------------------------------------------------------------------
+    if intent.is_ranking_query and intent.limit_n:
+        dim_col = "district_name" if any(w in query.lower() for w in ["district", "districts", "जिले", "जिल्हा", "மாவட்டம்", "జిల్లా", "জেলা"]) else None
+        if not dim_col and any(c.name.lower() == "district_name" for c in tree.find_all(exp.Column)):
+            dim_col = "district_name"
+        elif not dim_col and any(w in query.lower() for w in ["state", "states", "राज्य"]):
+            dim_col = "state_name"
+        if not dim_col and table_name in ["ndap_pm_kisan_disbursement", "ndap_education_stats", "ndap_soil_health_records", "ndap_mandi_commodity_prices"]:
+            dim_col = "district_name"
+
+        if dim_col:
+            measure_col = None
+            if table_name == "ndap_pm_kisan_disbursement":
+                measure_col = "amount_inr" if any(w in query.lower() for w in ["amount", "disbursement", "राशि", "पैसे", "డబ్బు", "பணம்"]) else "farmer_beneficiaries"
+            elif table_name == "ndap_education_stats":
+                if any(w in query.lower() for w in ["literacy", "साक्षरता", "கல்வியறிவு", "అక్షరాస్యత", "সাক্ষরতা", "साक्षर"]):
+                    measure_col = "male_literacy_rate" if any(w in query.lower() for w in ["male", "पुरुष", "ஆண்", "పురుష"]) else "female_literacy_rate"
+                elif any(w in query.lower() for w in ["female", "महिला", "பெண்", "స్త్రీ"]):
+                    measure_col = "female_literacy_rate"
+                else:
+                    measure_col = "student_count"
+            else:
+                num_cols = [c.name for c in tree.find_all(exp.Column) if c.name.lower() not in {dim_col, "state_name", "reporting_year", "financial_year", "year"}]
+                if num_cols:
+                    measure_col = num_cols[0]
+                else:
+                    agg_node = next((n for n in tree.find_all((exp.Sum, exp.Avg, exp.Max, exp.Min)) if isinstance(n.this, exp.Column)), None)
+                    if agg_node:
+                        measure_col = agg_node.this.name
+
+            if measure_col:
+                is_rate = measure_col in PERCENTAGE_RATE_COLUMNS or measure_col.endswith("_pct") or measure_col.endswith("_rate")
+                agg_cls = exp.Avg if is_rate else exp.Sum
+                alias_name = f"avg_{measure_col}" if is_rate else f"total_{measure_col}"
+                new_selects = [
+                    exp.Column(this=exp.to_identifier(dim_col)),
+                    exp.Alias(this=agg_cls(this=exp.Column(this=exp.to_identifier(measure_col))), alias=exp.to_identifier(alias_name))
+                ]
+                tree.set("expressions", new_selects)
+                tree.set("group", exp.Group(expressions=[exp.Column(this=exp.to_identifier(dim_col))]))
+                order_dir = "DESC" if intent.is_highest else "ASC"
+                new_order = sqlglot.parse_one(f"SELECT 1 ORDER BY {alias_name} {order_dir}").args["order"]
+                tree.set("order", new_order)
+                tree.set("limit", exp.Limit(expression=exp.Literal.number(intent.limit_n)))
+                logger.info("MetricGuard: Transformed query to %s ranking by %s %s LIMIT %d", dim_col, measure_col, order_dir, intent.limit_n)
+                modified = True
+
+    # -------------------------------------------------------------------------
     # 4. Aggregation Function Alignment: Average vs Total vs Peak
     # -------------------------------------------------------------------------
     # Scenario A: Explicit Average Intent
@@ -374,7 +439,7 @@ def sanitize_metric_aggregations(
     # If the user did NOT request grouping (no 'by district', 'each', etc.),
     # and the query is a scalar aggregate, prune non-aggregate dimension projections,
     # drop unrequested GROUP BY, and drop scalar ORDER BY/LIMIT.
-    if not intent.has_grouping_intent and not intent.is_lowest and not intent.is_highest:
+    if not intent.has_grouping_intent and not intent.is_lowest and not intent.is_highest and not intent.is_ranking_query:
         has_agg = any(isinstance(c, (exp.Sum, exp.Avg, exp.Count, exp.Min, exp.Max)) for c in tree.find_all(exp.Expression))
         if has_agg and tree.args.get("group"):
             kept_selects = [

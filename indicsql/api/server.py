@@ -45,6 +45,7 @@ class QueryResponse(BaseModel):
     detected_language: str
     detected_script: str
     generated_sql: str
+    raw_stochastic_sql: Optional[str] = None
     verbalized_response: str
     execution_result: Optional[Dict[str, Any]] = None
     audit_trace: List[Dict[str, Any]] = Field(default_factory=list)
@@ -99,6 +100,7 @@ def run_query(request: QueryRequest):
         detected_language=result_state.get("detected_lang", "unknown"),
         detected_script=result_state.get("detected_script", "unknown"),
         generated_sql=result_state.get("generated_sql", ""),
+        raw_stochastic_sql=result_state.get("raw_stochastic_sql", ""),
         verbalized_response=result_state.get("verbalized_response", ""),
         execution_result=result_state.get("execution_result"),
         audit_trace=result_state.get("audit_trace", []),

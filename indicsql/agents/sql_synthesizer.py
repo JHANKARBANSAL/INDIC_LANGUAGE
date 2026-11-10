@@ -198,6 +198,20 @@ def _build_dynamic_fallback(
         and not c.endswith("_id")
     ]
 
+    # Check for top N / bottom N ranking
+    top_match = re.search(r'\b(?:top|first|best|शीर्ष|सर्वोच्च)\s*(\d+)\b', lower)
+    bottom_match = re.search(r'\b(?:bottom|lowest|least)\s*(\d+)\b', lower)
+    if (top_match or bottom_match) and "district_name" in cols and numeric_cols:
+        limit_n = int(top_match.group(1)) if top_match else int(bottom_match.group(1))
+        order_dir = "DESC" if top_match else "ASC"
+        target_measure = "farmer_beneficiaries" if table_name == "ndap_pm_kisan_disbursement" and "amount" not in lower else (
+            next((c for c in (matched_cols or []) if c in numeric_cols), numeric_cols[0])
+        )
+        is_avg = "pct" in target_measure or "_rate" in target_measure
+        func = "AVG" if is_avg else "SUM"
+        alias = f"avg_{target_measure}" if is_avg else f"total_{target_measure}"
+        return f"SELECT district_name, {func}({target_measure}) AS {alias} FROM {table_name}{where_str} GROUP BY district_name ORDER BY {alias} {order_dir} LIMIT {limit_n};"
+
     # Check for lowest / highest superlative in query with script boundaries
     lower = raw_query.lower()
     is_min = any(re.search(r'\b' + re.escape(w) + r'\b', lower) for w in ['lowest', 'min', 'minimum', 'sabse kam']) or any(
@@ -341,6 +355,7 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
     # Final defense-in-depth: Ensure unrequested temporal filters are pruned and metrics are aligned
     raw_query = state.get("raw_query", "")
     target_table = state.get("target_database")
+    raw_stochastic_draft = best_sql
     best_sql = prune_unrequested_temporal_filters(best_sql, raw_query, table_name=target_table)
     best_sql = sanitize_metric_aggregations(best_sql, raw_query, table_name=target_table)
 
@@ -349,6 +364,7 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
 
     return {
         "generated_sql": best_sql,
+        "raw_stochastic_sql": raw_stochastic_draft,
         "syntax_valid": True,
         "grounded_entities": extract_canonical_entities(raw_query),
         "audit_trace": current_trace,

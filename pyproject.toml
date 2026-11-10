@@ -93,3 +93,8 @@ ignore = ["E501"]
 dev = [
     "ruff>=0.16.8",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["IndicSQL_Repo", "build", "dist", ".git", ".gemini"]
+
