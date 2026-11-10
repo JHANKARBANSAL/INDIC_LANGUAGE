@@ -188,11 +188,11 @@ def generate_fig_5_1_er_diagram():
     ax.axis("off")
 
     tables = [
-        {"name": "dim_geography\n-------------\nPK geography_key\nstate_id\nstate_name\ndistrict_id\ndistrict_name", "pos": (0.05, 0.55), "w": 0.22, "h": 0.36, "fc": "#eff6ff", "ec": "#2563eb"},
-        {"name": "dim_time\n-------------\nPK time_key\ncalendar_year\nfinancial_year\nmonth_number\nquarter", "pos": (0.73, 0.55), "w": 0.22, "h": 0.36, "fc": "#eff6ff", "ec": "#2563eb"},
-        {"name": "fact_crop_production\n--------------------\nPK fact_crop_id\nFK geography_key\nFK time_key\ncrop_name\narea_hectares\nproduction_tonnes\nyield_kg_per_ha", "pos": (0.38, 0.6), "w": 0.24, "h": 0.35, "fc": "#ecfdf5", "ec": "#059669"},
-        {"name": "fact_pm_kisan_disbursement\n--------------------------\nPK fact_kisan_id\nFK geography_key\nFK time_key\nfarmer_beneficiaries\namount_inr\ninstallment_number", "pos": (0.15, 0.08), "w": 0.28, "h": 0.35, "fc": "#fefce8", "ec": "#ca8a04"},
-        {"name": "fact_education_stats\n--------------------\nPK fact_edu_id\nFK geography_key\nFK time_key\nmale_literacy_rate\nfemale_literacy_rate\nstudent_count", "pos": (0.57, 0.08), "w": 0.28, "h": 0.35, "fc": "#fdf2f8", "ec": "#db2777"},
+        {"name": "dim_geography\n-------------\nPK geo_id\nstate_name\ndistrict_name\nzone", "pos": (0.05, 0.55), "w": 0.22, "h": 0.36, "fc": "#eff6ff", "ec": "#2563eb"},
+        {"name": "dim_time\n-------------\nPK time_id\nfinancial_year\ncalendar_year\nseason", "pos": (0.73, 0.55), "w": 0.22, "h": 0.36, "fc": "#eff6ff", "ec": "#2563eb"},
+        {"name": "fact_crop_production\n--------------------\nPK fact_id\nFK geo_id\nFK time_id\ncrop_name\narea_hectares\nproduction_tonnes\nyield_kg_per_hectare", "pos": (0.38, 0.6), "w": 0.24, "h": 0.35, "fc": "#ecfdf5", "ec": "#059669"},
+        {"name": "fact_pm_kisan_disbursement\n--------------------------\nPK fact_id\nFK geo_id\nFK time_id\nfarmer_beneficiaries\namount_inr", "pos": (0.15, 0.08), "w": 0.28, "h": 0.35, "fc": "#fefce8", "ec": "#ca8a04"},
+        {"name": "fact_education_stats\n--------------------\nPK fact_id\nFK geo_id\nFK time_id\nstudent_count\nmale_literacy_rate\nfemale_literacy_rate\npupil_teacher_ratio", "pos": (0.57, 0.08), "w": 0.28, "h": 0.35, "fc": "#fdf2f8", "ec": "#db2777"},
     ]
 
     for t in tables:

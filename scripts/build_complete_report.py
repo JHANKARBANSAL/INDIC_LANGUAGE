@@ -400,12 +400,12 @@ def build_report():
     add_body_p(doc, "A primary engineering challenge of government datasets is their historical distribution as denormalized, monolithic flat CSV files containing 50 to 120 sparse columns. Such flat architectures induce massive data redundancy, lack referential integrity, and degrade OLAP analytical scan performance.")
     add_body_p(doc, "In IndicSQL, all 20 NDAP catalogs were structurally refactored into a rigorous Third Normal Form (3NF) Star Schema architecture:")
     add_body_p(doc, "• Shared Conformed Dimensions:")
-    add_body_p(doc, "  - dim_geography: Consolidates administrative hierarchies across India, assigning unique synthetic surrogate keys (geography_key) mapped to state_id, state_name, district_id, and district_name.")
-    add_body_p(doc, "  - dim_time: Normalizes temporal attributes into conformed calendar_year, financial_year, quarter, and month_number, indexed by time_key.")
+    add_body_p(doc, "  - dim_geography: Consolidates administrative hierarchies across India, assigning unique synthetic surrogate keys (geo_id) mapped to state_name, district_name, and zone.")
+    add_body_p(doc, "  - dim_time: Normalizes temporal attributes into conformed calendar_year, financial_year, and season, indexed by time_id.")
     add_body_p(doc, "• Domain-Specific Fact Tables:")
-    add_body_p(doc, "  - fact_crop_production: Stores quantitative agricultural metrics (area_hectares, production_tonnes, yield_kg_per_ha) indexed by geography_key and time_key.")
-    add_body_p(doc, "  - fact_pm_kisan_disbursement: Records rural welfare disbursements (farmer_beneficiaries, amount_inr, installment_number).")
-    add_body_p(doc, "  - fact_education_stats: Contains literacy and educational indicators (male_literacy_rate, female_literacy_rate, student_count).")
+    add_body_p(doc, "  - fact_crop_production: Stores quantitative agricultural metrics (area_hectares, production_tonnes, yield_kg_per_hectare) indexed by geo_id and time_id.")
+    add_body_p(doc, "  - fact_pm_kisan_disbursement: Records rural welfare disbursements (farmer_beneficiaries, amount_inr) indexed by geo_id and time_id.")
+    add_body_p(doc, "  - fact_education_stats: Contains literacy and educational indicators (male_literacy_rate, female_literacy_rate, pupil_teacher_ratio) indexed by geo_id and time_id.")
     add_body_p(doc, "All tables are persisted as binary Apache Parquet columnar files utilizing dictionary encoding and Snappy block compression, achieving up to 85% storage reduction and 40x faster query scans compared to raw CSVs.")
 
     # Insert Figure 5.1
@@ -443,7 +443,7 @@ def build_report():
     add_table_data(doc, cat_headers, cat_data, col_widths=[1.8, 1.2, 1.6, 1.4, 0.6])
 
     add_sec_heading(doc, "5.3", "ER Diagrams and Relational Cardinalities")
-    add_body_p(doc, "As documented in Figure 5.1, the conformed dimension tables dim_geography and dim_time exhibit 1-to-many (1:N) relationships with each corresponding fact table. Primary key surrogate identifiers (geography_key and time_key) are enforced via foreign key constraints, guaranteeing referential integrity and supporting high-efficiency dimensional slicing without requiring costly runtime subqueries.")
+    add_body_p(doc, "As documented in Figure 5.1, the conformed dimension tables dim_geography and dim_time exhibit 1-to-many (1:N) relationships with each corresponding fact table. Primary key surrogate identifiers (geo_id and time_id) are enforced via foreign key constraints, guaranteeing referential integrity and supporting high-efficiency dimensional slicing without requiring costly runtime subqueries.")
 
     add_sec_heading(doc, "5.4", "Assumptions and Dependencies")
     add_body_p(doc, "• Host Hardware: Execution assumes an Apple Silicon M-series processor (or modern x86 CPU with AVX-512 support) and a minimum of 8 GB unified memory.")
