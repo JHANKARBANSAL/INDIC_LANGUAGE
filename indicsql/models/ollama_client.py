@@ -11,17 +11,11 @@ from typing import Any, Dict, List, Optional
 import httpx
 
 from indicsql.core.config import settings
+from indicsql.models.metric_guard import sanitize_metric_aggregations
+from indicsql.models.temporal_guard import sanitize_temporal_predicates
 from indicsql.schema.phonetic import transliterate_indic_to_latin
 
 logger = logging.getLogger(__name__)
-
-from indicsql.models.temporal_guard import (
-    extract_temporal_intent,
-    has_temporal_intent,
-    prune_unrequested_temporal_filters,
-    sanitize_temporal_predicates,
-)
-from indicsql.models.metric_guard import sanitize_metric_aggregations
 
 
 class OllamaClient:
@@ -84,10 +78,58 @@ class OllamaClient:
         Synthesizes a DuckDB SQL query dynamically from schema DDL and natural language.
         If error_feedback is provided, guides the model to reflect and fix the query.
         """
-        cols_desc = []
-        for col, col_desc in table_schema.get("columns", {}).items():
-            cols_desc.append(f"  - {col}: {col_desc}")
-        columns_text = "\n".join(cols_desc)
+        dynamic_schema = bool(table_schema.get("tables"))
+        if dynamic_schema:
+            schema_lines = []
+            columns_by_name: Dict[str, List[str]] = {}
+            for name, table in table_schema["tables"].items():
+                schema_lines.append(f"TABLE {name}: {table.get('description', '')}")
+                if table.get("primary_key"):
+                    schema_lines.append(f"  - PRIMARY KEY {table['primary_key']}")
+                schema_lines.extend(
+                    f"  - {column}: {description}"
+                    for column, description in table.get("columns", {}).items()
+                )
+                for column in table.get("columns", {}):
+                    columns_by_name.setdefault(column.lower(), []).append(
+                        f"{name}.{column}"
+                    )
+                for column, values in table.get("sample_values", {}).items():
+                    schema_lines.append(
+                        f"  - {column} example values (copy spelling/case exactly): "
+                        + ", ".join(values)
+                    )
+                schema_lines.extend(
+                    f"  - FOREIGN KEY {relationship}"
+                    for relationship in table.get("foreign_keys", [])
+                )
+            columns_text = "\n".join(schema_lines)
+            shared_columns = {
+                column: references
+                for column, references in columns_by_name.items()
+                if len(references) > 1
+            }
+            if shared_columns:
+                shared_column_lines = [
+                    f"  - {column}: {', '.join(references)}"
+                    for column, references in sorted(shared_columns.items())
+                ]
+                columns_text += (
+                    "\nSHARED COLUMN NAMES (always qualify these):\n"
+                    + "\n".join(shared_column_lines)
+                )
+            available_columns = {
+                column
+                for table in table_schema["tables"].values()
+                for column in table.get("columns", {})
+            }
+        else:
+            cols_desc = [
+                f"  - {col}: {col_desc}"
+                for col, col_desc in table_schema.get("columns", {}).items()
+            ]
+            columns_text = "\n".join(cols_desc)
+            available_columns = set(table_schema.get("columns", {}))
 
         entity_hints = ""
         if canonical_entities:
@@ -97,31 +139,58 @@ class OllamaClient:
 
         column_hints = ""
         if target_columns:
-            valid_targets = [c for c in target_columns if c in table_schema.get("columns", {})]
+            valid_targets = [c for c in target_columns if c in available_columns]
             if valid_targets:
                 column_hints = f"\nTarget Metric Columns Identified by Schema Linker: {', '.join(valid_targets)}"
 
-        system_prompt = (
-            "You are an expert Text-to-SQL engineer synthesizing queries for Indian Government (NDAP) databases.\n"
-            "Generate a single valid, deterministic DuckDB SQL query for the requested question.\n"
-            "Rules:\n"
-            "1. Output ONLY the raw executable SQL query ending with a semicolon. Do not wrap in markdown or explanations.\n"
-            "2. Table values for state_name (e.g. 'MAHARASHTRA', 'PUNJAB', 'ANDHRA PRADESH') and crop_name are stored in UPPERCASE. In ndap_mandi_commodity_prices, commodity is Title Case ('Wheat', 'Rice', 'Tomato'). District names are Title Case exactly as given in Entity Hints.\n"
-            "3. Include WHERE conditions ONLY for the columns explicitly provided in Entity Mappings or explicitly mentioned in the question.\n"
-            "4. Do NOT add any extra columns or conditions to the WHERE clause.\n"
-            "5. Use standard DuckDB aggregate functions: SUM(), AVG(), MIN(), MAX(), COUNT().\n"
-            "   - If the citizen asks for average, mean, or rate (e.g. 'average', 'avg', 'औसत', 'सरासरी', 'சராசரி', 'సగటు', 'গড়'), or asks to summarize a percentage/rate indicator column (such as institutional_births_pct) or commodity price, use AVG(). NEVER use SUM() or MAX() when average or rate is requested.\n"
-            "   - If the citizen asks for total, cumulative, or sum (e.g. 'total', 'sum', 'कुल', 'एकूण', 'మొత్తం', 'மொத்த', 'মোট'), use SUM(). NEVER use MAX() when a total or cumulative figure is requested.\n"
-            "6. If the question mentions 'महिला', 'பெண்', 'స్త్రీ' or 'female', select female columns (e.g. female_literacy_rate), never male.\n"
-            "7. If the citizen asks for both beneficiaries/farmers and amount/disbursement, select both SUM(farmer_beneficiaries) and SUM(amount_inr).\n"
-            "8. If the question asks for count of people, farmers, or beneficiaries (e.g. 'किती शेतकऱ्यांना', 'कितने किसानों', 'लाभार्थी', 'விவசாயிகள்', 'பயனாளிகள்', 'లబ్ధిదారులు', 'ఎంతమంది రైతులకు', 'ఎంతమంది', 'రైతులు', 'কতজন কৃষক'), aggregate beneficiary/farmer count columns (e.g. SUM(farmer_beneficiaries)), NOT monetary amount.\n"
-            "9. In soil health records (ndap_soil_health_records), if the question asks for soil samples tested (e.g. 'soil samples', 'नमूनों की जांच', 'मातीचे नमुने', 'மண் மாதிரிகள்', 'நேல నమూనాలు', 'মাটির নমুনা'), select SUM(samples_tested). ONLY select SUM(cards_issued) when the question specifically asks for cards distributed/issued (e.g. 'cards', 'कार्ड', 'அட்டைகள்', 'కార్డులు').\n"
-            "10. In vocational skill training (ndap_vocational_skill_training), if the question asks for certified or passed candidates (e.g. 'certified', 'प्रमाणित', 'সনদপ্রাপ্ত', 'சான்றிதழ் பெற்றவர்கள்', 'సర్టిఫైడ్'), select SUM(certified_candidates). If it asks for placed or employed candidates, select SUM(placed_candidates).\n"
-            "11. Include GROUP BY and project the dimension column (such as district_name) when the question asks for 'top N', ranking, 'list districts', or a breakdown by district/state/year. Avoid GROUP BY only on pure single scalar aggregations.\n"
-            "12. If the question asks for 'lowest', 'least', 'min', 'sabse kam', 'कमी', 'குறைவாக', 'అత్యల్పంగా', 'সবচেয়ে কম', use 'ORDER BY column ASC LIMIT 1', NEVER MAX or DESC. When the question asks 'which district' (e.g. 'किस जिले', 'कोणत्या जिल्ह्यात', 'எந்த மாவட்டம்', 'ఏ జిల్లా', 'কোন জেলায়'), project district_name (and the metric column), NOT state_name.\n"
-            "13. Unless the citizen question explicitly specifies a year, academic year, or time frame, NEVER add WHERE filters on temporal columns (reporting_year, academic_year, financial_year, survey_year, cycle_year). Calculate cumulative lifetime totals across all records.\n"
-            "14. If the question asks for 'top N' or 'bottom N' (e.g. 'list top 5 districts in UP', 'top 3 crops'), project the dimension (e.g. district_name), compute the aggregated metric, GROUP BY the dimension, and use ORDER BY metric DESC (or ASC) LIMIT N."
-        )
+        if dynamic_schema:
+            system_prompt = (
+                "You are an expert multilingual Text-to-SQL engineer. "
+                "Generate one valid, read-only PostgreSQL query using only the supplied schema. "
+                "Use the exact table and column names and declared foreign-key relationships. "
+                "The Database Schema value is a namespace, not a table; every FROM and JOIN "
+                "table must exactly match a TABLE entry below. Join fact and dimension tables "
+                "through their declared foreign-key IDs; never compare a text label to a numeric ID. "
+                "Qualify columns with table aliases whenever multiple referenced tables contain "
+                "the same column name, including inside subqueries; the shared-column list below "
+                "shows which table owns each occurrence. Prefer filtering a joined dimension "
+                "directly by its label instead of adding a redundant ID subquery. "
+                "Do not self-join or repeat a table unless the question explicitly requires "
+                "different roles for that table. Do not add COLLATE clauses. "
+                "For a request to list entities with at least some metric activity, select the "
+                "requested entity, join its dimension to the fact (and requested time dimension) "
+                "through declared foreign keys, and filter the metric with > 0; do not substitute "
+                "a count or another entity. Add state, district, or other location filters only "
+                "when that location is explicitly present in the question. "
+                "Text comparisons are case-sensitive; use the exact spelling and case of "
+                "sample values provided in the schema. "
+                "When the question requests positive or at-least-some metric values, filter the "
+                "metric with > 0; IS NOT NULL only checks whether a value exists. "
+                "Return only SQL, without markdown or explanation. Do not invent tables, columns, "
+                "filters, or joins; include only conditions requested by the question."
+            )
+        else:
+            system_prompt = (
+                "You are an expert Text-to-SQL engineer synthesizing queries for Indian Government (NDAP) databases.\n"
+                "Generate a single valid, deterministic DuckDB SQL query for the requested question.\n"
+                "Rules:\n"
+                "1. Output ONLY the raw executable SQL query ending with a semicolon. Do not wrap in markdown or explanations.\n"
+                "2. Table values for state_name (e.g. 'MAHARASHTRA', 'PUNJAB', 'ANDHRA PRADESH') and crop_name are stored in UPPERCASE. In ndap_mandi_commodity_prices, commodity is Title Case ('Wheat', 'Rice', 'Tomato'). District names are Title Case exactly as given in Entity Hints.\n"
+                "3. Include WHERE conditions ONLY for the columns explicitly provided in Entity Mappings or explicitly mentioned in the question.\n"
+                "4. Do NOT add any extra columns or conditions to the WHERE clause.\n"
+                "5. Use standard DuckDB aggregate functions: SUM(), AVG(), MIN(), MAX(), COUNT().\n"
+                "   - If the citizen asks for average, mean, or rate (e.g. 'average', 'avg', 'औसत', 'सरासरी', 'சராசரி', 'సగటు', 'গড়'), or asks to summarize a percentage/rate indicator column (such as institutional_births_pct) or commodity price, use AVG(). NEVER use SUM() or MAX() when average or rate is requested.\n"
+                "   - If the citizen asks for total, cumulative, or sum (e.g. 'total', 'sum', 'कुल', 'एकूण', 'మొత్తం', 'மொத்த', 'মোট'), use SUM(). NEVER use MAX() when a total or cumulative figure is requested.\n"
+                "6. If the question mentions 'महिला', 'பெண்', 'స్త్రీ' or 'female', select female columns (e.g. female_literacy_rate), never male.\n"
+                "7. If the citizen asks for both beneficiaries/farmers and amount/disbursement, select both SUM(farmer_beneficiaries) and SUM(amount_inr).\n"
+                "8. If the question asks for count of people, farmers, or beneficiaries (e.g. 'किती शेतकऱ्यांना', 'कितने किसानों', 'लाभार्थी', 'விவசாயிகள்', 'பயனாளிகள்', 'లబ్ధిదారులు', 'ఎంతమంది రైతులకు', 'ఎంతమంది', 'రైతులు', 'কতজন কৃষক'), aggregate beneficiary/farmer count columns (e.g. SUM(farmer_beneficiaries)), NOT monetary amount.\n"
+                "9. In soil health records (ndap_soil_health_records), if the question asks for soil samples tested (e.g. 'soil samples', 'नमूनों की जांच', 'मातीचे नमुने', 'மண் மாதிரிகள்', 'நேல నమూనాలు', 'মাটির নমুনা'), select SUM(samples_tested). ONLY select SUM(cards_issued) when the question specifically asks for cards distributed/issued (e.g. 'cards', 'कार्ड', 'அட்டைகள்', 'కార్డులు').\n"
+                "10. In vocational skill training (ndap_vocational_skill_training), if the question asks for certified or passed candidates (e.g. 'certified', 'प्रमाणित', 'সনদপ্রাপ্ত', 'சான்றிதழ் பெற்றவர்கள்', 'సర్టిఫైడ్'), select SUM(certified_candidates). If it asks for placed or employed candidates, select SUM(placed_candidates).\n"
+                "11. Include GROUP BY and project the dimension column (such as district_name) when the question asks for 'top N', ranking, 'list districts', or a breakdown by district/state/year. Avoid GROUP BY only on pure single scalar aggregations.\n"
+                "12. If the question asks for 'lowest', 'least', 'min', 'sabse kam', 'कमी', 'குறைவாக', 'అత్యల్పంగా', 'সবচেয়ে কম', use 'ORDER BY column ASC LIMIT 1', NEVER MAX or DESC. When the question asks 'which district' (e.g. 'किस जिले', 'कोणत्या जिल्ह्यात', 'எந்த மாவட்டம்', 'ఏ జిల్లా', 'কোন জেলায়'), project district_name (and the metric column), NOT state_name.\n"
+                "13. Unless the citizen question explicitly specifies a year, academic year, or time frame, NEVER add WHERE filters on temporal columns (reporting_year, academic_year, financial_year, survey_year, cycle_year). Calculate cumulative lifetime totals across all records.\n"
+                "14. If the question asks for 'top N' or 'bottom N' (e.g. 'list top 5 districts in UP', 'top 3 crops'), project the dimension (e.g. district_name), compute the aggregated metric, GROUP BY the dimension, and use ORDER BY metric DESC (or ASC) LIMIT N."
+            )
 
         repair_prompt = ""
         if error_feedback and previous_sql:
@@ -136,7 +205,7 @@ class OllamaClient:
         phonetic_hint = f" (Phonetic: \"{latin_bridge}\")" if latin_bridge and latin_bridge.lower() != query.lower() else ""
 
         user_prompt = (
-            f"Table Name: {table_name}\n"
+            f"{'Database Schema' if dynamic_schema else 'Table Name'}: {table_name}\n"
             f"Table Description: {table_schema.get('description', '')}\n"
             f"Table Schema Columns:\n{columns_text}\n"
             f"{entity_hints}"
@@ -161,6 +230,7 @@ class OllamaClient:
                     "stream": False,
                     "options": {
                         "temperature": 0.05,
+                        "seed": 42,
                         "stop": ["<|im_end|>", "<|endoftext|>"],
                     },
                 },
@@ -168,7 +238,13 @@ class OllamaClient:
             )
             if r.status_code == 200:
                 raw_response = r.json().get("response", "").strip()
-                return self._clean_sql(raw_response, table_name, query, canonical_entities=canonical_entities)
+                return self._clean_sql(
+                    raw_response,
+                    table_name,
+                    query,
+                    canonical_entities=canonical_entities,
+                    generic_sql=dynamic_schema,
+                )
         except Exception as e:
             logger.warning(f"Ollama generation failed ({self.model_name}): {e}")
             return None
@@ -181,6 +257,7 @@ class OllamaClient:
         table_name: str,
         query: str = "",
         canonical_entities: Optional[Dict[str, str]] = None,
+        generic_sql: bool = False,
     ) -> str:
         """Strips markdown code blocks, explanations, hallucinations, and ensures valid semicolon."""
         # Strip markdown ```sql ... ```
@@ -212,6 +289,9 @@ class OllamaClient:
             cleaned = cleaned[:-2] + ";"
         while cleaned.endswith(")") and cleaned.count(")") > cleaned.count("("):
             cleaned = cleaned[:-1]
+
+        if generic_sql:
+            return cleaned
 
         # Prune unrequested hallucinations common in smaller 3B models
         q_lower = query.lower()

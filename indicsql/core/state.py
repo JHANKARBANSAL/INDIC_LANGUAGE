@@ -38,7 +38,17 @@ class IndicSQLState(TypedDict, total=False):
     detected_lang: str  # 'hi', 'bn', 'ta', 'te', 'mr', 'hi-en', 'en'
     detected_script: str  # 'Devanagari', 'Tamil', 'Telugu', 'Bengali', 'Latin'
     canonical_query: str  # Transliterated / Normalized text
-    target_database: str  # Name of target NDAP database
+    target_database: str  # Name of target NDAP table or selected PostgreSQL schema
+    schema_linking_error: Optional[str]
+    suggested_queries: List[str]
+    database_schema_name: str
+    database_schema: Dict[str, Any]
+    database_schema_full: Dict[str, Any]
+    schema_context_broadened: bool
+    schema_validation_retry_used: bool
+    database_dialect: str
+    database_schema_source: str
+    schema_repairs: List[str]
 
     # 2. Schema-Linking Substrate
     pruned_schema: List[SchemaElement]
@@ -51,6 +61,7 @@ class IndicSQLState(TypedDict, total=False):
     # 4. Sandbox Execution & Self-Healing Reflection
     execution_result: Optional[TabularResult]
     execution_error: Optional[str]
+    schema_validation_error: Optional[str]
     reflection_attempts: int
 
     # 5. Presentation & Localization

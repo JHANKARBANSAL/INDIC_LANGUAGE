@@ -27,7 +27,7 @@ FORBIDDEN_EXPRESSION_TYPES = (
 )
 
 
-def validate_sql_security(sql: str) -> bool:
+def validate_sql_security(sql: str, dialect: str = "duckdb") -> bool:
     """
     Parses SQL AST using SQLGlot to ensure strict read-only execution.
     Inspects expression node types rather than naive substring matching.
@@ -36,7 +36,7 @@ def validate_sql_security(sql: str) -> bool:
         return False
 
     try:
-        parsed = sqlglot.parse_one(sql.strip(), read="duckdb")
+        parsed = sqlglot.parse_one(sql.strip(), read=dialect)
         if not parsed:
             return False
 
@@ -67,7 +67,7 @@ def critic_node(state: IndicSQLState) -> Dict[str, Any]:
     Critic Node: Analyzes candidate SQL and blocks security violations.
     """
     sql = state.get("generated_sql", "")
-    is_safe = validate_sql_security(sql)
+    is_safe = validate_sql_security(sql, state.get("database_dialect", "duckdb"))
 
     audit_entry = {
         "step": 3.5,

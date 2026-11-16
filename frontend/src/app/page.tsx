@@ -140,6 +140,10 @@ export default function Home() {
             data={resultData}
             isLoading={isLoading}
             error={error}
+            onSuggestedQuery={(suggestion) => {
+              setQuery(suggestion);
+              void handleQuerySubmit(suggestion);
+            }}
           />
         </section>
       </main>

@@ -15,12 +15,12 @@ Covers:
 3. Mathematical precision matching between raw DuckDB results and verbalized prose
 """
 
-import re
 import unittest
+
 from indicsql.agents.response_verbalizer import (
     format_indian_currency_number,
-    verbalize_tabular_result,
     response_verbalizer_node,
+    verbalize_tabular_result,
 )
 from indicsql.core.state import IndicSQLState
 
@@ -196,6 +196,21 @@ class TestMultilingualPurityAndNaturalOutput(unittest.TestCase):
 class TestMultilingualDomainVerbalization(unittest.TestCase):
     """Tests literacy, employment, and error handling across multiple languages."""
 
+    def test_institutional_birth_rate_uses_the_projected_metric_label(self):
+        state: IndicSQLState = {
+            "query_id": "test-bn-birth-rate",
+            "detected_lang": "bn",
+            "execution_result": {
+                "columns": ["district_name", "avg_institutional_births_pct"],
+                "rows": [["Guntur", 87.4], ["Krishna", 82.1]],
+            },
+        }
+
+        answer = verbalize_tabular_result(state)
+
+        self.assertIn("প্রাতিষ্ঠানিক প্রসবের হার", answer)
+        self.assertNotIn("PM-Kisan", answer)
+
     def test_mgnrega_mandays_tamil_and_telugu(self):
         ta_state: IndicSQLState = {
             "query_id": "test-ta-mg",
@@ -236,16 +251,38 @@ class TestMultilingualDomainVerbalization(unittest.TestCase):
 
     def test_graceful_multilingual_error_messages(self):
         languages = ["hi", "mr", "ta", "te", "bn", "hi-en", "en"]
-        for l in languages:
+        for language in languages:
             state: IndicSQLState = {
-                "query_id": f"test-err-{l}",
-                "detected_lang": l,
+                "query_id": f"test-err-{language}",
+                "detected_lang": language,
                 "execution_result": None,
                 "execution_error": "Connection reset",
             }
             msg = verbalize_tabular_result(state)
             self.assertIsNotNone(msg)
             self.assertGreater(len(msg), 10)
+
+    def test_entity_only_multirow_result_does_not_assume_metric_column(self):
+        expected = {
+            "en": "Matching districts: Guntur, Kurnool",
+            "hi": "जिले: Guntur, Kurnool",
+            "mr": "जिल्हे: Guntur, Kurnool",
+            "ta": "மாவட்டங்கள்: Guntur, Kurnool",
+            "te": "జిల్లాలు: Guntur, Kurnool",
+            "bn": "জেলাগুলো: Guntur, Kurnool",
+            "hi-en": "Matching districts: Guntur, Kurnool",
+        }
+        for language, answer in expected.items():
+            with self.subTest(language=language):
+                state: IndicSQLState = {
+                    "query_id": f"test-district-list-{language}",
+                    "detected_lang": language,
+                    "execution_result": {
+                        "columns": ["district_name"],
+                        "rows": [["Guntur"], ["Kurnool"]],
+                    },
+                }
+                self.assertEqual(verbalize_tabular_result(state), answer)
 
 
 class TestVerbalizedNumbersMatchExecution(unittest.TestCase):

@@ -18,7 +18,6 @@ def reflection_healer_node(state: IndicSQLState) -> Dict[str, Any]:
     Emits ReflectionTriggeredEvent on the EventBus.
     """
     attempts = state.get("reflection_attempts", 0) + 1
-    current_sql = state.get("generated_sql", "")
     err = state.get("execution_error", "") or ""
 
     EventBus.publish(
@@ -29,8 +28,14 @@ def reflection_healer_node(state: IndicSQLState) -> Dict[str, Any]:
         )
     )
 
-    feedback = f"Query execution failed: {err}."
-    if "does not exist" in err.lower():
+    if state.get("schema_validation_error"):
+        feedback = (
+            f"{err} Correct the SQL using only the allowed tables and columns listed "
+            "in the database schema. Do not execute or invent missing identifiers."
+        )
+    else:
+        feedback = f"Query execution failed: {err}."
+    if "does not exist" in err.lower() and not state.get("schema_validation_error"):
         feedback += " Please ensure all referenced table and column names exist in the schema DDL."
     elif "syntax error" in err.lower():
         feedback += " Please ensure standard DuckDB SQL syntax and remove any non-SQL tokens."

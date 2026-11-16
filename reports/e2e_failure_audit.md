@@ -1,5 +1,7 @@
 # IndicSQL End-to-End Execution Failure Audit (140-Query Unseen Benchmark)
 
+> **Historical snapshot, not the latest evaluation.** The 71.43% figure below matches the archived 2026-11-08 report in `data/benchmarks/unseen_140_evaluation_report.json.bak`. The newer 2026-11-09 report records 99.29% on the same suite. This audit was not regenerated from that newer run; use a timestamped run from `scripts/evaluate_unseen_140.py` for current results.
+
 **Audit Timestamp:** 2026-11-09  
 **Target Suite:** `data/benchmarks/indicdb_unseen_suite_140.json` (140 unseen queries across 7 languages)  
 **Official Report:** `data/benchmarks/unseen_140_evaluation_report.json`  

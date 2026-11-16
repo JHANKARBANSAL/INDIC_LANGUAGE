@@ -351,6 +351,97 @@ class TestMetricRegressionComprehensive(unittest.TestCase):
                 f"Failed live execution isomorphism on {qid}: {fixed_sql} vs {gold_sql}",
             )
 
+    def test_22_count_intent_sums_additive_household_measure(self):
+        query = "How many rural households have tap water connections under Jal Jeevan Mission in Telangana?"
+        sql = (
+            "SELECT households_with_tap_connection AS rural_households_with_tap_connection "
+            "FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';"
+        )
+        gold_sql = (
+            "SELECT SUM(households_with_tap_connection) AS total_connections "
+            "FROM ndap_jal_jeevan_tap_water WHERE state_name = 'TELANGANA';"
+        )
+
+        cleaned = sanitize_metric_aggregations(
+            sql, query, table_name="ndap_jal_jeevan_tap_water"
+        )
+
+        self.assertIn("SUM(households_with_tap_connection)", cleaned)
+        self.assertTrue(
+            are_tabular_results_equivalent(
+                self.sandbox.execute_query(cleaned),
+                self.sandbox.execute_query(gold_sql),
+            )
+        )
+
+    def test_23_false_grouping_markers_do_not_preserve_unrequested_group_by(self):
+        cases = [
+            (
+                "झारखंड में व्यावसायिक कौशल प्रशिक्षण के तहत कुल कितने उम्मीदवार प्रमाणित हुए?",
+                "SELECT district_name, SUM(certified_candidates) AS total_certified_candidates "
+                "FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' "
+                "GROUP BY district_name ORDER BY total_certified_candidates DESC;",
+                "ndap_vocational_skill_training",
+                "SELECT SUM(certified_candidates) AS total_certified_candidates "
+                "FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+            ),
+            (
+                "झारखंडमध्ये व्यावसायिक कौशल्य प्रशिक्षणांतर्गत एकूण किती उमेदवार प्रमाणित झाले?",
+                "SELECT district_name, SUM(certified_candidates) AS total_certified_candidates "
+                "FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND' "
+                "GROUP BY district_name ORDER BY total_certified_candidates DESC;",
+                "ndap_vocational_skill_training",
+                "SELECT SUM(certified_candidates) AS total_certified_candidates "
+                "FROM ndap_vocational_skill_training WHERE state_name = 'JHARKHAND';",
+            ),
+            (
+                "এনএফএইচএস-৫ অনুসারে অন্ধ্রপ্রদেশে প্রাতিষ্ঠানিক প্রসবের গড় হার কত শতাংশ?",
+                "SELECT district_name, AVG(institutional_births_pct) AS avg_institutional_births_pct "
+                "FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH' "
+                "GROUP BY district_name ORDER BY avg_institutional_births_pct DESC;",
+                "ndap_nfhs5_health_indicators",
+                "SELECT AVG(institutional_births_pct) AS avg_institutional_births_pct "
+                "FROM ndap_nfhs5_health_indicators WHERE state_name = 'ANDHRA PRADESH';",
+            ),
+        ]
+
+        for query, sql, table, gold_sql in cases:
+            with self.subTest(query=query):
+                intent = extract_metric_intent(query)
+                self.assertFalse(intent.has_grouping_intent)
+                cleaned = sanitize_metric_aggregations(sql, query, table_name=table)
+                self.assertNotIn("GROUP BY", cleaned)
+                self.assertTrue(
+                    are_tabular_results_equivalent(
+                        self.sandbox.execute_query(cleaned),
+                        self.sandbox.execute_query(gold_sql),
+                    )
+                )
+
+    def test_24_tamil_person_day_intent_selects_mandays_metric(self):
+        query = "பீகாரில் மகாத்மா காந்தி ஊரக வேலை திட்டத்தில் உருவாக்கப்பட்ட மொத்த மனித வேலை நாட்கள் எத்தனை?"
+        sql = (
+            "SELECT SUM(households_worked) AS total_mandays_generated "
+            "FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';"
+        )
+        gold_sql = (
+            "SELECT SUM(total_mandays_generated) AS total_mandays "
+            "FROM mgnrega_state_annual_employment WHERE state_name = 'BIHAR';"
+        )
+
+        cleaned = sanitize_metric_aggregations(
+            sql, query, table_name="mgnrega_state_annual_employment"
+        )
+
+        self.assertIn("SUM(total_mandays_generated)", cleaned)
+        self.assertNotIn("households_worked", cleaned)
+        self.assertTrue(
+            are_tabular_results_equivalent(
+                self.sandbox.execute_query(cleaned),
+                self.sandbox.execute_query(gold_sql),
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

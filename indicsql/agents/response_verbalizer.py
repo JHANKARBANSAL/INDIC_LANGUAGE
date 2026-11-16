@@ -92,10 +92,31 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
     # 0. Multi-row Ranking / Grouping Verbalization (e.g. top districts / states)
     if len(rows) > 1 and ("district_name" in columns or "state_name" in columns):
         ent_col_idx = columns.index("district_name") if "district_name" in columns else columns.index("state_name")
-        val_col_idx = next(
-            (i for i in range(len(columns)) if i != ent_col_idx and columns[i] not in ["state_name", "district_name", "financial_year", "survey_year", "crop_year"]),
-            1 if ent_col_idx == 0 else 0
-        )
+        value_columns = [
+            i
+            for i in range(len(columns))
+            if i != ent_col_idx
+            and columns[i]
+            not in ["state_name", "district_name", "financial_year", "survey_year", "crop_year"]
+        ]
+        if not value_columns:
+            entities = ", ".join(
+                str(row[ent_col_idx]) for row in rows if len(row) > ent_col_idx
+            )
+            is_district = "district_name" in columns
+            entity_labels = {
+                "en": ("Matching districts", "Matching states"),
+                "hi": ("जिले", "राज्य"),
+                "mr": ("जिल्हे", "राज्ये"),
+                "ta": ("மாவட்டங்கள்", "மாநிலங்கள்"),
+                "te": ("జిల్లాలు", "రాష్ట్రాలు"),
+                "bn": ("জেলাগুলো", "রাজ্যগুলো"),
+                "hi-en": ("Matching districts", "Matching states"),
+            }
+            labels = entity_labels.get(lang, entity_labels["en"])
+            entity_label = labels[0] if is_district else labels[1]
+            return f"{entity_label}: {entities}"
+        val_col_idx = value_columns[0]
         val_col_name = columns[val_col_idx] if val_col_idx < len(columns) else ""
         is_val_pct = "rate" in val_col_name or "pct" in val_col_name
 
@@ -137,6 +158,9 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
         elif "amount" in val_col_name:
             metric_en = "disbursed amount (₹)"
             metric_hi = "वितरित राशि"
+        elif "institutional_births" in val_col_name:
+            metric_en = "institutional birth rate"
+            metric_hi = "संस्थागत प्रसव दर"
 
         # Detect State in Query
         state_display = ""
@@ -165,7 +189,12 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
             return f"{st_prefix}{metric_en} ఆధారంగా అగ్ర {len(rows)} నమోదైన జిల్లాలు: {joined_items}."
         elif lang == "bn":
             st_prefix = f"{state_display} এ " if state_display else ""
-            return f"{st_prefix}{metric_en} অনুসারে শীর্ষ {len(rows)}টি নথিভুক্ত জেলা: {joined_items}।"
+            metric_bn = (
+                "প্রাতিষ্ঠানিক প্রসবের হার"
+                if "institutional_births" in val_col_name
+                else metric_en
+            )
+            return f"{st_prefix}{metric_bn} অনুসারে শীর্ষ {len(rows)}টি নথিভুক্ত জেলা: {joined_items}।"
         elif lang == "hi-en":
             st_prefix = f"{state_display} mein " if state_display else ""
             return f"{st_prefix}{metric_en} ke basis par top {len(rows)} recorded districts: {joined_items}."
@@ -175,7 +204,28 @@ def verbalize_tabular_result(state: IndicSQLState) -> str:
 
     row = rows[0]
 
-    # 1. Female Literacy Rate
+    # 1. NFHS institutional birth rate
+    institutional_birth_idx = next(
+        (i for i, column in enumerate(columns) if "institutional_births" in column),
+        None,
+    )
+    if institutional_birth_idx is not None:
+        rate = row[institutional_birth_idx]
+        if lang == "hi":
+            return f"औसत संस्थागत प्रसव दर {rate}% दर्ज की गई।"
+        elif lang == "mr":
+            return f"संस्थात्मक प्रसूतींचे सरासरी प्रमाण {rate}% नोंदवले गेले."
+        elif lang == "ta":
+            return f"நிறுவனங்களில் நடைபெற்ற பிரசவங்களின் சராசரி விகிதம் {rate}% ஆகும்."
+        elif lang == "te":
+            return f"సంస్థాగత ప్రసవాల సగటు రేటు {rate}% గా నమోదైంది."
+        elif lang == "bn":
+            return f"প্রাতিষ্ঠানিক প্রসবের গড় হার {rate}% রেকর্ড করা হয়েছে।"
+        elif lang == "hi-en":
+            return f"Institutional births ka average rate {rate}% record hua."
+        return f"The average institutional birth rate was {rate}%."
+
+    # 2. Female Literacy Rate
     if "female_literacy_rate" in columns:
         dist_idx = columns.index("district_name") if "district_name" in columns else 0
         rate_idx = columns.index("female_literacy_rate")

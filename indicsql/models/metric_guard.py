@@ -38,6 +38,7 @@ class MetricIntent:
     is_soil_cards: bool = False
     is_vocational_certified: bool = False
     is_vocational_placed: bool = False
+    is_mandays: bool = False
     has_grouping_intent: bool = False
     limit_n: Optional[int] = None
     is_ranking_query: bool = False
@@ -81,6 +82,7 @@ ADDITIVE_MEASURE_COLUMNS: Set[str] = {
     "primary_health_centres_phc",
     "maternal_mortality_ratio",
     "infant_mortality_rate",
+    "households_with_tap_connection",
 }
 
 
@@ -112,6 +114,18 @@ def extract_metric_intent(query: str) -> MetricIntent:
     ]
     if any(re.search(p, clean_q, re.IGNORECASE) for p in total_patterns):
         intent.is_total = True
+
+    # 2b. Count intent, distinct from totals and explicit average/ranking questions.
+    count_patterns = [
+        r'\b(?:how\s+many|number\s+of|count\s+of)\b',
+        r'कितने|कितनी|कितना',
+        r'किती',
+        r'কতজন|কতগুলি|কতটি|কত',
+        r'எத்தனை',
+        r'ఎన్ని|ఎంతమంది|ఎంత',
+    ]
+    if any(re.search(p, clean_q, re.IGNORECASE) for p in count_patterns):
+        intent.is_count = True
 
     # 3. Lowest / Minimum Intent
     lowest_patterns = [
@@ -195,12 +209,24 @@ def extract_metric_intent(query: str) -> MetricIntent:
     if any(re.search(p, clean_q, re.IGNORECASE) for p in placed_patterns):
         intent.is_vocational_placed = True
 
+    mandays_patterns = [
+        r'\b(?:mandays|person[-\s]?days|man[-\s]?days)\b',
+        r'मानव\s*(?:कार्य\s*)?दिवस|कार्य\s*दिवस',
+        r'मनुष्य\s*दिन|कामाचे\s*दिवस',
+        r'কর্মদিবস|মানব-দিন',
+        r'மனித\s*வேலை\s*நாட்கள்|மனித\s*நாட்கள்|வேலை\s*நாட்கள்',
+        r'మానవ\s*పని\s*దినాలు|పనిదినాలు',
+    ]
+    if any(re.search(p, clean_q, re.IGNORECASE) for p in mandays_patterns):
+        intent.is_mandays = True
+
     # 7. Grouping Intent
     grouping_patterns = [
         r'\b(?:each|every|per|breakdown|by\s+state|by\s+district|by\s+year|state-wise|district-wise|year-wise|wise|top\s+\d+|bottom\s+\d+|districts\s+in|states\s+in)\b',
-        r'वार', r'जिलेवार', r'राज्यवार', r'सालवार', r'प्रत्येक', r'हर\s*एक',
+        r'(?<!\w)(?:जिले|जिला|राज्य|साल|वर्ष)वार(?!\w)', r'प्रत्येक', r'हर\s*एक',
         r'जिल्हानिहाय', r'राज्यनिहाय',
-        r'প্রতিটি', r'অনুসারে',
+        r'প্রতিটি', r'জেলাভিত্তিক|রাজ্যভিত্তিক|বছরভিত্তিক',
+        r'জেলা\s+অনুযায়ী|রাজ্য\s+অনুযায়ী|বছর\s+অনুযায়ী',
         r'ஒவ்வொரு', r'வரியாக',
         r'ప్రతి', r'వారీగా',
     ]
@@ -273,6 +299,16 @@ def sanitize_metric_aggregations(
                     logger.info("MetricGuard: Replaced amount_inr with farmer_beneficiaries based on farmer count intent")
                     col.replace(exp.Column(this=exp.to_identifier("farmer_beneficiaries")))
                     modified = True
+
+    # -------------------------------------------------------------------------
+    # 2c. MGNREGA Person-Days vs Households Worked
+    # -------------------------------------------------------------------------
+    if table_name == "mgnrega_state_annual_employment" and intent.is_mandays:
+        for col in tree.find_all(exp.Column):
+            if col.name.lower() == "households_worked":
+                logger.info("MetricGuard: Replaced households_worked with total_mandays_generated based on person-day intent")
+                col.replace(exp.Column(this=exp.to_identifier("total_mandays_generated")))
+                modified = True
 
     # -------------------------------------------------------------------------
     # 3. Superlative Direction & Projection Alignment
@@ -404,6 +440,19 @@ def sanitize_metric_aggregations(
     # -------------------------------------------------------------------------
     # 4. Aggregation Function Alignment: Average vs Total vs Peak
     # -------------------------------------------------------------------------
+    # A scalar "how many" question over a known additive measure needs a sum,
+    # even when the model emits the measure as a plain column projection.
+    if (intent.is_count or intent.is_total) and not intent.is_average and not intent.is_highest and not intent.is_lowest:
+        for select in tree.selects:
+            expression = select.this if isinstance(select, exp.Alias) else select
+            if isinstance(expression, exp.Column) and expression.name.lower() in ADDITIVE_MEASURE_COLUMNS:
+                sum_expression = exp.Sum(this=expression.copy())
+                if isinstance(select, exp.Alias):
+                    select.set("this", sum_expression)
+                else:
+                    select.replace(sum_expression)
+                modified = True
+
     # Scenario A: Explicit Average Intent
     if intent.is_average and not intent.is_total and not intent.is_highest:
         for node in list(tree.find_all((exp.Sum, exp.Max))):

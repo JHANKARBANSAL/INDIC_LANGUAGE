@@ -30,7 +30,7 @@ export function SqlViewer({ sql }: SqlViewerProps) {
         <div className="flex items-center gap-2">
           <Code2 className="w-4 h-4 text-emerald-400" />
           <span className="font-mono font-medium text-slate-200">
-            Synthesized Dialect SQL (DuckDB Engine)
+            Generated SQL (read-only)
           </span>
         </div>
         <div className="flex items-center gap-2">

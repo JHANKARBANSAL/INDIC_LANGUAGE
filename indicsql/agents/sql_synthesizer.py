@@ -14,8 +14,10 @@ from typing import Any, Dict, List, Optional, Tuple
 from indicsql.core.state import IndicSQLState
 from indicsql.events.bus import EventBus
 from indicsql.events.schemas import SQLSynthesizedEvent
-from indicsql.models.ollama_client import OllamaClient, prune_unrequested_temporal_filters
 from indicsql.models.metric_guard import sanitize_metric_aggregations
+from indicsql.models.ollama_client import OllamaClient
+from indicsql.models.temporal_guard import prune_unrequested_temporal_filters
+from indicsql.sandbox.validator import repair_missing_foreign_key_join
 from indicsql.schema.catalog import NDAPCatalog
 from indicsql.schema.entity_grounder import dynamic_entity_grounder
 from indicsql.schema.phonetic import transliterate_indic_to_latin
@@ -189,6 +191,7 @@ def _build_dynamic_fallback(
         where_clauses.append(f"commodity = '{entities['commodity'].capitalize()}'")
 
     where_str = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    lower = raw_query.lower()
 
     # Find candidate numeric measure columns
     numeric_cols = [
@@ -213,7 +216,6 @@ def _build_dynamic_fallback(
         return f"SELECT district_name, {func}({target_measure}) AS {alias} FROM {table_name}{where_str} GROUP BY district_name ORDER BY {alias} {order_dir} LIMIT {limit_n};"
 
     # Check for lowest / highest superlative in query with script boundaries
-    lower = raw_query.lower()
     is_min = any(re.search(r'\b' + re.escape(w) + r'\b', lower) for w in ['lowest', 'min', 'minimum', 'sabse kam']) or any(
         re.search(r'(?:^|[^\w\u0900-\u0D7F])' + re.escape(w) + r'(?:[^\w\u0900-\u0D7F]|$)', raw_query)
         for w in ['कम', 'குறைவாக', 'తక్కువ', 'అత్యల్పంగా', 'কম', 'कमी']
@@ -261,13 +263,28 @@ def synthesize_sql(
         (sql_query, method, confidence_score)
     """
     raw_query = state.get("raw_query", "").strip()
-    table_name = state.get("target_database") or "ndap_pm_kisan_disbursement"
-    table_schema = NDAPCatalog.get_table_schema(table_name)
+    database_schema = state.get("database_schema")
+    database_schema_name = state.get("database_schema_name")
+    if database_schema:
+        if not database_schema_name:
+            raise ValueError("SQL synthesis requires the selected database schema name.")
+        table_name = database_schema_name
+        table_schema = database_schema
+        table_cols = {
+            column: description
+            for table in database_schema.get("tables", {}).values()
+            for column, description in table.get("columns", {}).items()
+        }
+    else:
+        table_name = state.get("target_database")
+        if not table_name:
+            raise ValueError("SQL synthesis requires a matched target database table.")
+        table_schema = NDAPCatalog.get_table_schema(table_name)
+        table_cols = table_schema.get("columns", {})
     language = state.get("detected_lang", "en")
     entities = extract_canonical_entities(raw_query)
 
     # Map generic commodity to the table's specific column name
-    table_cols = table_schema.get("columns", {})
     mapped_entities: Dict[str, str] = {}
     if "state_name" in entities:
         mapped_entities["state_name"] = entities["state_name"]
@@ -280,8 +297,34 @@ def synthesize_sql(
             mapped_entities["fertilizer_type"] = entities["commodity"]
         elif "commodity" in table_cols:
             mapped_entities["commodity"] = entities["commodity"]
+    if database_schema:
+        for entity, column_names in (
+            ("state_name", ("state_name", "state")),
+            ("district_name", ("district_name", "district")),
+        ):
+            canonical_value = mapped_entities.get(entity)
+            if not canonical_value:
+                continue
+            for table in database_schema.get("tables", {}).values():
+                examples = table.get("sample_values", {})
+                stored_value = next(
+                    (
+                        value
+                        for column in column_names
+                        for value in examples.get(column, [])
+                        if value.casefold() == canonical_value.casefold()
+                    ),
+                    None,
+                )
+                if stored_value:
+                    mapped_entities[entity] = stored_value
+                    break
 
-    matched_cols = [el.get("column_name") for el in state.get("pruned_schema", [])]
+    matched_cols = (
+        []
+        if database_schema
+        else [el.get("column_name") for el in state.get("pruned_schema", [])]
+    )
 
     # 1. Neural Generation via Ollama
     if _ollama_client.is_available:
@@ -307,6 +350,13 @@ def synthesize_sql(
                 return neural_sql, f"ollama_{_ollama_client.model_name}", 0.94
         except Exception as e:
             logger.warning("Neural SQL synthesis error: %s", e)
+            if database_schema:
+                raise RuntimeError(f"PostgreSQL SQL generation failed: {e}") from e
+
+    if database_schema:
+        raise RuntimeError(
+            "The local SQL model is unavailable; no fallback is configured for PostgreSQL schemas."
+        )
 
     # 2. Dynamic Schema-Grounded Fallback
     matched_cols = [el.get("column_name") for el in state.get("pruned_schema", [])]
@@ -330,6 +380,13 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
         error_feedback=error_feedback,
         previous_sql=prev_sql,
     )
+    raw_stochastic_draft = best_sql
+    schema_repairs: List[str] = []
+    if state.get("database_schema"):
+        best_sql, schema_repairs = repair_missing_foreign_key_join(
+            best_sql, state["database_schema"]
+        )
+    raw_query = state.get("raw_query", "")
 
     # Publish Event
     EventBus.publish(
@@ -351,13 +408,15 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
         "output_sql": best_sql,
         "reflection_attempt": state.get("reflection_attempts", 0),
     }
+    if schema_repairs:
+        audit_entry["raw_schema_sql"] = raw_stochastic_draft
+        audit_entry["schema_repairs"] = schema_repairs
 
     # Final defense-in-depth: Ensure unrequested temporal filters are pruned and metrics are aligned
-    raw_query = state.get("raw_query", "")
-    target_table = state.get("target_database")
-    raw_stochastic_draft = best_sql
-    best_sql = prune_unrequested_temporal_filters(best_sql, raw_query, table_name=target_table)
-    best_sql = sanitize_metric_aggregations(best_sql, raw_query, table_name=target_table)
+    if not state.get("database_schema"):
+        target_table = state.get("target_database")
+        best_sql = prune_unrequested_temporal_filters(best_sql, raw_query, table_name=target_table)
+        best_sql = sanitize_metric_aggregations(best_sql, raw_query, table_name=target_table)
 
     current_trace = list(state.get("audit_trace", []))
     current_trace.append(audit_entry)
@@ -365,6 +424,7 @@ def sql_synthesizer_node(state: IndicSQLState) -> Dict[str, Any]:
     return {
         "generated_sql": best_sql,
         "raw_stochastic_sql": raw_stochastic_draft,
+        "schema_repairs": schema_repairs,
         "syntax_valid": True,
         "grounded_entities": extract_canonical_entities(raw_query),
         "audit_trace": current_trace,

@@ -29,6 +29,8 @@ def route_after_execution(state: IndicSQLState) -> str:
 
     if not error and state.get("execution_result") is not None:
         return "success"
+    if state.get("schema_validation_retry_used") and attempts >= 1:
+        return "fatal_error"
     if attempts < 3:
         return "retry"
     return "fatal_error"
@@ -85,7 +87,16 @@ def create_indicsql_graph(checkpointer: Optional[Any] = None):
         return None
 
 
-def execute_indicsql_pipeline(query: str, query_id: Optional[str] = None) -> IndicSQLState:
+def execute_indicsql_pipeline(
+    query: str,
+    query_id: Optional[str] = None,
+    *,
+    database_schema_name: Optional[str] = None,
+    database_schema: Optional[dict[str, Any]] = None,
+    database_schema_source: Optional[str] = None,
+    language_override: Optional[str] = None,
+    sandbox: Optional[Any] = None,
+) -> IndicSQLState:
     """
     Executes the multi-agent swarm for a given query, supporting both LangGraph and native execution.
     """
@@ -98,17 +109,50 @@ def execute_indicsql_pipeline(query: str, query_id: Optional[str] = None) -> Ind
         "reflection_attempts": 0,
         "audit_trace": [],
     }
+    if database_schema is not None:
+        state["database_schema"] = database_schema
+        state["database_schema_full"] = database_schema
+        state["database_schema_name"] = database_schema_name or ""
+        state["database_dialect"] = database_schema.get("dialect", "postgres")
+        state["database_schema_source"] = database_schema_source or "provided"
 
     # Step 1: Supervisor
     state.update(supervisor_node(state))
+    if language_override:
+        if state.get("detected_lang") != language_override:
+            current_trace = list(state.get("audit_trace", []))
+            current_trace.append(
+                {
+                    "step": 1.5,
+                    "agent": "BenchmarkLanguageMetadata",
+                    "action": "language_override",
+                    "detected_language": language_override,
+                }
+            )
+            state["audit_trace"] = current_trace
+        state["detected_lang"] = language_override
 
     # Step 2: Schema Linker
     state.update(schema_linker_node(state))
+    if state.get("schema_linking_error"):
+        state["generated_sql"] = ""
+        state["execution_result"] = None
+        state["execution_time_ms"] = 0.0
+        state["execution_error"] = state["schema_linking_error"]
+        state.update(response_verbalizer_node(state))
+        return state
 
     # Step 3: Loop with Reflection
     while True:
         # Synthesize SQL
-        state.update(sql_synthesizer_node(state))
+        try:
+            state.update(sql_synthesizer_node(state))
+        except (RuntimeError, ValueError) as exc:
+            state["generated_sql"] = ""
+            state["execution_result"] = None
+            state["execution_error"] = f"SQL synthesis failed: {exc}"
+            state.update(response_verbalizer_node(state))
+            return state
 
         # Critic security check
         state.update(critic_node(state))
@@ -116,12 +160,34 @@ def execute_indicsql_pipeline(query: str, query_id: Optional[str] = None) -> Ind
             break
 
         # Sandbox execution
-        state.update(sandbox_executor_node(state))
+        state.update(sandbox_executor_node(state, sandbox=sandbox))
 
         decision = route_after_execution(state)
         if decision == "success" or decision == "fatal_error":
             break
         elif decision == "retry":
+            if state.get("schema_validation_error"):
+                state["schema_validation_retry_used"] = True
+            full_schema = state.get("database_schema_full")
+            current_schema = state.get("database_schema", {})
+            full_tables = set(full_schema.get("tables", {})) if full_schema else set()
+            current_tables = set(current_schema.get("tables", {}))
+            if (
+                state.get("schema_validation_error")
+                and full_schema
+                and full_tables != current_tables
+            ):
+                state["database_schema"] = full_schema
+                state["schema_context_broadened"] = True
+                current_trace = list(state.get("audit_trace", []))
+                current_trace.append(
+                    {
+                        "step": 4.25,
+                        "agent": "SchemaValidation",
+                        "action": "broadened_schema_context",
+                    }
+                )
+                state["audit_trace"] = current_trace
             state.update(reflection_healer_node(state))
 
     # Step 4: Response Verbalizer

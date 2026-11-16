@@ -25,6 +25,9 @@ export interface QueryResponse {
   detected_language: string;
   detected_script: string;
   generated_sql: string;
+  execution_status?: "success" | "failed";
+  execution_error?: string | null;
+  suggested_queries?: string[];
   verbalized_response: string;
   execution_result: ExecutionResult | null;
   audit_trace?: AuditStep[];

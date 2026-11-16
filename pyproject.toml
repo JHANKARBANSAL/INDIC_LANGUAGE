@@ -69,6 +69,10 @@ eval = [
     "pytest-asyncio>=0.23.0",
     "tqdm>=4.66.0"
 ]
+indicdb = [
+    "psycopg2-binary>=2.9.9",
+    "PyYAML>=6.0"
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
