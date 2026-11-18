@@ -26,6 +26,7 @@ BharatQuery Cockpit is built with **Next.js 14 (App Router)**, **TypeScript**, *
      - DuckDB In-Memory Execution Latency (e.g., `0.67 ms`)
    - The query result panel shows whether SQL executed, any database error, and the number of returned rows. A successful execution does not by itself prove the answer matches the question; compare the rows with an expected result.
    - Unsupported questions explain which data is missing and can offer clickable related questions that the available datasets can answer.
+   - Interactive farmer counts default to the latest available financial year when none is requested. Literacy questions use latest-year district rates rather than an unweighted state-wide average; applied defaults are shown with the result.
 4. **📊 Dynamic Visualizer & Civic Data Grid:**
    - **Visual Charts:** Auto Bar/Line charts using Recharts for categorical or temporal distributions. Bold KPI Metric cards for single scalar answers.
    - **Data Table:** Dynamic columns, right-aligned numbers, and client-side pagination.

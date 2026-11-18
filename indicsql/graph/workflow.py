@@ -91,6 +91,7 @@ def execute_indicsql_pipeline(
     query: str,
     query_id: Optional[str] = None,
     *,
+    interactive_defaults: bool = False,
     database_schema_name: Optional[str] = None,
     database_schema: Optional[dict[str, Any]] = None,
     database_schema_source: Optional[str] = None,
@@ -108,6 +109,7 @@ def execute_indicsql_pipeline(
         "raw_query": query,
         "reflection_attempts": 0,
         "audit_trace": [],
+        "interactive_defaults": interactive_defaults,
     }
     if database_schema is not None:
         state["database_schema"] = database_schema

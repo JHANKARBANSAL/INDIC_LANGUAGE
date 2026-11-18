@@ -21,9 +21,14 @@ class TestQueryApi(unittest.TestCase):
 
         response = run_query(QueryRequest(query="List records"))
 
+        run_pipeline.assert_called_once_with(
+            "List records",
+            interactive_defaults=True,
+        )
         self.assertEqual(response.execution_status, "success")
         self.assertIsNone(response.execution_error)
         self.assertEqual(response.execution_result["row_count"], 0)
+        self.assertEqual(response.applied_defaults, [])
 
     @patch("indicsql.api.server.execute_indicsql_pipeline")
     def test_returns_execution_failure_details(self, run_pipeline):

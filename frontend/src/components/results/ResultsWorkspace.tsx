@@ -147,6 +147,14 @@ export function ResultsWorkspace({
             answer is semantically correct. Compare the returned rows with an
             expected result to verify correctness.
           </p>
+          {data.applied_defaults?.map((appliedDefault) => (
+            <p
+              key={appliedDefault}
+              className="text-xs font-medium text-amber-800"
+            >
+              Assumption applied: {appliedDefault}
+            </p>
+          ))}
         </div>
       </div>
 

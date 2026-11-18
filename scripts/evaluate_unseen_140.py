@@ -313,7 +313,7 @@ def evaluate_unseen_suite(
     started_at = datetime.now(timezone.utc)
 
     print("=" * 80)
-    print(f"Executing End-to-End Multilingual Evaluation on {total_queries} Unseen Queries")
+    print(f"Executing End-to-End Multilingual Evaluation on {total_queries} Benchmark Queries")
     print("=" * 80)
 
     metrics_by_lang = defaultdict(

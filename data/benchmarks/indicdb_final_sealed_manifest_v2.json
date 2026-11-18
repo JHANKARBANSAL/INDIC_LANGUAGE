@@ -1,0 +1,49 @@
+{
+  "artifact_type": "IndicDB sealed final-test manifest",
+  "status": "sealed_pending_official_postgresql_evaluation",
+  "benchmark_repo_id": "roshankaranth/IndicDB",
+  "benchmark_revision": "f57b0fb75d672114ae2d6e6be1a78d64056ce8af",
+  "selection_rule": "SHA-256(seed + NUL + pair_id + NUL + dataset_name), ascending",
+  "seed": "indicdb-final-v2-20261118",
+  "group_count": 40,
+  "question_count": 280,
+  "languages": [
+    "bn",
+    "en",
+    "hi",
+    "hi-en",
+    "mr",
+    "ta",
+    "te"
+  ],
+  "input_parquet_sha256": {
+    "en": "1cef7e3b5a2f3f863a8c4dcc5b2774848245ed87f94ce671c16cdd57a5cb22e5",
+    "hi": "2285c66cc32797bbf08705537b4c070388525e81c8d032fde27f95bfc4e5d28c",
+    "hi-en": "29ecc60b58a975cd33e53d540fe04f23b4b54cbc6ef941b4fef755c6a140d359",
+    "mr": "394a55726639dcaf94f3650f9a0463899ff11bc960e157931fbf9feb928e6552",
+    "ta": "c07108e67f6c457153f8268cdff9561eb208419438d2d4783f912193d3c4ff2b",
+    "te": "c5971cbc346bfad370a58786f1c6d40b16e96d02b839e1a56540ff8e42bdaa77",
+    "bn": "a41bd22bbae77922c5b1297ef27b74931fbbdec1ad03dc5b63ad5b6cc5fb0a43"
+  },
+  "development_fixture_files": [
+    "data/benchmarks/indicdb_eval_suite_pan_india_280.json",
+    "data/benchmarks/indicdb_development_candidate.json",
+    "data/benchmarks/indicdb_unseen_suite_140.json"
+  ],
+  "eligible_group_exclusions": {
+    "incomplete_language_group": 438,
+    "previously_opened_sealed_key": 40,
+    "unresolved_schema_name": 1297
+  },
+  "excluded_unresolved_schema_names": [
+    "INDIA_IHDS_2005_HOUSEHOLD_SURVEY_",
+    "INDIA_IHDS_2005_INDIVIDUAL_SURVEY_",
+    "INDIA_UDISE_SCHOOL_PROFILES"
+  ],
+  "selected_key_sha256": "3cf591ed126cbef2a8fc704472291e39b296ee587dd84878e7d14b88a8e0b84b",
+  "previously_opened_key_count_excluded": 40,
+  "question_and_sql_in_manifest": false,
+  "sealed_key_file_is_gitignored": "benchmark_results/sealed_final/indicdb_final_keys_v2.json",
+  "official_postgresql_requirement": "Evaluate only on the byte-verified official dump restored with PostgreSQL 16 or newer; report unresolved UDISE rows separately.",
+  "publication_warning": "No code or vocabulary tuning may use these selected questions or SQL."
+}

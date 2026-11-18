@@ -46,6 +46,11 @@ class TestSchemaLinking(unittest.TestCase):
         self.assertEqual(set(NDAPCatalog.list_tables()), indexed_tables)
 
         for concept, entry in NDAP_MULTILINGUAL_INDEX.items():
+            self.assertIn(
+                entry["column"],
+                NDAPCatalog.get_table_schema(entry["table"])["columns"],
+                msg=f"{concept} references a missing catalog column",
+            )
             expected = (entry["table"], entry["column"])
             for synonym in entry["synonyms"]:
                 with self.subTest(concept=concept, synonym=synonym):
@@ -73,6 +78,46 @@ class TestSchemaLinking(unittest.TestCase):
         self.assertTrue(len(mr_elements) > 0)
         self.assertEqual(mr_elements[0]["table_name"], "ndap_school_infrastructure")
 
+    def test_regression_routing_for_provisional_multilingual_terms(self):
+        cases = {
+            "बिहार में कुपोषित बच्चों के सबसे अधिक प्रतिशत वाले जिले": (
+                "ndap_nfhs5_health_indicators",
+                "stunted_children_pct",
+            ),
+            "महाराष्ट्रात तपासलेल्या माती नमुन्यांची एकूण संख्या किती?": (
+                "ndap_soil_health_records",
+                "samples_tested",
+            ),
+            "தமிழ்நாட்டில் வழங்கப்பட்ட மண் வள அட்டைகளின் எண்ணிக்கை என்ன?": (
+                "ndap_soil_health_records",
+                "cards_issued",
+            ),
+            "ఆంధ్రప్రదేశ్‌లో ట్యాప్ వాటర్ కవరేజ్ సగటు శాతం ఎంత?": (
+                "ndap_jal_jeevan_tap_water",
+                "tap_connection_coverage_pct",
+            ),
+            "What was the total DAP requirement in Rajasthan in tonnes?": (
+                "ndap_fertilizer_distribution",
+                "requirement_tonnes",
+            ),
+            "महाराष्ट्रातील ग्रामपंचायतींनी वापरलेला एकूण निधी किती रुपये आहे?": (
+                "ndap_gram_panchayat_finance",
+                "grant_utilized_inr",
+            ),
+            "महाराष्ट्रात आरोग्य सेवा क्षेत्रात किती विद्यार्थी प्रशिक्षित झाले?": (
+                "ndap_vocational_skill_training",
+                "certified_candidates",
+            ),
+            "What is the total student count enrolled in Delhi schools?": (
+                "ndap_education_stats",
+                "student_count",
+            ),
+        }
+        for query, expected in cases.items():
+            with self.subTest(query=query):
+                match = link_schema_elements(query)[0]
+                self.assertEqual((match["table_name"], match["column_name"]), expected)
+
     def test_schema_linker_node_state_integration(self):
         state = {
             "raw_query": "उत्तर प्रदेश में यूरिया उर्वरक की कुल बिक्री कितनी रही?",
@@ -83,6 +128,14 @@ class TestSchemaLinking(unittest.TestCase):
         res = schema_linker_node(state)
         self.assertEqual(res["target_database"], "ndap_fertilizer_distribution")
         self.assertIn("step", res["audit_trace"][-1])
+
+    def test_combined_schema_evidence_beats_a_generic_amount_term(self):
+        elements = link_schema_elements(
+            "Show the PMJAY claim value for the selected state.", lang="en"
+        )
+        self.assertTrue(elements)
+        self.assertEqual(elements[0]["table_name"], "ndap_ayushman_bharat_pmjay")
+        self.assertEqual(elements[0]["column_name"], "claim_amount_settled_inr")
 
     def test_unknown_schema_does_not_fall_back_to_pm_kisan(self):
         state = {

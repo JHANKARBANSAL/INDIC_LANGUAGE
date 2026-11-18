@@ -95,7 +95,6 @@ def extract_metric_intent(query: str) -> MetricIntent:
         return MetricIntent()
 
     clean_q = query.split("\n")[0].strip()
-    lower_q = clean_q.lower()
     intent = MetricIntent()
 
     # 1. Average / Mean Intent
@@ -143,10 +142,11 @@ def extract_metric_intent(query: str) -> MetricIntent:
     # 4. Highest / Maximum Intent
     highest_patterns = [
         r'\b(?:highest|maximum|most|max|peak|greatest|top|best)\b',
-        r'सबसे\s*ज्यादा', r'अधिकतम', r'सर्वाधिक',
+        r'\b(?:sabse\s*zyada|sab\s*se\s*zyada)\b',
+        r'सबसे\s*ज्यादा', r'सबसे\s*अधिक', r'अधिक', r'अधिकतम', r'सर्वाधिक',
         r'सर्वात\s*जास्त', r'कमाल', r'जास्त',
         r'সবচেয়ে\s*বেশি', r'সর্বাধিক',
-        r'மிக\s*அதிக', r'அதிகபட்ச', r'அதிகமாக',
+        r'மிக\s*அதிக', r'அதிக', r'அதிகபட்ச', r'அதிகமாக',
         r'అత్యధికంగా', r'అత్యధిక', r'గరిష్ట',
     ]
     if any(re.search(p, clean_q, re.IGNORECASE) for p in highest_patterns):
@@ -165,6 +165,13 @@ def extract_metric_intent(query: str) -> MetricIntent:
         intent.limit_n = int(bottom_n_match.group(1))
         intent.is_ranking_query = True
         intent.has_grouping_intent = True
+
+    if not intent.is_ranking_query:
+        indic_top_n_match = re.search(r"(\d+)\s*(?:जिले|जिलों|জেলা|மாவட்டங்கள்|జిల్లాలు)", clean_q)
+        if indic_top_n_match and (intent.is_highest or intent.is_lowest):
+            intent.limit_n = int(indic_top_n_match.group(1))
+            intent.is_ranking_query = True
+            intent.has_grouping_intent = True
 
     # 5. Soil Health Disambiguation: Samples Tested vs Cards Issued
     soil_samples_patterns = [
@@ -222,7 +229,7 @@ def extract_metric_intent(query: str) -> MetricIntent:
 
     # 7. Grouping Intent
     grouping_patterns = [
-        r'\b(?:each|every|per|breakdown|by\s+state|by\s+district|by\s+year|state-wise|district-wise|year-wise|wise|top\s+\d+|bottom\s+\d+|districts\s+in|states\s+in)\b',
+        r'\b(?:each|every|per|breakdown|by\s+state|by\s+district|by\s+year|state-wise|district-wise|year-wise|wise|top\s+\d+|bottom\s+\d+|districts\s+in|states\s+in|kis\s+district)\b',
         r'(?<!\w)(?:जिले|जिला|राज्य|साल|वर्ष)वार(?!\w)', r'प्रत्येक', r'हर\s*एक',
         r'जिल्हानिहाय', r'राज्यनिहाय',
         r'প্রতিটি', r'জেলাভিত্তিক|রাজ্যভিত্তিক|বছরভিত্তিক',

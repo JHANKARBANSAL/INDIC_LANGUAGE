@@ -1,0 +1,46 @@
+{
+  "artifact_type": "IndicDB sealed final-run lock",
+  "benchmark_revision": "f57b0fb75d672114ae2d6e6be1a78d64056ce8af",
+  "code": {
+    "git_revision": "9230c913b2b784cc60562074d5f98a60352dc700",
+    "worktree_dirty": true
+  },
+  "credentials_included": false,
+  "evaluator_command": "./.venv/bin/python scripts/evaluate_indicdb_sealed_final.py --parquet-dir <verified-parquet-dir> --archive <verified-archive> --dump <verified-dump> --sealed-manifest data/benchmarks/indicdb_final_sealed_manifest.json --lock data/benchmarks/indicdb_final_run_lock_pg16_qwen7b.json --sealed-key-file benchmark_results/sealed_final/indicdb_final_keys_v1.json --output benchmark_results/sealed_final/indicdb_final_results_pg16_qwen7b.json --receipt benchmark_results/sealed_final/indicdb_final_run_receipt_pg16_qwen7b.json",
+  "input_parquet_sha256": {
+    "bn": "a41bd22bbae77922c5b1297ef27b74931fbbdec1ad03dc5b63ad5b6cc5fb0a43",
+    "en": "1cef7e3b5a2f3f863a8c4dcc5b2774848245ed87f94ce671c16cdd57a5cb22e5",
+    "hi": "2285c66cc32797bbf08705537b4c070388525e81c8d032fde27f95bfc4e5d28c",
+    "hi-en": "29ecc60b58a975cd33e53d540fe04f23b4b54cbc6ef941b4fef755c6a140d359",
+    "mr": "394a55726639dcaf94f3650f9a0463899ff11bc960e157931fbf9feb928e6552",
+    "ta": "c07108e67f6c457153f8268cdff9561eb208419438d2d4783f912193d3c4ff2b",
+    "te": "c5971cbc346bfad370a58786f1c6d40b16e96d02b839e1a56540ff8e42bdaa77"
+  },
+  "lock_sha256": "bd20adad159004e898668a7ff21b9acd7633a4de81b92614d375c2f02b55bbe2",
+  "lock_version": 1,
+  "model": {
+    "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "endpoint": "http://127.0.0.1:11434",
+    "name": "qwen2.5:7b",
+    "provider": "ollama",
+    "seed": 42,
+    "temperature": 0.05
+  },
+  "official_archive_sha256": "b450a6c4471b07cdb67da7d51b40f274ad413111ed6d0767550be5ce28c93f5d",
+  "official_dump_sha256": "39a12ed5a0a1bcc8758b210056d464ee24e04252e1d28b99f077aef8e9168ed2",
+  "postgresql_runtime": {
+    "connection_mode": "INDICDB_DSN environment variable; excluded from lock",
+    "database_name": "indicdb_final_audit",
+    "database_user": "jhankar",
+    "postgresql_major_version": "16",
+    "postgresql_server_version": "16.16 (Homebrew)"
+  },
+  "questions_or_gold_sql_included": false,
+  "sealed_manifest_sha256": "844ca10c55ad6d1796f5d18c87fbdc74bd75468dd21f70b921ed68b450844cae",
+  "selected_keys_included": false,
+  "source_snapshot": {
+    "archive_file_name": "indicDB.zip",
+    "dump_file_name": "indicDB.dump",
+    "source_manifest_sha256": "37b110dac619e0f2539d5c20cefdf4804c039bdaf2db5f2ad9414762901e9879"
+  }
+}

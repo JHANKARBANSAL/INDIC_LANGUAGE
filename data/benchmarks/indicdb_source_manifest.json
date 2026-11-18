@@ -1,0 +1,117 @@
+{
+  "benchmark": {
+    "repo_id": "roshankaranth/IndicDB",
+    "repo_url": "https://huggingface.co/datasets/roshankaranth/IndicDB",
+    "revision": "f57b0fb75d672114ae2d6e6be1a78d64056ce8af",
+    "license_metadata": "cc",
+    "license_subtype": null,
+    "files": {
+      "en": {
+        "path": "data/english/test_english.parquet",
+        "rows": 3477,
+        "size_bytes": 338971,
+        "sha256": "1cef7e3b5a2f3f863a8c4dcc5b2774848245ed87f94ce671c16cdd57a5cb22e5"
+      },
+      "hi": {
+        "path": "data/hindi/test_hindi.parquet",
+        "rows": 2254,
+        "size_bytes": 295078,
+        "sha256": "2285c66cc32797bbf08705537b4c070388525e81c8d032fde27f95bfc4e5d28c"
+      },
+      "hi-en": {
+        "path": "data/hinglish/test_hinglish.parquet",
+        "rows": 2043,
+        "size_bytes": 206148,
+        "sha256": "29ecc60b58a975cd33e53d540fe04f23b4b54cbc6ef941b4fef755c6a140d359"
+      },
+      "mr": {
+        "path": "data/marathi/test_marathi.parquet",
+        "rows": 2368,
+        "size_bytes": 327388,
+        "sha256": "394a55726639dcaf94f3650f9a0463899ff11bc960e157931fbf9feb928e6552"
+      },
+      "ta": {
+        "path": "data/tamil/test_tamil.parquet",
+        "rows": 2368,
+        "size_bytes": 356309,
+        "sha256": "c07108e67f6c457153f8268cdff9561eb208419438d2d4783f912193d3c4ff2b"
+      },
+      "te": {
+        "path": "data/telugu/test_telugu.parquet",
+        "rows": 2368,
+        "size_bytes": 318085,
+        "sha256": "c5971cbc346bfad370a58786f1c6d40b16e96d02b839e1a56540ff8e42bdaa77"
+      },
+      "bn": {
+        "path": "data/bengali/test_bengali.parquet",
+        "rows": 2368,
+        "size_bytes": 317773,
+        "sha256": "a41bd22bbae77922c5b1297ef27b74931fbbdec1ad03dc5b63ad5b6cc5fb0a43"
+      }
+    },
+    "observed_totals": {
+      "physical_rows": 17246,
+      "distinct_dataset_names": 17,
+      "english_repeated_pair_schema_keys": 5,
+      "english_rows_with_blank_sql": 5
+    },
+    "database_name_comparison": {
+      "exact_matches": 14,
+      "benchmark_names_without_schema_config": [
+        "INDIA_IHDS_2005_HOUSEHOLD_SURVEY_",
+        "INDIA_IHDS_2005_INDIVIDUAL_SURVEY_",
+        "INDIA_UDISE_SCHOOL_PROFILES"
+      ],
+      "schema_config_names_without_benchmark_rows": [
+        "INDIA_IHDS_2011_HOUSEHOLD_SURVEY",
+        "INDIA_IHDS_2011_INDIVIDUAL_SURVEY",
+        "india_ihds_2005_birth_history_coded"
+      ]
+    },
+    "card_claims": {
+      "tasks": 15617,
+      "databases": 20,
+      "tables": 237,
+      "database_rows": 7690000
+    },
+    "card_vs_files_note": "The pinned Parquet files have 17,246 physical rows and reference 17 distinct dataset_name values. These differ from the dataset card summary; use the pinned file counts for experiments and report the discrepancy."
+  },
+  "postgresql_dump": {
+    "published_source_url": "https://drive.google.com/uc?export=download&id=1PfZN0HAyoPtJ_Ef6YLd3of5YBj24z131",
+    "local_file_name": "indicDB.dump",
+    "source_archive_member": "database/indicDB.dump",
+    "local_size_bytes": 32374412,
+    "local_sha256": "39a12ed5a0a1bcc8758b210056d464ee24e04252e1d28b99f077aef8e9168ed2",
+    "local_format": "PostgreSQL custom database dump v1.15-0",
+    "published_checksum": null,
+    "downloaded_source_archive_sha256": "b450a6c4471b07cdb67da7d51b40f274ad413111ed6d0767550be5ce28c93f5d",
+    "byte_for_byte_source_match_verified": true,
+    "source_match_evidence": "Downloaded the dataset-card Google Drive indicDB.zip; its SHA-256 matches the local archive, and the embedded database/indicDB.dump member SHA-256 matches the local dump.",
+    "verified_archive_schema_configs": {
+      "schemas": 17,
+      "tables": 208,
+      "note": "Counted 17 unique schema_config.yaml database names and 208 declared dimension/fact tables inside the byte-verified source archive. The byte-verified dump was also restored in an isolated PostgreSQL 16.16 container, confirming 17 schemas, 208 tables, and 3,910,112 rows."
+    },
+    "card_claims": {
+      "databases": 20,
+      "tables": 237,
+      "rows": 7690000
+    }
+  },
+  "official_source_archive": {
+    "local_file_name": "indicDB.zip",
+    "local_size_bytes": 87069122,
+    "local_sha256": "b450a6c4471b07cdb67da7d51b40f274ad413111ed6d0767550be5ce28c93f5d",
+    "byte_for_byte_source_match_verified": true,
+    "note": "This archive matches the dataset-card Google Drive download byte-for-byte and contains the embedded PostgreSQL dump plus the released schema/source data."
+  },
+  "audit_status": {
+    "hugging_face_revision_and_parquet_hashes": "verified",
+    "parquet_row_counts": "verified",
+    "google_drive_archive_and_embedded_dump_identity": "verified by SHA-256",
+    "declared_schema_and_table_counts": "verified from the byte-matched archive schema configs: 17 schemas and 208 tables",
+    "restored_postgresql_catalog_and_table_row_counts": "verified: the byte-verified dump was restored in an isolated PostgreSQL 16.16 container; catalog contains 17 schemas, 208 tables, and 3,910,112 rows",
+    "benchmark_to_database_schema_name_parity": "not exact: 14 of 17 benchmark names match archive configs; 3 names differ on each side",
+    "exact_dataset_license": "unresolved; Hugging Face metadata only says cc"
+  }
+}

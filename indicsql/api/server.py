@@ -49,6 +49,7 @@ class QueryResponse(BaseModel):
     verbalized_response: str
     execution_error: Optional[str] = None
     suggested_queries: List[str] = Field(default_factory=list)
+    applied_defaults: List[str] = Field(default_factory=list)
     raw_stochastic_sql: Optional[str] = None
     execution_result: Optional[Dict[str, Any]] = None
     audit_trace: List[Dict[str, Any]] = Field(default_factory=list)
@@ -95,7 +96,10 @@ def run_query(request: QueryRequest):
     if not request.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    result_state = execute_indicsql_pipeline(request.query)
+    result_state = execute_indicsql_pipeline(
+        request.query,
+        interactive_defaults=True,
+    )
 
     return QueryResponse(
         query_id=result_state.get("query_id", ""),
@@ -108,6 +112,7 @@ def run_query(request: QueryRequest):
         ),
         execution_error=result_state.get("execution_error"),
         suggested_queries=result_state.get("suggested_queries", []),
+        applied_defaults=result_state.get("applied_defaults", []),
         raw_stochastic_sql=result_state.get("raw_stochastic_sql", ""),
         verbalized_response=result_state.get("verbalized_response", ""),
         execution_result=result_state.get("execution_result"),

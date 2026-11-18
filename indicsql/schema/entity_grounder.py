@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Optional, Set
 
 try:
     import duckdb
@@ -379,6 +379,7 @@ class DynamicEntityGrounder:
         self.known_states: Set[str] = set()
         self.known_districts: Set[str] = set()
         self.known_commodities: Set[str] = set()
+        self.known_sectors: Set[str] = set()
         self.district_to_state: Dict[str, str] = {}
         self._is_initialized = False
         self._populate_database_entities()
@@ -402,8 +403,8 @@ class DynamicEntityGrounder:
             # 1. Collect all distinct states (UPPERCASE)
             try:
                 states = con.execute("""
-                    SELECT DISTINCT UPPER(state_name) 
-                    FROM ndap_pm_kisan_disbursement 
+                    SELECT DISTINCT UPPER(state_name)
+                    FROM ndap_pm_kisan_disbursement
                     WHERE state_name IS NOT NULL
                 """).fetchall()
                 self.known_states = {s[0] for s in states if s[0]}
@@ -414,7 +415,7 @@ class DynamicEntityGrounder:
             try:
                 dist_state_rows = con.execute("""
                     SELECT DISTINCT district_name, UPPER(state_name)
-                    FROM read_parquet('data/parquet_stores/*.parquet', union_by_name=true) 
+                    FROM read_parquet('data/parquet_stores/*.parquet', union_by_name=true)
                     WHERE district_name IS NOT NULL AND length(trim(district_name)) > 1
                 """).fetchall()
                 for d, s in dist_state_rows:
@@ -449,6 +450,21 @@ class DynamicEntityGrounder:
                     SELECT DISTINCT UPPER(commodity) FROM ndap_mandi_commodity_prices WHERE commodity IS NOT NULL
                 """).fetchall()
                 self.known_commodities = {c[0].strip() for c in commodities if c[0] and len(c[0].strip()) > 1}
+            except Exception:
+                pass
+
+            # 4. Sector values are verified database literals, not free-text
+            # guesses. They may be used only when the query contains the exact
+            # stored sector name (case-insensitive).
+            try:
+                sectors = con.execute(
+                    """
+                    SELECT DISTINCT sector_skill_council
+                    FROM ndap_vocational_skill_training
+                    WHERE sector_skill_council IS NOT NULL
+                    """
+                ).fetchall()
+                self.known_sectors = {sector[0].strip() for sector in sectors if sector[0]}
             except Exception:
                 pass
 
@@ -570,6 +586,14 @@ class DynamicEntityGrounder:
             dist = entities["district_name"]
             if dist in self.district_to_state:
                 entities["state_name"] = self.district_to_state[dist]
+
+        # Step 8: preserve an exact sector literal for the only schema that
+        # supports sector-level filtering. This is intentionally conservative:
+        # translated sector aliases require native-speaker-reviewed vocabulary.
+        for sector in sorted(self.known_sectors, key=len, reverse=True):
+            if sector.casefold() in q_lower:
+                entities["sector_skill_council"] = sector
+                break
 
         return entities
 

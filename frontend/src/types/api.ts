@@ -28,6 +28,7 @@ export interface QueryResponse {
   execution_status?: "success" | "failed";
   execution_error?: string | null;
   suggested_queries?: string[];
+  applied_defaults?: string[];
   verbalized_response: string;
   execution_result: ExecutionResult | null;
   audit_trace?: AuditStep[];

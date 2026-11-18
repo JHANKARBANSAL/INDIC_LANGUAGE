@@ -49,6 +49,8 @@ class IndicSQLState(TypedDict, total=False):
     database_dialect: str
     database_schema_source: str
     schema_repairs: List[str]
+    interactive_defaults: bool
+    applied_defaults: List[str]
 
     # 2. Schema-Linking Substrate
     pruned_schema: List[SchemaElement]
