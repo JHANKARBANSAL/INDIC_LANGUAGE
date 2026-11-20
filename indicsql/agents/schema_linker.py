@@ -11,6 +11,7 @@ from indicsql.core.state import IndicSQLState, SchemaElement
 from indicsql.events.bus import EventBus
 from indicsql.events.schemas import SchemaLinkedEvent
 from indicsql.schema.catalog import NDAPCatalog
+from indicsql.agents.query_recommender import recommend_alternative_queries
 from indicsql.schema.multilingual_index import NDAP_MULTILINGUAL_INDEX
 from indicsql.schema.phonetic import normalize_indic_phonetics, transliterate_indic_to_latin
 
@@ -419,6 +420,16 @@ def schema_linker_node(state: IndicSQLState) -> Dict[str, Any]:
         if has_target
         else "No supported database schema matched this question; no query was executed."
     )
+    # General recommendation fallback for any unmatched schema (not only farmer literacy).
+    # Existing specialized alternatives take precedence and preserve prior behavior.
+    if linking_error and not suggested_queries:
+        suggested_queries = recommend_alternative_queries(
+            canonical_query,
+            schema=provided_schema,
+            language=lang,
+            preferred_table=primary_table or None,
+            limit=5,
+        )
 
     # Dynamic schema-linking confidence score based on match count and specificity
     match_density = sum(len(el.get("indic_synonyms", [])) for el in pruned)
