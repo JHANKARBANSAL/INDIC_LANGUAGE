@@ -804,14 +804,15 @@ LIMIT 1;</pre>
       const options = document.createElement('div');
       options.className = 'flex flex-col gap-2';
       queries.slice(0, 5).forEach((question) => {
-        if (typeof question !== 'string' || !question.trim()) return;
+        if (!question || typeof question.query !== 'string' || !question.token) return;
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'text-left text-sm px-4 py-2.5 bg-white hover:bg-amber-100 border border-amber-200 rounded-xl';
-        button.textContent = question;
+        button.textContent = question.query;
         button.addEventListener('click', () => {
           switchView('home');
-          setQueryAndExecute(question);
+          document.getElementById('main-search-input').value = question.query;
+          void executeCurrentQuery(question.token);
         });
         options.appendChild(button);
       });
@@ -820,7 +821,7 @@ LIMIT 1;</pre>
     }
 
     // Execute Current Query across all features (Connected Live to FastAPI & DuckDB Backend)
-    async function executeCurrentQuery() {
+    async function executeCurrentQuery(verifiedToken = null) {
       const q = document.getElementById('main-search-input').value.trim();
       if (!q) return;
 
@@ -841,10 +842,12 @@ LIMIT 1;</pre>
       ansCard.innerHTML = '<span class="inline-flex items-center gap-2 text-indigo-600 font-medium"><svg class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> ⏳ LangGraph Agent Swarm is querying DuckDB...</span>';
 
       try {
-        const response = await fetch('/query', {
+        const response = await fetch(verifiedToken ? '/suggestions/execute' : '/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: q })
+          body: verifiedToken
+            ? JSON.stringify({ token: verifiedToken })
+            : JSON.stringify({ query: q })
         });
 
         if (response.ok) {
@@ -857,7 +860,7 @@ LIMIT 1;</pre>
             if (rawPre) rawPre.textContent = '';
             const homeSqlCode = document.getElementById('home-sql-code');
             if (homeSqlCode) homeSqlCode.textContent = '';
-            renderAlternativeQueries(data.suggested_queries, data.execution_error);
+            renderAlternativeQueries(data.verified_suggestions, data.execution_error);
             return;
           }
           ansCard.textContent = data.verbalized_response || '';
