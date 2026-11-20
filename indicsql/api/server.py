@@ -3,6 +3,9 @@ FastAPI Server Gateway for IndicSQL Swarm.
 Exposes endpoints for natural language queries, schema inspection, and benchmark execution.
 """
 
+import secrets
+import threading
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
@@ -15,7 +18,9 @@ from indicsql import __version__
 from indicsql.graph.workflow import execute_indicsql_pipeline
 from indicsql.models.sarvam_client import SarvamAPIError, SarvamClient
 from indicsql.schema.catalog import NDAPCatalog
-from indicsql.agents.query_recommender import recommend_alternative_queries
+from indicsql.agents.verified_recommender import verified_alternative_queries
+from indicsql.agents.sandbox_executor import _sandbox
+from indicsql.sandbox.validator import validate_and_limit_sql
 
 app = FastAPI(
     title="IndicSQL API Gateway",
@@ -40,6 +45,43 @@ class QueryRequest(BaseModel):
     )
 
 
+class VerifiedSuggestion(BaseModel):
+    query: str
+    token: str
+    table: str
+    sample_row_count: int
+
+
+class SuggestedExecutionRequest(BaseModel):
+    token: str = Field(..., min_length=16, max_length=128)
+
+
+_SUGGESTION_CACHE: Dict[str, Dict[str, Any]] = {}
+_CACHE_LOCK = threading.RLock()
+_SANDBOX_LOCK = threading.RLock()
+_SUGGESTION_TTL_SECONDS = 300
+
+
+def _store_verified_suggestions(records: List[Dict[str, Any]]) -> List[VerifiedSuggestion]:
+    now = time.monotonic()
+    offered = []
+    with _CACHE_LOCK:
+        expired = [key for key, item in _SUGGESTION_CACHE.items() if item["expires"] <= now]
+        for key in expired:
+            _SUGGESTION_CACHE.pop(key, None)
+        # Constrain cache growth in a long-running process.
+        if len(_SUGGESTION_CACHE) > 500:
+            _SUGGESTION_CACHE.clear()
+        for item in records:
+            token = secrets.token_urlsafe(24)
+            _SUGGESTION_CACHE[token] = {**item, "expires": now + _SUGGESTION_TTL_SECONDS}
+            offered.append(VerifiedSuggestion(
+                query=item["query"], token=token,
+                table=item["table"], sample_row_count=item["sample_row_count"],
+            ))
+    return offered
+
+
 class QueryResponse(BaseModel):
     query_id: str
     raw_query: str
@@ -50,6 +92,7 @@ class QueryResponse(BaseModel):
     verbalized_response: str
     execution_error: Optional[str] = None
     suggested_queries: List[str] = Field(default_factory=list)
+    verified_suggestions: List[VerifiedSuggestion] = Field(default_factory=list)
     applied_defaults: List[str] = Field(default_factory=list)
     raw_stochastic_sql: Optional[str] = None
     execution_result: Optional[Dict[str, Any]] = None
@@ -102,19 +145,23 @@ def run_query(request: QueryRequest):
         interactive_defaults=True,
     )
 
-    suggestions = list(result_state.get("suggested_queries", []))
-    # Recover from schema/unanswerable-query failures, not service/model outages.
+    # Do not expose schema-only guesses as verified recommendations.
+    verified = []
     schema_error = result_state.get("schema_linking_error") or result_state.get("schema_validation_error")
-    execution_error = result_state.get("execution_error") or ""
-    if not suggestions and result_state.get("execution_result") is None and (
-        schema_error or ("Binder Error" in execution_error or "Catalog Error" in execution_error)
+    error_text = str(result_state.get("execution_error") or "").casefold()
+    if result_state.get("execution_result") is None and (
+        schema_error or "binder error" in error_text or "catalog error" in error_text
     ):
-        suggestions = recommend_alternative_queries(
-            request.query,
-            language=result_state.get("detected_lang", "en"),
-            preferred_table=result_state.get("target_database") or None,
-            limit=5,
-        )
+        with _SANDBOX_LOCK:
+            candidates = verified_alternative_queries(
+                request.query,
+                sandbox=_sandbox,
+                language=result_state.get("detected_lang", "en"),
+                preferred_table=result_state.get("target_database") or None,
+                limit=5,
+            )
+        verified = _store_verified_suggestions(candidates)
+    suggestions = [item.query for item in verified]
 
     return QueryResponse(
         query_id=result_state.get("query_id", ""),
@@ -127,11 +174,61 @@ def run_query(request: QueryRequest):
         ),
         execution_error=result_state.get("execution_error"),
         suggested_queries=suggestions,
+        verified_suggestions=verified,
         applied_defaults=result_state.get("applied_defaults", []),
         raw_stochastic_sql=result_state.get("raw_stochastic_sql", ""),
         verbalized_response=result_state.get("verbalized_response", ""),
         execution_result=result_state.get("execution_result"),
         audit_trace=result_state.get("audit_trace", []),
+    )
+
+
+@app.post("/suggestions/execute", response_model=QueryResponse)
+def execute_verified_suggestion(request: SuggestedExecutionRequest):
+    """Execute ONLY SQL previously generated and verified by this server.
+
+    The client supplies a random reference, never SQL. An expired reference
+    cannot trigger a query. The server rechecks actual database execution.
+    """
+    with _CACHE_LOCK:
+        candidate = _SUGGESTION_CACHE.get(request.token)
+        if candidate is None or candidate["expires"] <= time.monotonic():
+            _SUGGESTION_CACHE.pop(request.token, None)
+            raise HTTPException(status_code=410, detail="Suggestion expired; run the original question again.")
+        candidate = dict(candidate)
+
+    valid, safe_sql = validate_and_limit_sql(candidate["sql"], default_limit=25)
+    if not valid:
+        raise HTTPException(status_code=422, detail="Suggestion failed the SQL safety check.")
+    # Generated SQL uses only cataloged identifiers, and was pre-executed.
+    try:
+        with _SANDBOX_LOCK:
+            result = _sandbox.execute_query(safe_sql)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Suggestion is no longer executable against the database.") from exc
+    if int(result.get("row_count", 0)) <= 0:
+        raise HTTPException(status_code=409, detail="Suggestion no longer has available matching records.")
+
+    count = result["row_count"]
+    return QueryResponse(
+        query_id="suggest-" + secrets.token_hex(6),
+        raw_query=candidate["query"],
+        detected_language="schema-grounded",
+        detected_script="derived",
+        generated_sql=safe_sql,
+        execution_status="success",
+        verbalized_response=(
+            f"Verified database query returned {count} row(s) from "
+            f"{candidate['table']}. Showing available {candidate['metric']} "
+            f"values by {candidate['dimension']} (maximum 25 rows)."
+        ),
+        execution_result=result,
+        audit_trace=[{
+            "step": 1, "agent": "VerifiedAlternativeQuery",
+            "action": "reexecuted_prevalidated_schema_query",
+            "matched_table": candidate["table"],
+            "row_count": count, "status": "success",
+        }],
     )
 
 
