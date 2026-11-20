@@ -912,7 +912,7 @@ LIMIT 1;</pre>
 
           const n6Desc = document.getElementById('pipeline-node-6-desc');
           if (n6Desc) {
-            n6Desc.innerHTML = `Formulated localized response: <span class="font-semibold text-slate-800">"${data.verbalized_response}"</span>`;
+            n6Desc.textContent = 'Formulated localized response: ' + (data.verbalized_response || '');
           }
 
           // Render live DuckDB rows and dynamic headers into Inspector table
