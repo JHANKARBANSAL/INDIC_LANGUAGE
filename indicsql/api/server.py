@@ -15,6 +15,7 @@ from indicsql import __version__
 from indicsql.graph.workflow import execute_indicsql_pipeline
 from indicsql.models.sarvam_client import SarvamAPIError, SarvamClient
 from indicsql.schema.catalog import NDAPCatalog
+from indicsql.agents.query_recommender import recommend_alternative_queries
 
 app = FastAPI(
     title="IndicSQL API Gateway",
@@ -101,6 +102,20 @@ def run_query(request: QueryRequest):
         interactive_defaults=True,
     )
 
+    suggestions = list(result_state.get("suggested_queries", []))
+    # Recover from schema/unanswerable-query failures, not service/model outages.
+    schema_error = result_state.get("schema_linking_error") or result_state.get("schema_validation_error")
+    execution_error = result_state.get("execution_error") or ""
+    if not suggestions and result_state.get("execution_result") is None and (
+        schema_error or ("Binder Error" in execution_error or "Catalog Error" in execution_error)
+    ):
+        suggestions = recommend_alternative_queries(
+            request.query,
+            language=result_state.get("detected_lang", "en"),
+            preferred_table=result_state.get("target_database") or None,
+            limit=5,
+        )
+
     return QueryResponse(
         query_id=result_state.get("query_id", ""),
         raw_query=result_state.get("raw_query", ""),
@@ -111,7 +126,7 @@ def run_query(request: QueryRequest):
             "success" if result_state.get("execution_result") is not None else "failed"
         ),
         execution_error=result_state.get("execution_error"),
-        suggested_queries=result_state.get("suggested_queries", []),
+        suggested_queries=suggestions,
         applied_defaults=result_state.get("applied_defaults", []),
         raw_stochastic_sql=result_state.get("raw_stochastic_sql", ""),
         verbalized_response=result_state.get("verbalized_response", ""),
