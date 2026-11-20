@@ -59,7 +59,7 @@ class VerifiedAlternativeTests(unittest.TestCase):
     def test_irrelevant_questions_do_not_get_random_suggestions(self):
         sandbox = FakeSandbox()
         found = verified_alternative_queries(
-            "What is the orbital period of Neptune?",
+            "What is the orbital velocity of Neptune?",
             sandbox=sandbox
         )
         self.assertEqual(found, [])
