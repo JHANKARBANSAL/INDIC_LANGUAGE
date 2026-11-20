@@ -776,6 +776,49 @@ LIMIT 1;</pre>
       executeCurrentQuery();
     }
 
+    // Display alternatives only when returned by the live backend.
+    // DOM nodes are created with textContent; model/server text is never parsed as HTML.
+    function renderAlternativeQueries(queries, explanation) {
+      const previous = document.getElementById('alternative-query-panel');
+      if (previous) previous.remove();
+      if (!Array.isArray(queries) || queries.length === 0) return;
+      const card = document.getElementById('home-result-card');
+      if (!card || !card.parentElement) return;
+      const panel = document.createElement('section');
+      panel.id = 'alternative-query-panel';
+      panel.setAttribute('role', 'status');
+      panel.setAttribute('aria-live', 'polite');
+      panel.className = 'mt-5 p-5 bg-amber-50 border border-amber-200 rounded-2xl';
+      const heading = document.createElement('h3');
+      heading.className = 'text-sm font-bold text-amber-900 mb-2';
+      heading.textContent = 'Exact question cannot be answered with the available schema';
+      panel.appendChild(heading);
+      const reason = document.createElement('p');
+      reason.className = 'text-sm text-amber-800 mb-3';
+      reason.textContent = explanation || 'Try a related question grounded in documented table columns.';
+      panel.appendChild(reason);
+      const label = document.createElement('p');
+      label.className = 'text-sm font-semibold mb-2 text-slate-700';
+      label.textContent = 'Related questions based on available schema:';
+      panel.appendChild(label);
+      const options = document.createElement('div');
+      options.className = 'flex flex-col gap-2';
+      queries.slice(0, 5).forEach((question) => {
+        if (typeof question !== 'string' || !question.trim()) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'text-left text-sm px-4 py-2.5 bg-white hover:bg-amber-100 border border-amber-200 rounded-xl';
+        button.textContent = question;
+        button.addEventListener('click', () => {
+          switchView('home');
+          setQueryAndExecute(question);
+        });
+        options.appendChild(button);
+      });
+      panel.appendChild(options);
+      card.insertAdjacentElement('afterend', panel);
+    }
+
     // Execute Current Query across all features (Connected Live to FastAPI & DuckDB Backend)
     async function executeCurrentQuery() {
       const q = document.getElementById('main-search-input').value.trim();
@@ -793,6 +836,7 @@ LIMIT 1;</pre>
       const ansCard = document.getElementById('home-verbalized-answer');
       const sqlPre = document.getElementById('clean-sql-pre');
       const queryIdSpan = document.getElementById('home-query-id');
+      renderAlternativeQueries([], '');
 
       ansCard.innerHTML = '<span class="inline-flex items-center gap-2 text-indigo-600 font-medium"><svg class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> ⏳ LangGraph Agent Swarm is querying DuckDB...</span>';
 
@@ -806,7 +850,17 @@ LIMIT 1;</pre>
         if (response.ok) {
           const data = await response.json();
           // Real live data from FastAPI Backend, Ollama & DuckDB
-          ansCard.innerHTML = `"${data.verbalized_response}"`;
+          if (data.execution_status === 'failed') {
+            ansCard.textContent = data.execution_error || data.verbalized_response || 'Query could not be answered.';
+            sqlPre.textContent = '';
+            const rawPre = document.getElementById('raw-sql-pre');
+            if (rawPre) rawPre.textContent = '';
+            const homeSqlCode = document.getElementById('home-sql-code');
+            if (homeSqlCode) homeSqlCode.textContent = '';
+            renderAlternativeQueries(data.suggested_queries, data.execution_error);
+            return;
+          }
+          ansCard.textContent = data.verbalized_response || '';
           const cleanFormatted = formatSQL(data.generated_sql);
           sqlPre.innerText = cleanFormatted;
 
@@ -869,24 +923,23 @@ LIMIT 1;</pre>
           // Add to History table
           addQueryToHistory(data);
         } else {
-          throw new Error('API returned status ' + response.status);
+          let message = 'API returned status ' + response.status;
+          try {
+            const body = await response.json();
+            if (typeof body.detail === 'string') message = body.detail;
+          } catch (_) { /* Preserve the HTTP status if body is not JSON. */ }
+          throw new Error(message);
         }
       } catch (err) {
-        console.warn('Live API call failed or offline, using client fallback:', err);
-        // Fallback to client sample data
-        if (q.includes('महिला साक्षरता') || q.includes('female literacy') || q.includes('கல்வியறிவு')) {
-          ansCard.innerHTML = '"बिहार में <strong class="text-indigo-600 font-bold">पूर्णिया (Purnia)</strong> जिले में महिला साक्षरता दर सबसे कम (<strong class="text-amber-600 font-bold">62.2%</strong>) दर्ज की गई।"';
-          sqlPre.innerText = "SELECT district_name, female_literacy_rate\nFROM ndap_education_stats\nWHERE state_name = 'BIHAR'\nORDER BY female_literacy_rate ASC\nLIMIT 1;";
-        } else if (q.includes('मनरेगा') || q.includes('मराठी') || q.includes('मनुष्यदिन')) {
-          ansCard.innerHTML = '"महाराष्ट्रात मनरेगा अंतर्गत एकूण <strong class="text-indigo-600 font-bold">42.5 लाख</strong> मनुष्यदिन निर्माण झाले आहेत."';
-          sqlPre.innerText = "SELECT SUM(total_mandays_generated) AS total_mandays\nFROM ndap_mgnrega_employment\nWHERE state_name = 'MAHARASHTRA';";
-        } else if (q.includes('PM-Kisan') || q.includes('beneficiaries') || q.includes('farmers')) {
-          ansCard.innerHTML = '"उत्तर प्रदेशात सर्वाधिक शेतकरी लाभार्थी <strong class="text-indigo-600 font-bold">प्रयागराज आणि लखीमपूर</strong> जिल्ह्यात नोंदवले गेले."';
-          sqlPre.innerText = "SELECT district_name, farmer_beneficiaries\nFROM ndap_pm_kisan_disbursement\nWHERE state_name = 'UTTAR PRADESH'\nORDER BY farmer_beneficiaries DESC\nLIMIT 5;";
-        } else {
-          ansCard.innerHTML = '"प्रश्न प्रक्रिया पूर्ण झाली. डेटाबेस परिणाम यशस्वीरित्या लोड झाला आहे."';
-          sqlPre.innerText = "SELECT * FROM ndap_pm_kisan_disbursement LIMIT 5;";
-        }
+        // Never present invented sample statistics as live query results.
+        console.error('IndicSQL API request failed:', err);
+        ansCard.textContent = 'Unable to execute the query: ' + (err instanceof Error ? err.message : 'Backend unavailable');
+        sqlPre.textContent = '';
+        const rawPre = document.getElementById('raw-sql-pre');
+        if (rawPre) rawPre.textContent = '';
+        const homeSqlCode = document.getElementById('home-sql-code');
+        if (homeSqlCode) homeSqlCode.textContent = '';
+        renderAlternativeQueries([], '');
       }
 
       // Scroll to result card smoothly
