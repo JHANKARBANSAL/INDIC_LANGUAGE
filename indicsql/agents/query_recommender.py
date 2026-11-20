@@ -37,10 +37,14 @@ _TEXT = {
 
 
 def _terms(value: str) -> set[str]:
-    return {
-        word for word in re.findall(r"[a-z0-9]+", value.casefold().replace("_", " "))
-        if len(word) > 2 and word not in _STOP
-    }
+    """Normalize a small set of English morphology variants for schema overlap."""
+    words = re.findall(r"[a-z0-9]+", value.casefold().replace("_", " "))
+    terms = {w for w in words if len(w) > 2 and w not in _STOP}
+    # Keep original tokens as well to avoid false positives from stemming.
+    terms.update(w[:-1] for w in tuple(terms) if len(w) > 4 and w.endswith("s"))
+    if "literate" in terms or "illiterate" in terms:
+        terms.add("literacy")
+    return terms
 
 
 def _numeric_metrics(columns: Dict[str, Any]) -> List[str]:
